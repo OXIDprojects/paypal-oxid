@@ -14,6 +14,7 @@ use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Session as EshopSession;
+use OxidSolutionCatalysts\PayPal\Core\Config;
 use OxidSolutionCatalysts\PayPal\Core\ConfirmOrderRequestFactory;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\OrderRequestFactory;
@@ -124,6 +125,8 @@ class Payment
         $order instanceof EshopModelOrder ?? $order->setOrderNumber();
         /** @var ApiOrderService $orderService */
         $orderService = $this->serviceFactory->getOrderService();
+        /** @var Config $payPalConfig */
+        $payPalConfig = oxNew(Config::class);
 
         $request = $this->orderRequestFactory->getRequest(
             $basket,
@@ -349,6 +352,11 @@ class Payment
                     $issue = $exception->getErrorIssue();
                     $this->displayErrorIfInstrumentDeclined($issue);
                     $this->logger->log('debug', $exception->getMessage(), [$exception]);
+                    /** @var Config $payPalConfig */
+                    $payPalConfig = oxNew(Config::class);
+                    if ($payPalConfig->isLogLevel('error')) {
+                        $this->moduleLogger->error($exception->getMessage(), [$exception]);
+                    }
                     throw oxNew(StandardException::class, 'OSC_PAYPAL_ORDEREXECUTION_ERROR');
                 }
             } else {
@@ -666,6 +674,8 @@ class Payment
         string $payPalClientMetadataId = ''
     ): bool {
         $this->setPaymentExecutionError(self::PAYMENT_ERROR_NONE);
+        /** @var Config $payPalConfig */
+        $payPalConfig = oxNew(Config::class);
 
         try {
             $result = $this->doCreatePayPalOrder(
