@@ -8,12 +8,14 @@
 namespace OxidSolutionCatalysts\PayPal\Core\Onboarding;
 
 use OxidEsales\Eshop\Core\Registry;
+use OxidSolutionCatalysts\PayPal\Core\Logger;
 use OxidSolutionCatalysts\PayPal\Core\Config as PayPalConfig;
 use OxidSolutionCatalysts\PayPal\Core\PartnerConfig;
 use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
 use OxidSolutionCatalysts\PayPal\Exception\OnboardingException;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
+use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
 use OxidSolutionCatalysts\PayPalApi\Onboarding as ApiOnboardingClient;
 use Psr\Log\LoggerInterface;
 
@@ -52,11 +54,18 @@ class Onboarding
         $nonce = Registry::getSession()->getVariable('PAYPAL_MODULE_NONCE');
         Registry::getSession()->deleteVariable('PAYPAL_MODULE_NONCE');
 
+        try {
         /** @var ApiOnboardingClient $apiClient */
         $apiClient = $this->getOnboardingClient($onboardingResponse['isSandBox']);
         $apiClient->authAfterWebLogin($onboardingResponse['authCode'], $onboardingResponse['sharedId'], $nonce);
 
         $credentials = $apiClient->getCredentials();
+            $credentials = $apiClient->getCredentials();
+        } catch (ApiException $exception) {
+            /** @var Logger $logger */
+            $logger = oxNew(Logger::class);
+            $logger->log('error', $exception->getMessage(), [$exception]);
+        }
 
         return $credentials;
     }
@@ -143,9 +152,16 @@ class Onboarding
     public function fetchMerchantInformations(): array
     {
         $onboardingResponse = $this->getOnboardingPayload();
-        /** @var ApiOnboardingClient $apiClient */
-        $apiClient = $this->getOnboardingClient($onboardingResponse['isSandBox'], true);
-        return $apiClient->getMerchantInformations();
+        try {
+            /** @var ApiOnboardingClient $apiClient */
+            $apiClient = $this->getOnboardingClient($onboardingResponse['isSandBox'], true);
+            $merchantInformations = $apiClient->getMerchantInformations();
+        } catch (ApiException $exception) {
+            /** @var Logger $logger */
+            $logger = oxNew(Logger::class);
+            $logger->log('error', $exception->getMessage(), [$exception]);
+        }
+        return $merchantInformations;
     }
 
     public function saveEligibility(array $merchantInformations): array
