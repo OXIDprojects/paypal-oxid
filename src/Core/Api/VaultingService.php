@@ -32,6 +32,7 @@ class VaultingService extends BaseService
         }
 
         $path = '/v1/oauth2/token';
+        $method = 'post';
 
         $response = $this->send('POST', $path, $params, $headers);
         $body = $response->getBody();
@@ -68,6 +69,7 @@ class VaultingService extends BaseService
         $headers = $this->getVaultingHeaders();
 
         $path = '/v3/vault/setup-tokens';
+        $method = 'post';
 
         $response = $this->send(
             'POST',
@@ -175,6 +177,7 @@ class VaultingService extends BaseService
         $headers = $this->getVaultingHeaders();
 
         $path = '/v3/vault/payment-tokens';
+        $method = 'post';
 
         $requestBody = [
             "payment_source" => [
@@ -198,9 +201,12 @@ class VaultingService extends BaseService
             return null;
         }
 
-        $path = '/v3/vault/payment-tokens?customer_id=' . $paypalCustomerId;
+        $headers = $this->getVaultingHeaders();
 
-        $response = $this->send('GET', $path);
+        $path = '/v3/vault/payment-tokens?customer_id='.$paypalCustomerId;
+        $method = 'get';
+
+        $response = $this->send($method, $path, [], $headers);
         $body = $response->getBody();
 
         return json_decode((string)$body, true);
@@ -233,6 +239,7 @@ class VaultingService extends BaseService
     {
         $headers = [];
         $headers['Content-Type'] = 'application/json';
+        $headers['PayPal-Request-Id'] = time();
         $headers['PayPal-Partner-Attribution-Id'] = Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP;
         $headers = array_merge($headers, $this->getAuthHeaders());
         return $headers;

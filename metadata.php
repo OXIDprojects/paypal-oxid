@@ -29,8 +29,11 @@ use OxidSolutionCatalysts\PayPal\Controller\Admin\OrderMain as PayPalOrderMainCo
 use OxidSolutionCatalysts\PayPal\Controller\Admin\OrderOverview as PayPalOrderOverviewController;
 use OxidSolutionCatalysts\PayPal\Controller\OrderController as PayPalFrontEndOrderController;
 use OxidSolutionCatalysts\PayPal\Controller\PaymentController as PayPalPaymentController;
+use OxidSolutionCatalysts\PayPal\Controller\PayPalVaultingCardController;
 use OxidSolutionCatalysts\PayPal\Controller\ProxyController;
+use OxidSolutionCatalysts\PayPal\Controller\VaultingTokenController;
 use OxidSolutionCatalysts\PayPal\Controller\WebhookController;
+use OxidSolutionCatalysts\PayPal\Controller\PayPalVaultingController;
 use OxidSolutionCatalysts\PayPal\Core\InputValidator as PayPalInputValidator;
 use OxidSolutionCatalysts\PayPal\Core\ShopControl as PayPalShopControl;
 use OxidSolutionCatalysts\PayPal\Core\ViewConfig as PayPalViewConfig;
@@ -81,10 +84,13 @@ $aModule = [
         State::class => PayPalState::class
     ],
     'controllers' => [
-        'oscpaypalconfig' => PayPalConfigController::class,
-        'oscpaypalwebhook' => WebhookController::class,
-        'oscpaypalproxy' => ProxyController::class,
-        'oscpaypalorder' => PayPalOrderController::class,
+        'oscpaypalconfig'       => PayPalConfigController::class,
+        'oscpaypalwebhook'      => WebhookController::class,
+        'oscpaypalproxy'        => ProxyController::class,
+        'oscpaypalorder'        => PayPalOrderController::class,
+        'oscaccountvault'       => PayPalVaultingController::class,
+        'oscaccountvaultcard'   => PayPalVaultingCardController::class,
+        'osctokencontroller'    => VaultingTokenController::class,
     ],
     'events' => [
         'onActivate' => '\OxidSolutionCatalysts\PayPal\Core\Events\Events::onActivate',
@@ -101,6 +107,43 @@ $aModule = [
         '@osc_paypal/frontend/paymentbuttons.tpl' => 'views/smarty/frontend/paymentbuttons.tpl',
         '@osc_paypal/frontend/pui_flow.tpl' => 'views/smarty/frontend/pui_flow.tpl',
         '@osc_paypal/frontend/select_payment.tpl' => 'views/smarty/frontend/select_payment.tpl',
+        // Admin: Config
+        'oscpaypalconfig.tpl' => 'osc/paypal/views/admin/tpl/oscpaypalconfig.tpl',
+
+        // Admin: Order
+        'oscpaypalorder.tpl' => 'osc/paypal/views/admin/tpl/oscpaypalorder.tpl',
+        'oscpaypalorder_ppplus.tpl' => 'osc/paypal/views/admin/tpl/oscpaypalorder_ppplus.tpl',
+        'oscpaypalorder_pp.tpl' => 'osc/paypal/views/admin/tpl/oscpaypalorder_pp.tpl',
+
+        'modules/osc/paypal/paymentbuttons.tpl' => 'osc/paypal/views/tpl/shared/paymentbuttons.tpl',
+
+        'modules/osc/paypal/pui_flow.tpl' => 'osc/paypal/views/tpl/flow/page/checkout/pui.tpl',
+        'modules/osc/paypal/pui_wave.tpl' => 'osc/paypal/views/tpl/wave/page/checkout/pui.tpl',
+        'modules/osc/paypal/pui_fraudnet.tpl' => 'osc/paypal/views/tpl/shared/page/checkout/pui_fraudnet.tpl',
+        'modules/osc/paypal/shipping_and_payment_flow.tpl' => 'osc/paypal/views/tpl/flow/page/checkout/shipping_and_payment.tpl',
+        'modules/osc/paypal/shipping_and_payment_wave.tpl' => 'osc/paypal/views/tpl/wave/page/checkout/shipping_and_payment.tpl',
+        'modules/osc/paypal/checkout_order_btn_submit_bottom_flow.tpl' => 'osc/paypal/views/tpl/flow/page/checkout/checkout_order_btn_submit_bottom.tpl',
+        'modules/osc/paypal/checkout_order_btn_submit_bottom_wave.tpl' => 'osc/paypal/views/tpl/wave/page/checkout/checkout_order_btn_submit_bottom.tpl',
+
+        // PAYPAL-486 Register templates for overloading here;
+        // use theme name in key when theme-specific. Shared templates don't receive a theme-specific key.
+        'modules/osc/paypal/acdc.tpl' => 'osc/paypal/views/tpl/shared/page/checkout/acdc.tpl',
+        'modules/osc/paypal/sepa_cc_alternative.tpl' => 'osc/paypal/views/tpl/shared/page/checkout/sepa_cc_alternative.tpl',
+        'modules/osc/paypal/base_js.tpl' => 'osc/paypal/views/tpl/shared/layout/base_js.tpl',
+        'modules/osc/paypal/base_style.tpl' => 'osc/paypal/views/tpl/shared/layout/base_style.tpl',
+        'modules/osc/paypal/basket_btn_next_bottom.tpl' =>
+            'osc/paypal/views/tpl/shared/page/checkout/basket_btn_next_bottom.tpl',
+        'modules/osc/paypal/select_payment.tpl' => 'osc/paypal/views/tpl/shared/page/checkout/select_payment.tpl',
+        'modules/osc/paypal/details_productmain_tobasket.tpl' =>
+            'osc/paypal/views/tpl/shared/page/details/inc/details_productmain_tobasket.tpl',
+        'modules/osc/paypal/dd_layout_page_header_icon_menu_minibasket_functions.tpl' =>
+            'osc/paypal/views/tpl/shared/widget/minibasket/dd_layout_page_header_icon_menu_minibasket_functions.tpl',
+        // PAYPAL-486 Theme-specific
+        'modules/osc/paypal/change_payment_flow.tpl' => 'osc/paypal/views/tpl/flow/page/checkout/change_payment.tpl',
+        'modules/osc/paypal/change_payment_wave.tpl' => 'osc/paypal/views/tpl/wave/page/checkout/change_payment.tpl',
+
+        // PSPAYPAL-491 Installment banners
+        'modules/osc/paypal/installment_banners.tpl' => 'osc/paypal/views/tpl/shared/installment_banners.tpl',
     ],
     'blocks'    => [
         [
@@ -194,6 +237,17 @@ $aModule = [
             'block' => 'start_newest_articles',
             'file' => 'views/smarty/frontend/blocks/page/shop/start__start_newest_articles.tpl',
         ],
+        [
+            'template' => 'page/account/inc/account_menu.tpl',
+            'block' => 'account_menu',
+            'file' => '/views/blocks/page/account/inc/account_menu.tpl',
+        ],
+        [
+            'template' => 'page/checkout/thankyou.tpl',
+            'block' => 'checkout_thankyou_info',
+            'file' => '/views/blocks/page/checkout/thankyou.tpl',
+        ],
+        // <-- PSPAYPAL-491
         [
             'template' => 'widget/minibasket/minibasket.tpl',
             'block' => 'dd_layout_page_header_icon_menu_minibasket_functions',
@@ -467,6 +521,12 @@ $aModule = [
             'name' => 'oscPayPalDefaultShippingPriceExpress',
             'type' => 'num',
             'value' => 3.5,
+            'group' => null
+        ],
+        [
+            'name' => 'oscPayPalSetVaulting',
+            'type' => 'bool',
+            'value' => false,
             'group' => null
         ],
     ],

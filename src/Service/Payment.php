@@ -11,6 +11,7 @@ use Exception;
 use OxidEsales\Eshop\Application\Model\Basket as EshopModelBasket;
 use OxidEsales\Eshop\Application\Model\Order as EshopModelOrder;
 use OxidEsales\Eshop\Core\Exception\StandardException;
+use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Session as EshopSession;
 use OxidSolutionCatalysts\PayPal\Core\ConfirmOrderRequestFactory;
@@ -602,7 +603,7 @@ class Payment
             throw PayPalException::sessionPaymentMalformedResponse();
         }
         foreach ($response->links as $links) {
-            if ($links['rel'] === 'approve') {
+            if ($links['rel'] === 'approve' || $links['rel'] === 'payer-action') {
                 $redirectLink = $links['href'];
                 break;
             }

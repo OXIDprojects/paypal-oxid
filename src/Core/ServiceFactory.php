@@ -87,6 +87,17 @@ class ServiceFactory
     }
 
     /**
+     * @return UserIdService
+     */
+    public function getVaultingService(): VaultingService
+    {
+        return oxNew(
+            VaultingService::class,
+            $this->getClient()
+        );
+    }
+
+    /**
      * @return Partner
      */
     public function getPartnerService(): Partner

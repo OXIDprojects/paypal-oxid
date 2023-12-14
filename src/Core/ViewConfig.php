@@ -94,6 +94,10 @@ class ViewConfig extends ViewConfig_parent
         return $this->getServiceFromContainer(ModuleSettings::class)->isPayPalCheckoutExpressPaymentEnabled();
     }
 
+    public function getIsVaultingActive():bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->getIsVaultingActive();
+    }
 
     /**
      * @return Config
@@ -243,6 +247,11 @@ class ViewConfig extends ViewConfig_parent
         if ($this->isPayPalBannerActive()) {
             $params['components'] .= ',messages';
         }
+
+        if($this->getIsVaultingActive()) {
+            $params['components'] .= ',card-fields';
+        }
+
         $params['locale'] = $localeCode;
 
         return Constants::PAYPAL_JS_SDK_URL . '?' . http_build_query($params);
