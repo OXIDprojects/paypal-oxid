@@ -75,7 +75,7 @@ class PaymentGateway extends PaymentGateway_parent
                 $shopOrderId = (string)$order->getFieldData('oxordernr');
                 $paymentService->doPatchPayPalOrder($basket, $checkoutOrderId, $shopOrderId);
             } catch (Exception $exception) {
-                $logger->log('error','Error on order patch call.', [$exception]);
+                $logger->log('error', 'Error on order patch call.', [$exception]);
             }
 
             // Capture Order
@@ -86,7 +86,7 @@ class PaymentGateway extends PaymentGateway_parent
                 // success means at this point, that we triggered the capture without errors
                 $success = true;
             } catch (Exception $exception) {
-                $logger->log('error','Error on order capture call.', [$exception]);
+                $logger->log('error', 'Error on order capture call.', [$exception]);
             }
 
             // destroy PayPal-Session
