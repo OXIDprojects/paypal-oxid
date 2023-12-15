@@ -8,7 +8,7 @@
 namespace OxidSolutionCatalysts\PayPal\Core\Onboarding;
 
 use OxidEsales\Eshop\Core\Registry;
-use OxidSolutionCatalysts\PayPal\Core\Logger;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Core\Config as PayPalConfig;
 use OxidSolutionCatalysts\PayPal\Core\PartnerConfig;
 use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
@@ -63,7 +63,7 @@ class Onboarding
             $credentials = $apiClient->getCredentials();
         } catch (ApiException $exception) {
             /** @var Logger $logger */
-            $logger = oxNew(Logger::class);
+            $logger = $this->getServiceFromContainer('OxidSolutionCatalysts\PayPal\Service\Logger');
             $logger->log('error', $exception->getMessage(), [$exception]);
         }
 
@@ -158,7 +158,7 @@ class Onboarding
             $merchantInformations = $apiClient->getMerchantInformations();
         } catch (ApiException $exception) {
             /** @var Logger $logger */
-            $logger = oxNew(Logger::class);
+            $logger = $this->getServiceFromContainer('OxidSolutionCatalysts\PayPal\Service\Logger');
             $logger->log('error', $exception->getMessage(), [$exception]);
         }
         return $merchantInformations;

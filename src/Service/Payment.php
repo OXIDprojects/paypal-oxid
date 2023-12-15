@@ -15,7 +15,6 @@ use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Session as EshopSession;
 use OxidSolutionCatalysts\PayPal\Core\Config;
-use OxidSolutionCatalysts\PayPal\Core\Logger;
 use OxidSolutionCatalysts\PayPal\Core\ConfirmOrderRequestFactory;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\OrderRequestFactory;
@@ -126,8 +125,6 @@ class Payment
         $order instanceof EshopModelOrder ?? $order->setOrderNumber();
         /** @var ApiOrderService $orderService */
         $orderService = $this->serviceFactory->getOrderService();
-        /** @var Logger $logger */
-        $logger = oxNew(Logger::class);
 
         $request = $this->orderRequestFactory->getRequest(
             $basket,
@@ -167,14 +164,14 @@ class Payment
                 $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null,
             );
         } catch (ApiException $exception) {
-            $logger->log(
+            $this->logger->log(
                 'error',
                 'Api error on order create call. ' . $exception->getErrorIssue(),
                 [$exception]
             );
             $this->handlePayPalApiError($exception);
         } catch (Exception $exception) {
-            $logger->log('error', 'Error on order create call.', [$exception]);
+            $this->logger->log('error', 'Error on order create call.', [$exception]);
             $this->setPaymentExecutionError(self::PAYMENT_ERROR_GENERIC);
         }
 
@@ -242,9 +239,7 @@ class Payment
                 Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
             );
         } catch (Exception $exception) {
-            /** @var Logger $logger */
-            $logger = oxNew(Logger::class);
-            $logger->log('error', 'Error on order patch call.', [$exception]);
+            $this->logger->log('error', 'Error on order patch call.', [$exception]);
             throw $exception;
         }
     }
@@ -270,8 +265,6 @@ class Payment
         $paymentService = Registry::get(ServiceFactory::class)->getPaymentService();
         /** @var ApiOrderService $orderService */
         $orderService = $this->serviceFactory->getOrderService();
-        /** @var Logger $logger */
-        $logger = oxNew(Logger::class);
 
         // Capture Order
         try {
@@ -329,7 +322,7 @@ class Payment
 
                     $issue = $exception->getErrorIssue();
                     $this->displayErrorIfInstrumentDeclined($issue);
-                    $logger->log('error', $exception->getMessage(), [$exception]);
+                    $this->logger->log('error', $exception->getMessage(), [$exception]);
 
                     throw oxNew(StandardException::class, 'OSC_PAYPAL_ORDEREXECUTION_ERROR');
                 }
@@ -587,9 +580,7 @@ class Payment
             PayPalSession::unsetPayPalOrderId();
             $this->removeTemporaryOrder();
             //TODO: do we need to log this?
-            /** @var Logger $logger */
-            $logger = oxNew(Logger::class);
-            $logger->log('error', $exception->getMessage(), [$exception]);
+            $this->logger->log('error', $exception->getMessage(), [$exception]);
         }
 
         //NOTE: payment not fully executed, we need customer interaction first
@@ -713,14 +704,12 @@ class Payment
             $this->setPaymentExecutionError(self::PAYMENT_ERROR_PUI_PHONE);
         } catch (Exception $exception) {
             $this->setPaymentExecutionError(self::PAYMENT_ERROR_PUI_GENERIC);
-            /** @var Logger $logger */
-            $logger = oxNew(Logger::class);
-            $logger->log('error', 'Error on pui order creation call.', [$exception]);
+            $this->logger->log('error', 'Error on pui order creation call.', [$exception]);
         }
 
         # TODO: check what we created, ensure it is a pui order
         # $paymentSource = $this->fetchOrderFields((string) $payPalOrderId, 'payment_source');
-        # $logger->log('error', serialize($paymentSource));
+        # $this->logger->log('error', serialize($paymentSource));
 
         if (!$payPalOrderId) {
             return false;
