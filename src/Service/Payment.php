@@ -111,7 +111,6 @@ class Payment
         string $processingInstruction = null,
         string $paymentSource = null,
         string $payPalClientMetadataId = '',
-        string $payPalRequestId = '',
         string $payPalPartnerAttributionId = '',
         string $returnUrl = null,
         string $cancelUrl = null,
@@ -159,9 +158,7 @@ class Payment
             $response = $orderService->createOrder(
                 $request,
                 $payPalPartnerAttributionId,
-                $payPalClientMetadataId,
-                'return=minimal',
-                $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null,
+                $payPalClientMetadataId
             );
         } catch (ApiException $exception) {
             $this->logger->log(
@@ -191,7 +188,6 @@ class Payment
             OrderRequestFactory::USER_ACTION_CONTINUE,
             null,
             null,
-            '',
             '',
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
             null,
@@ -611,7 +607,6 @@ class Payment
             null,
             null,
             '',
-            '',
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
             $returnUrl,
             $cancelUrl,
@@ -662,7 +657,6 @@ class Payment
             null,
             null,
             null,
-            '',
             '',
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
             null,
