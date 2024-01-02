@@ -69,7 +69,7 @@ class OrderRequestFactory
      * @param Basket $basket
      * @param string $intent Order::INTENT_CAPTURE or Order::INTENT_AUTHORIZE constant values
      * @param null|string $userAction USER_ACTION_CONTINUE constant values
-     * @param null|string $transactionId transaction id
+     * @param null|string $customId custom id reference
      * @param null|string $processingInstruction processing instruction
      * @param null|string $paymentSource Payment-Source Name
      * @param null|string $invoiceId custom invoice number
@@ -141,6 +141,8 @@ class OrderRequestFactory
         if (!$paymentSource && $basket->getUser()) {
             $request->payer = $this->getPayer();
         }
+
+        $request->purchase_units = $this->getPurchaseUnits($transactionId, $invoiceId, $withArticles);
 
         if ($userAction || $returnUrl || $cancelUrl) {
             $request->application_context = $this->getApplicationContext(
