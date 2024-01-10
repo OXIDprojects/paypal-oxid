@@ -379,7 +379,6 @@ class OrderController extends OrderController_parent
      */
     public function getPayPalPuiFraudnetCmId(): string
     {
-
         if (!($cmId = PayPalSession::getPayPalPuiCmId())) {
             $cmId = Registry::getUtilsObject()->generateUId();
             PayPalSession::storePayPalPuiCmId($cmId);
@@ -432,10 +431,5 @@ class OrderController extends OrderController_parent
         }
 
         return parent::getNextStep($success);
-    }
-
-    protected function addVaultedPaymentInfoToTpl()
-    {
-
     }
 }

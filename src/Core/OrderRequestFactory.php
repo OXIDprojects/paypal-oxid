@@ -99,12 +99,12 @@ class OrderRequestFactory
         $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
         $setVaulting = $moduleSettings->getIsVaultingActive();
         $selectedVaultPaymentSourceIndex = Registry::getSession()->getVariable("selectedVaultPaymentSourceIndex");
-        $useVaulting = $setVaulting && !is_null($selectedVaultPaymentSourceIndex);
 
         $request->intent = $intent;
         $request->purchase_units = $this->getPurchaseUnits($transactionId, $invoiceId, $withArticles);
 
-        if($useVaulting) {
+        $useVaultedPayment = $setVaulting && !is_null($selectedVaultPaymentSourceIndex);
+        if($useVaultedPayment) {
             $config = Registry::getConfig();
             $vaultingService = $this->getVaultingService();
             $payPalCustomerId = $this->getUsersPayPalCustomerId();
@@ -128,6 +128,13 @@ class OrderRequestFactory
                 $cancelUrl,
                 false
             );
+            return $request;
+        }elseif (Registry::getRequest()->getRequestParameter("vaultPayment")) {
+            $paymentType = Registry::getRequest()->getRequestParameter("oscPayPalPaymentTypeForVaulting");
+            $card = $paymentType == PayPalDefinitions::ACDC_PAYPAL_PAYMENT_ID;
+
+            $this->modifyPaymentSourceForVaulting($request, $card);
+
             return $request;
         }
 
