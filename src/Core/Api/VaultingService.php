@@ -201,7 +201,7 @@ class VaultingService extends BaseService
             return null;
         }
 
-        $path = '/v3/vault/payment-tokens?customer_id='.$paypalCustomerId;
+        $path = '/v3/vault/payment-tokens?customer_id=' . $paypalCustomerId;
         $method = 'get';
 
         $response = $this->send($method, $path);

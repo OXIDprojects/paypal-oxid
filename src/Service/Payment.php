@@ -44,6 +44,7 @@ use OxidSolutionCatalysts\PayPalApi\Service\Payments as ApiPaymentService;
 class Payment
 {
     use ServiceContainer;
+
     public const PAYMENT_ERROR_NONE = 'PAYPAL_PAYMENT_ERROR_NONE';
     public const PAYMENT_ERROR_GENERIC = 'PAYPAL_PAYMENT_ERROR_GENERIC';
     public const PAYMENT_ERROR_PUI_PHONE = 'PAYPAL_PAYMENT_ERROR_PUI_PHONE';
@@ -636,7 +637,7 @@ class Payment
 
         //no customer interaction needed if a vaulted payment is used
         if ($response->status === Constants::PAYPAL_STATUS_COMPLETED) {
-            return $returnUrl."&vaulting=true";
+            return $returnUrl . "&vaulting=true";
         }
 
         if (!$redirectLink) {
