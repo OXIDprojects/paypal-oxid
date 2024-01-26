@@ -59,13 +59,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - first Version for OXID7 with APEX-Theme as Twig-Frontend-Standard-Theme, without Smarty-Support
 
-## [2.3.4] - 2023-??-??
-
-- PayPal-Log consider Shop-ErrorLogLevel
-
-## [2.3.4] - 2024-??-??
+## [2.3.4] - 2024-01-26
 
 - Transfer OXID-Ordernumber to PayPal
+- PayPal-Log consider Shop-ErrorLogLevel
+- Composer-Installation now via packagist.
+  - https://packagist.org/packages/oxid-solution-catalysts/paypal-module
+  - https://packagist.org/packages/oxid-solution-catalysts/paypal-client
+-  "Repositories"-requirement for Source https://paypal-module.packages.oxid-esales.com/ not need anymore
 
 ## [2.3.3] - 2023-11-16
 
