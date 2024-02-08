@@ -53,6 +53,7 @@
                         <label>[{oxmultilang ident="OSC_PAYPAL_CREDENTIALS"}]</label>
 
                         <p class="help-block text-danger">[{oxmultilang ident="HELP_OSC_PAYPAL_CREDENTIALS_PART1"}]</p>
+                        <p class="help-block text-danger">[{oxmultilang ident="HELP_OSC_PAYPAL_CREDENTIALS_PART2"}]</p>
 
                         <p class="help-block text-danger">[{oxmultilang ident="HELP_OSC_PAYPAL_CREDENTIALS_PART2"}]</p>
                         <p class="live"><a target="_blank"
