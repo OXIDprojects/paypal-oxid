@@ -325,6 +325,9 @@ class Payment
                 }
 
                 $result = $this->fetchOrderFields($checkoutOrderId);
+            } elseif (Registry::getRequest()->getRequestParameter("vaulting")) {
+                //when a vaulted payment is used, the order is already finished.
+                $result = $this->fetchOrderFields($checkoutOrderId);
             } elseif ($payPalOrder->status !== Constants::PAYPAL_STATUS_COMPLETED) {
                 $request = new OrderCaptureRequest();
                 //order number must be resolved before order patching
