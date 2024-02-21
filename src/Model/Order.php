@@ -420,8 +420,6 @@ class Order extends Order_parent
      * Returns PayPal order id.
      *
      * @param string|null $oxId
-     *
-     * @return string
      */
     public function getPayPalOrderIdForOxOrderId(string $oxId = null): string
     {
