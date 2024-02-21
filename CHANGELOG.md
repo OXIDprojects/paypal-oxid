@@ -59,6 +59,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - first Version for OXID7 with APEX-Theme as Twig-Frontend-Standard-Theme, without Smarty-Support
 
+## [2.3.5] - 2024-??-??
+
+- remove Sofort and MyBank, Paymentmethods will soon no longer be accepted via PayPal
+
 ## [2.3.4] - 2024-01-26
 
 - Transfer OXID-Ordernumber to PayPal
