@@ -206,6 +206,8 @@ class Order extends Order_parent
                 // so we set the order to "oxtransstatus" = ERROR
                 // The Merchant has the opportunity to see what is going on and can contact the customer if necessary
                 $this->setOrderStatus('ERROR');
+                $paymentService = $this->getServiceFromContainer(PaymentService::class);
+                $paymentService->removeTemporaryOrder();
                 throw PayPalException::cannotFinalizeOrderAfterExternalPayment($payPalOrderId, $paymentsId);
             }
             $this->setTransId($capture->id);
