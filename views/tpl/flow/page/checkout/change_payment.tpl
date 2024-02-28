@@ -1,9 +1,9 @@
 [{if $vaultedPaymentSources}]
-    <div class="card">
-        <div class="card-header">
+    <div class="panel panel-default">
+        <div class="panel-heading">
             <h3 id="paymentHeader" class="card-title">[{oxmultilang ident="OSC_PAYPAL_VAULTING_VAULTED_PAYMENTS"}]</h3>
         </div>
-        <div class="card-body">
+        <div class="panel-body">
             [{assign var="iterator" value=0}]
             [{foreach from=$vaultedPaymentSources item=vaultedPayment key="paymentType"}]
                 [{foreach from=$vaultedPayment item=paymentDescription name="paymentSources"}]
@@ -50,26 +50,25 @@
         }
     </script>
 [{/if}]
+
 [{if 'oscpaypal_express'|array_key_exists:$oView->getPaymentList() && $oViewConf->isPayPalExpressSessionActive()}]
     [{assign var="config" value=$oViewConf->getPayPalCheckoutConfig()}]
-    <div class="card-deck">
+    <div class="panel panel-default">
         <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">[{oxmultilang ident="OSC_PAYPAL_PAY_EXPRESS"}]</h3>
+            <div class="panel-heading">
+                <h3 class="panel-title">[{oxmultilang ident="OSC_PAYPAL_PAY_EXPRESS"}]</h3>
             </div>
-            <div class="card-body oxEqualized">
-                <div class="row">
-                    <div class="col-12 col-md-6">
-                        [{oxmultilang ident="OSC_PAYPAL_PAY_PROCESSED"}]
-                    </div>
-                    <div class="col-12 col-md-6 text-right">
-                        <a class="btn btn-outline-dark" href="[{$oViewConf->getCancelPayPalPaymentUrl()}]">[{oxmultilang ident="OSC_PAYPAL_PAY_UNLINK"}]</a>
-                    </div>
+            <div class="panel-body">
+                <div class="pull-left">
+                    [{oxmultilang ident="OSC_PAYPAL_PAY_PROCESSED"}]
+                </div>
+                <div class="pull-right">
+                    <a class="btn btn-default" href="[{$oViewConf->getCancelPayPalPaymentUrl()}]">[{oxmultilang ident="OSC_PAYPAL_PAY_UNLINK"}]</a>
                 </div>
                 [{capture name="hide_payment"}]
                     [{literal}]
                         $(function () {
-                            $('#payment > .card:first').hide();
+                            $('#payment > .panel.panel-default:first').hide();
                         });
                     [{/literal}]
                 [{/capture}]
@@ -78,5 +77,3 @@
         </div>
     </div>
 [{/if}]
-
-[{$smarty.block.parent}]
