@@ -72,4 +72,5 @@ class PayPalRequestAmountFactory
 
         return $amount;
     }
+
 }
