@@ -7,6 +7,7 @@
 
 namespace OxidSolutionCatalysts\PayPal\Core\Onboarding;
 
+use JsonException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Core\Config as PayPalConfig;
@@ -44,10 +45,13 @@ class Onboarding
         return $credentials;
     }
 
+    /**
+     * @throws ApiException
+     * @throws OnboardingException
+     * @throws JsonException
+     */
     public function fetchCredentials(): array
     {
-        $credentials = [];
-
         $onboardingResponse = $this->getOnboardingPayload();
         $this->saveSandboxMode($onboardingResponse['isSandBox']);
 
@@ -70,15 +74,16 @@ class Onboarding
         return $credentials;
     }
 
+    /**
+     * @throws OnboardingException
+     * @throws JsonException
+     */
     public function getOnboardingPayload(): array
     {
-        $response = json_decode(PayPalSession::getOnboardingPayload(), true);
+        $response = json_decode(PayPalSession::getOnboardingPayload(), true, 512, JSON_THROW_ON_ERROR);
 
         if (
-            !is_array($response) ||
-            !isset($response['authCode']) ||
-            !isset($response['sharedId']) ||
-            !isset($response['isSandBox'])
+            !isset($response['authCode'], $response['sharedId'], $response['isSandBox'])
         ) {
             throw OnboardingException::mandatoryDataNotFound();
         }
@@ -92,11 +97,13 @@ class Onboarding
         $moduleSettings->saveSandboxMode($isSandbox);
     }
 
+    /**
+     * @throws OnboardingException
+     */
     public function saveCredentials(array $credentials): array
     {
         if (
-            !isset($credentials['client_id']) ||
-            !isset($credentials['client_secret'])
+            !isset($credentials['client_id'], $credentials['client_secret'])
         ) {
             throw OnboardingException::mandatoryDataNotFound();
         }
@@ -144,7 +151,6 @@ class Onboarding
     }
 
     /**
-     * @return array
      * @throws ApiException
      * @throws JsonException
      * @throws OnboardingException
@@ -152,16 +158,7 @@ class Onboarding
     public function fetchMerchantInformations(): array
     {
         $onboardingResponse = $this->getOnboardingPayload();
-        try {
-            /** @var ApiOnboardingClient $apiClient */
-            $apiClient = $this->getOnboardingClient($onboardingResponse['isSandBox'], true);
-            $merchantInformations = $apiClient->getMerchantInformations();
-        } catch (ApiException $exception) {
-            /** @var Logger $logger */
-            $logger = $this->getServiceFromContainer(Logger::class);
-            $logger->log('error', $exception->getMessage(), [$exception]);
-        }
-        return $merchantInformations;
+        return $this->getOnboardingClient($onboardingResponse['isSandBox'], true)->getMerchantInformations();
     }
 
     public function saveEligibility(array $merchantInformations): array
@@ -188,20 +185,20 @@ class Onboarding
         foreach ($merchantInformations['products'] as $product) {
             if (
                 $product['name'] === 'PAYMENT_METHODS' &&
-                in_array('PAY_UPON_INVOICE', $product['capabilities'])
+                in_array('PAY_UPON_INVOICE', $product['capabilities'], true)
             ) {
                 $isPuiEligibility = true;
             } elseif (
                 $product['name'] === 'PPCP_CUSTOM' &&
-                in_array('CUSTOM_CARD_PROCESSING', $product['capabilities'])
+                in_array('CUSTOM_CARD_PROCESSING', $product['capabilities'], true)
             ) {
                 $isAcdcEligibility = true;
             }
 
             if (
+                $isVaultingCapability &&
                 $product['name'] === 'PPCP_CUSTOM' &&
-                in_array('PAYPAL_WALLET_VAULTING_ADVANCED', $product['capabilities']) &&
-                $isVaultingCapability
+                in_array('PAYPAL_WALLET_VAULTING_ADVANCED', $product['capabilities'], true)
             ) {
                 $isVaultingEligibility = true;
             }
