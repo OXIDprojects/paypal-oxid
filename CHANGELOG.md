@@ -59,7 +59,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - first Version for OXID7 with APEX-Theme as Twig-Frontend-Standard-Theme, without Smarty-Support
 
-## [2.3.5] - 2024-??-??
+## [2.4.0] - 2024-04-04
 
 ### FIX
 - [0007588](https://bugs.oxid-esales.com/view.php?id=7588): Improve Error handling for Capture Order Requests (thanks to mount7)
