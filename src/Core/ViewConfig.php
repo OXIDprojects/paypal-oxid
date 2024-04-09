@@ -570,16 +570,16 @@ class ViewConfig extends ViewConfig_parent
         $config = oxNew(Config::class);
         $params = 'cl=osctokencontroller&fnc=generatesetuptoken';
         if ($config->isSandbox()) {
-            $params.= '&XDEBUG_SESSION_START=1';
+            $params .= '&XDEBUG_SESSION_START=1';
         }
 
-        if($card) {
-            $params.= '&card=true';
+        if ($card) {
+            $params .= '&card=true';
         }
 
         $url = html_entity_decode($this->getConfig()->getShopHomeUrl());
 
-        return $url.$params;
+        return $url . $params;
     }
 
     public function getGeneratePaymentTokenLink()
@@ -587,12 +587,11 @@ class ViewConfig extends ViewConfig_parent
         $config = oxNew(Config::class);
         $params = 'cl=osctokencontroller&fnc=generatepaymenttoken';
         if ($config->isSandbox()) {
-            $params.= '&XDEBUG_SESSION_START=1';
+            $params .= '&XDEBUG_SESSION_START=1';
         }
 
         $url = html_entity_decode($this->getConfig()->getShopHomeUrl());
 
-        return $url.$params.'&token=';
-
+        return $url . $params . '&token=';
     }
 }
