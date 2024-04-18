@@ -574,6 +574,10 @@ class ModuleSettings
     {
         return (bool)$this->getSettingValue('oscPayPalSetVaulting');
     }
+    public function getIsGooglePayDeliveryAddressActive(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalUseGooglePayAddress');
+    }
 
     /**
      * @return mixed

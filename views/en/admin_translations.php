@@ -276,6 +276,9 @@ return [
     'HELP_OSC_PAYPAL_VAULTING_ACTIVATE_VAULTING'    => 'Repeat purchases made easy: With PayPal you can securely store your customers preferred payment methods, making it quick and easy
                                                         Enable purchase processing. With their saved payment details, customers can make repeat purchases with just a few clicks. This can be for you
                                                         mean higher checkout conversion.',
+    'OSC_PAYPAL_GOOGLEPAY_TITLE'                     => 'Google Pay address',
+    'OSC_PAYPAL_GOOGLEPAY_ADDRESS_ACTIVATE'           => 'Google Pay address active',
+    'HELP_OSC_OSC_PAYPAL_GOOGLEPAY_ADRESS_ACTIVATE'     => 'Takeover delivery address from googlepay',
 
     'OSC_PAYPAL_INSTALLPROCESS_FAILED'               => 'Because the module was not installed correctly via Composer, errors occurred during the (de)activation of the module. Please reinstall the module via composer and repeat the process.',
 ];
