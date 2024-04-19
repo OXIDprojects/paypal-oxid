@@ -537,6 +537,7 @@
                 </div>
             </div>
             </div>
+            [{*
             <div class="card">
                 <div class="card-header" id="heading9">
                     <h4 class="collapsed" data-toggle="collapse" data-target="#collapse9" aria-expanded="false" aria-controls="collapse9">
@@ -562,7 +563,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> *}]
         </div>
         <button type="submit" class="btn btn-primary bottom-space">[{oxmultilang ident="GENERAL_SAVE"}]</button>
     </form>
