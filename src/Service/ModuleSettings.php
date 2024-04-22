@@ -349,7 +349,16 @@ class ModuleSettings
     {
         return (bool)$this->getSettingValue('oscPayPalVaultingEligibility');
     }
-
+    public function isLiveGooglePayEligibility(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalGooglePayEligibility');
+    }
+    public function isGooglePayEligibility(): bool
+    {
+        return $this->isSandbox()?
+            $this->isSandBoxVaultingEligibility() :
+            $this->isLiveVaultingEligibility();
+    }
     public function isSandboxAcdcEligibility(): bool
     {
         return (bool)$this->getSettingValue('oscPayPalSandboxAcdcEligibility');
@@ -363,6 +372,10 @@ class ModuleSettings
     public function isSandboxVaultingEligibility(): bool
     {
         return (bool)$this->getSettingValue('oscPayPalSandboxVaultingEligibility');
+    }
+    public function isSandboxGooglePayEligibility(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalSandboxGooglePayEligibility');
     }
 
     public function getIsVaultingActive(): bool
@@ -473,6 +486,18 @@ class ModuleSettings
         }
     }
 
+    public function saveActivePayments(array $activePayments): void
+    {
+        $this->save('oscPayPalActivePayments', $activePayments);
+    }
+    public function saveGooglePayEligibility(bool $isGooglePayEligibility): void
+    {
+        if ($this->isSandbox()) {
+            $this->save('oscPayPalSandboxGooglePayEligibility', $isGooglePayEligibility);
+        } else {
+            $this->save('oscPayPalGooglePayEligibility', $isGooglePayEligibility);
+        }
+    }
     /**
      * add details controller to requireSession
      */
@@ -591,4 +616,6 @@ class ModuleSettings
     {
         return isAdmin();
     }
+
+
 }
