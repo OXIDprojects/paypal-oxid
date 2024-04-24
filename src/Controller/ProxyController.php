@@ -19,6 +19,7 @@ use OxidEsales\Eshop\Core\Exception\OutOfStockException;
 use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Price;
 use OxidEsales\Eshop\Core\Registry;
+use OxidSolutionCatalysts\PayPal\Core\Api\VaultingService;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 use OxidSolutionCatalysts\PayPal\Module;
@@ -33,12 +34,12 @@ use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
 use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Core\Utils\PayPalAddressResponseToOxidAddress;
 use OxidSolutionCatalysts\PayPal\Traits\JsonTrait;
+use OxidSolutionCatalysts\PayPalApi\Model\Orders\AddressPortable;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as PayPalApiOrder;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderRequest;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\AddressPortable;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\AddressPortable3;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\PurchaseUnitRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Payer;
+use OxidSolutionCatalysts\PayPalApi\Model\Orders\PurchaseUnitRequest;
+use OxidSolutionCatalysts\PayPalApi\Model\Orders\AddressPortable3;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Phone as ApiModelPhone;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\PhoneWithType;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\ShippingDetail;
@@ -55,7 +56,7 @@ class ProxyController extends FrontendController
     {
         if (PayPalSession::isPayPalExpressOrderActive()) {
             //TODO: improve
-            $this->outputJson(['ERROR' => 'PayPal session already started.']);
+          //  $this->outputJson(['ERROR' => 'PayPal session already started.']);
         }
 
         $config = Registry::getConfig();
