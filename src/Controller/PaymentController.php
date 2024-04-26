@@ -68,7 +68,7 @@ class PaymentController extends PaymentController_parent
 
         return parent::render();
     }
-    
+
     public function getPayPalPuiFraudnetCmId(): string
     {
 
