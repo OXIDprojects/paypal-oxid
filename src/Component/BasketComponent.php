@@ -16,6 +16,9 @@ use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
 class BasketComponent extends BasketComponent_parent
 {
     /**
+     * Resets the session if the user has previously authorized a payment
+     * with PayPal Express and is now changing their basket.
+     *
      * @param $sProductId
      * @param $dAmount
      * @param $aSel
@@ -35,6 +38,9 @@ class BasketComponent extends BasketComponent_parent
     }
 
     /**
+     * Resets the session if the user has previously authorized a payment
+     *  with PayPal Express and is now adding an item to the basket.
+     *
      * @param $sProductId
      * @param $dAmount
      * @param $aSel
@@ -60,5 +66,6 @@ class BasketComponent extends BasketComponent_parent
             Registry::getSession()->getBasket()->setPayment(null);
             Registry::getUtilsView()->addErrorToDisplay('OSCPAYPAL_KILL_EXPRESS_SESSION_REASON');
         }
+        return parent::toBasket($sProductId, $dAmount, $aSel, $aPersParam, $blOverride);
     }
 }
