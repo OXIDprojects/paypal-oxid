@@ -16,6 +16,7 @@ use OxidEsales\Eshop\Core\Exception\ArticleInputException;
 use OxidEsales\Eshop\Core\Exception\NoArticleException;
 use OxidEsales\Eshop\Core\Exception\OutOfStockException;
 use OxidEsales\Eshop\Core\Exception\StandardException;
+use OxidEsales\Eshop\Core\Price;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
@@ -97,6 +98,18 @@ class ProxyController extends FrontendController
         $this->outputJson($response);
     }
 
+    /**
+     * @param $defaultShippingPriceExpress
+     * @param $basket
+     * @return void
+     */
+    protected function addExpressShippingPrice($defaultShippingPriceExpress,$basket) {
+        $oPrice    = oxNew(Price::class);
+        $oPrice->setPrice((double)$defaultShippingPriceExpress);
+        $basket->setDeliveryPrice($oPrice);
+        $basket->onUpdate();
+        $basket->calculateBasket(true);
+    }
     public function getGooglepayBasket()
     {
         $basket = Registry::getSession()->getBasket();
