@@ -11,6 +11,7 @@ use Exception;
 use OxidEsales\Eshop\Application\Component\UserComponent;
 use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\DeliverySetList;
 use OxidEsales\Eshop\Core\Exception\ArticleInputException;
 use OxidEsales\Eshop\Core\Exception\NoArticleException;
@@ -99,16 +100,20 @@ class ProxyController extends FrontendController
     }
 
     /**
+     * Clones the basket from the session and sets a specific express shipping price, ensuring the original basket remains unchanged.
+     * This cloned basket with the adjusted shipping price is specifically used in scenarios like a PayPal checkout,
+     * where a different shipping price might be necessary to prevent overcharge.
      * @param $defaultShippingPriceExpress
-     * @param $basket
-     * @return void
+     * @return object|Basket|null
      */
-    protected function addExpressShippingPrice($defaultShippingPriceExpress,$basket) {
+    protected function createExpressShippingBasket($defaultShippingPriceExpress) {
+        $basket = Registry::getSession()->getBasket();
+        $basket = clone($basket);
         $oPrice    = oxNew(Price::class);
         $oPrice->setPrice((double)$defaultShippingPriceExpress);
         $basket->setDeliveryPrice($oPrice);
-        $basket->onUpdate();
         $basket->calculateBasket(true);
+        return $basket;
     }
     public function getGooglepayBasket()
     {
