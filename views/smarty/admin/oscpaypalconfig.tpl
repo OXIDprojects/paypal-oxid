@@ -545,28 +545,26 @@
 
             <div class="card">
                 <div class="card-header" id="heading10">
-                    <h4 class="collapsed" data-toggle="collapse" data-target="#collapse10" aria-expanded="false" aria-controls="collapse9">
+                    <h4 class="collapsed" data-toggle="collapse" data-target="#collapse10" aria-expanded="false" aria-controls="collapse10">
                         [{oxmultilang ident="OSC_PAYPAL_EXPRESS_SHIPPING_TITLE"}]
                     </h4>
                 </div>
-            <div id="collapse10" class="collapse" aria-labelledby="heading10" data-parent="#accordion">
-                <div class="card-body">
-                    <div class="form-group">
-                        <div class="controls">
-                            <div class="form-group">
-                                <div class="controls">
-                                    <label>
-                                        <input type="number"  step="0.01" class="form-control" name="conf[oscPayPalDefaultShippingPriceExpress]" value="[{$config->getDefaultShippingPriceForExpress()}]">
-                                    </label>
-                                    <br>
-                                    <span class="help-block">[{oxmultilang ident="OSC_PAYPAL_EXPRESS_SHIPPING_DESC"}]</span>
+                <div id="collapse10" class="collapse" aria-labelledby="heading10" data-parent="#accordion">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="controls">
+                                <div class="form-group">
+                                    <label for="shippingExpress">[{oxmultilang ident="OSC_PAYPAL_EXPRESS_SHIPPING_TITLE"}]</label>
+                                    <div class="controls">
+                                        <input type="text" id="shippingExpress" class="form-control" name="conf[oscPayPalDefaultShippingPriceExpress]" value="[{$config->getDefaultShippingPriceForExpress()|string_format:"%.2f"}]" />
+                                        <span class="help-block">[{oxmultilang ident="OSC_PAYPAL_EXPRESS_SHIPPING_DESC"}]</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
             [{*
             <div class="card">
                 <div class="card-header" id="heading9">
