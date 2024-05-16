@@ -99,22 +99,6 @@ class ProxyController extends FrontendController
         $this->outputJson($response);
     }
 
-    /**
-     * Clones the basket from the session and sets a specific express shipping price, ensuring the original basket remains unchanged.
-     * This cloned basket with the adjusted shipping price is specifically used in scenarios like a PayPal checkout,
-     * where a different shipping price might be necessary to prevent overcharge.
-     * @param $defaultShippingPriceExpress
-     * @return object|Basket|null
-     */
-    protected function createExpressShippingBasket($defaultShippingPriceExpress) {
-        $basket = Registry::getSession()->getBasket();
-        $basket = clone($basket);
-        $oPrice    = oxNew(Price::class);
-        $oPrice->setPrice((double)$defaultShippingPriceExpress);
-        $basket->setDeliveryPrice($oPrice);
-        $basket->calculateBasket(true);
-        return $basket;
-    }
     public function getGooglepayBasket()
     {
         $basket = Registry::getSession()->getBasket();
