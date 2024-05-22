@@ -68,7 +68,7 @@ class ConfirmOrderRequestFactory
             $requestName = 'google_pay';
             $paymentSource = new \stdClass();
 
-// Dynamically adding properties to the stdClass object
+            // Dynamically adding properties to the stdClass object
             $paymentSource->$requestName = new \stdClass();
             $paymentSource->$requestName->name = $userName;
             $paymentSource->$requestName->country_code = $country->getFieldData('oxisoalpha2');
@@ -83,6 +83,9 @@ class ConfirmOrderRequestFactory
                 ]
             ]);
         }
+
+        Registry::getLogger()->error('ConfirmOrder');
+        Registry::getLogger()->error(print_r($paymentSource,true));
 
 
         return $paymentSource;
