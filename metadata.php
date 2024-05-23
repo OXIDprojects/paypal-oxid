@@ -488,6 +488,12 @@ $aModule = [
             'group' => null
         ],
         [
+            'name' => 'oscPayPalApplePayEligibility',
+            'type' => 'bool',
+            'value' => false,
+            'group' => null
+        ],
+        [
             'name' => 'oscPayPalGooglePayEligibility',
             'type' => 'bool',
             'value' => false,
@@ -507,6 +513,12 @@ $aModule = [
         ],
         [
             'name' => 'oscPayPalSandboxVaultingEligibility',
+            'type' => 'bool',
+            'value' => false,
+            'group' => null
+        ],
+        [
+            'name' => 'oscPayPalSandboxApplePayEligibility',
             'type' => 'bool',
             'value' => false,
             'group' => null

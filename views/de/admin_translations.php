@@ -70,6 +70,7 @@ return [
     'OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC'            => 'Kreditkarte',
     'OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC_FALLBACK'   => '(Alternativ zur fehlenden Zahlart wird ein zusätzlicher Button "Kreditkarte" unter den Paypal-Buttons angezeigt.)',
     'OSC_PAYPAL_SPECIAL_PAYMENTS_VAULTING'        => 'Vaulting',
+    'OSC_PAYPAL_SPECIAL_PAYMENTS_APPLEPAY'        => 'Applepay',
 
     'OSC_PAYPAL_SPECIAL_PAYMENTS_VAULTING'        => 'Vaulting',
     'OSC_PAYPAL_SPECIAL_PAYMENTS_GOOGLEPAY'       => 'GooglePay',

@@ -171,6 +171,7 @@ class Onboarding
         $isAcdcEligibility = false;
         $isVaultingEligibility = false;
         $isVaultingCapability = false;
+        $isApplePayEligibility = false;
         $isGooglePayCapability = false;
 
         foreach ($merchantInformations['capabilities'] as $capability) {
@@ -179,6 +180,12 @@ class Onboarding
                 $capability['status'] === 'ACTIVE'
             ) {
                 $isVaultingCapability = true;
+            }
+            if (
+                $capability['name'] === 'APPLE_PAY' &&
+                $capability['status'] === 'ACTIVE'
+            ) {
+                $isApplePayEligibility = true;
             }
             if (
                 $capability['name'] === 'GOOGLE_PAY' &&
@@ -214,12 +221,14 @@ class Onboarding
         $moduleSettings->savePuiEligibility($isPuiEligibility);
         $moduleSettings->saveAcdcEligibility($isAcdcEligibility);
         $moduleSettings->saveVaultingEligibility($isVaultingEligibility);
+        $moduleSettings->saveApplePayEligibility($isApplePayEligibility);
         $moduleSettings->saveGooglePayEligibility($isGooglePayCapability);
 
         return [
             'acdc' => $isAcdcEligibility,
             'pui' => $isPuiEligibility,
             'vaulting' => $isVaultingEligibility,
+            'applepay' => $isVaultingEligibility,
             'googlepay' => $isGooglePayCapability,
         ];
     }
