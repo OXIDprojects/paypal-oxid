@@ -172,7 +172,7 @@ class PayPalConfigController extends AdminController
 
         $confArr = $this->handleSpecialFields($confArr);
         $this->saveConfig($confArr);
-        $this->checkEligibility();
+        $this->checkEligibility($confArr);
         parent::save();
     }
 
@@ -191,9 +191,10 @@ class PayPalConfigController extends AdminController
     /**
      * check Eligibility if config would be changed
      *
+     * @param $confArr array
      * @throws OnboardingException
      */
-    protected function checkEligibility(): void
+    protected function checkEligibility($confArr): void
     {
         $config = new Config();
         /** skip check if no client ID provided */

@@ -506,17 +506,21 @@
                 </div>
                 <div id="collapse9" class="collapse" aria-labelledby="heading9" data-parent="#accordion">
                     <div class="card-body">
-                        <div class="form-group">
-                            <div class="controls">
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" name="conf[oscPayPalSetVaulting]" [{if $config->getIsVaultingActive()}]checked[{/if}] value="1">
-                                        [{oxmultilang ident="OSC_PAYPAL_VAULTING_ACTIVATE_VAULTING"}]
-                                    </label>
+                            <div class="form-group">
+                                <div class="controls">
+                                    <div class="checkbox">
+                                        <label>
+                                            [{if $isSandBox}]
+                                                <input type="checkbox" name="conf[oscPayPalSetVaulting]" [{if $config->getIsVaultingActive()}]checked[{/if}] value="1" [{if !$config->isVaultingEligibility()}]disabled[{/if}]>
+                                            [{else}]
+                                                <input type="checkbox" name="conf[oscPayPalSetVaulting]" [{if $config->getIsVaultingActive()}]checked[{/if}] value="1" [{if !$config->isLiveVaultingEligibility()}]disabled[{/if}]>
+                                            [{/if}]
+                                            [{oxmultilang ident="OSC_PAYPAL_VAULTING_ACTIVATE_VAULTING"}]
+                                        </label>
+                                    </div>
+                                    <span class="help-block">[{oxmultilang ident="HELP_OSC_PAYPAL_VAULTING_ACTIVATE_VAULTING"}]</span>
                                 </div>
-                                <span class="help-block">[{oxmultilang ident="HELP_OSC_PAYPAL_VAULTING_ACTIVATE_VAULTING"}]</span>
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>
