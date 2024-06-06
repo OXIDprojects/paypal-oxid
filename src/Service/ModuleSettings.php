@@ -364,8 +364,8 @@ class ModuleSettings
     public function isGooglePayEligibility(): bool
     {
         return $this->isSandbox() ?
-            $this->isSandBoxVaultingEligibility() :
-            $this->isLiveVaultingEligibility();
+            $this->isSandboxGooglePayEligibility() :
+            $this->isLiveGooglePayEligibility();
     }
     public function isSandboxAcdcEligibility(): bool
     {
