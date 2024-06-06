@@ -483,7 +483,8 @@ class ProxyController extends FrontendController
             $defaultPayPalPaymentId;
     }
 
-    public function getPaymentRequestLines() {
+    public function getPaymentRequestLines()
+    {
 
         try {
             $basket = Registry::getSession()->getBasket();
@@ -545,7 +546,6 @@ class ProxyController extends FrontendController
         $shippingAddress->country_code   = $shippingData['shippingContact']['countryCode'] ?? '';
         if (PayPalSession::isPayPalExpressOrderActive()) {
             //TODO: improve
-
         }
         $paymentId = Registry::getSession()->getVariable('paymentid');
 
@@ -585,7 +585,8 @@ class ProxyController extends FrontendController
 
             $response->payer = new Payer();
             $response->payer->email_address = $data['email'];
-            $response->payer->phone->phone_number->national_number = $shippingData['shippingContact']['phoneNumber'] ?? '';
+            $response->payer->phone->phone_number->national_number =
+                $shippingData['shippingContact']['phoneNumber'] ?? '';
 
             $userRepository = $this->getServiceFromContainer(UserRepository::class);
             $paypalEmail = $data['email'];
@@ -609,9 +610,13 @@ class ProxyController extends FrontendController
             // add PayPal-Address as Delivery-Address
             if (($response !== null) && !empty($response->purchase_units[0]->shipping)) {
                 $response->purchase_units[0]->shipping->address = $shippingAddress;
-                $response->purchase_units[0]->shipping->name->full_name = $shippingData['shippingContact']['name'] ?? '';
+                $response->purchase_units[0]->shipping->name->full_name =
+                    $shippingData['shippingContact']['name'] ?? '';
                 $deliveryAddress = PayPalAddressResponseToOxidAddress::mapUserDeliveryAddress($response);
-                if ($deliveryAddress['oxaddress__oxfname'] !== '' && $deliveryAddress['oxaddress__oxstreet'] !== '') {
+                if (
+                    $deliveryAddress['oxaddress__oxfname'] !== ''
+                    && $deliveryAddress['oxaddress__oxstreet'] !== ''
+                ) {
                     try {
                         $user->changeUserData(
                             $user->oxuser__oxusername->value,
@@ -645,6 +650,4 @@ class ProxyController extends FrontendController
         }
         $this->outputJson($response);
     }
-
-
 }

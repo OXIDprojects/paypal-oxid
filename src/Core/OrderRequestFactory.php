@@ -101,7 +101,7 @@ class OrderRequestFactory
         $selectedVaultPaymentSourceIndex = Registry::getSession()->getVariable("selectedVaultPaymentSourceIndex");
         $paymentId = Registry::getSession()->getVariable('paymentid');
         if ($paymentId === PayPalDefinitions::APPLEPAY_PAYPAL_PAYMENT_ID) {
-            $request->payment_source = $this->getApplePayPaymentSource($basket,'apple_pay');
+            $request->payment_source = $this->getApplePayPaymentSource($basket, 'apple_pay');
         }
         $paymentId = Registry::getSession()->getVariable('paymentid');
         if ($paymentId === PayPalDefinitions::GOOGLEPAY_PAYPAL_PAYMENT_ID) {
@@ -177,7 +177,8 @@ class OrderRequestFactory
 
         return $request;
     }
-    protected function getApplePayPaymentSource($basket, $requestName) {
+    protected function getApplePayPaymentSource($basket, $requestName)
+    {
 
         $user = $basket->getBasketUser();
 

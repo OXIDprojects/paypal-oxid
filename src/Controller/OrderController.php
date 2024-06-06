@@ -401,12 +401,11 @@ class OrderController extends OrderController_parent
 
             $_POST['sDeliveryAddressMD5'] = $this->getDeliveryAddressMD5();
             $status = $this->execute();
-
         } catch (Exception $exception) {
             /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
-            $this->outputJson(['error' => 'failed to execute shop order'.$exception->getMessage()]);
+            $this->outputJson(['error' => 'failed to execute shop order' . $exception->getMessage()]);
             return;
         }
 
@@ -418,7 +417,7 @@ class OrderController extends OrderController_parent
             return;
         }
 
-        if (!$status ) {
+        if (!$status) {
             $response = ['error' => 'unexpected order status ' . $status];
             $paymentService->removeTemporaryOrder();
         } else {
@@ -449,11 +448,10 @@ class OrderController extends OrderController_parent
                 '',
             );
         } catch (ApiException $exception) {
-
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
 
-            throw oxNew(StandardException::class, 'OSC_PAYPAL_ORDEREXECUTION_ERROR'.$exception->getMessage());
+            throw oxNew(StandardException::class, 'OSC_PAYPAL_ORDEREXECUTION_ERROR' . $exception->getMessage());
         }
 
         try {
