@@ -395,7 +395,6 @@ class ProxyController extends FrontendController
             $basket->calculateBasket(false);
         }
     }
-
     public function setPayPalPaymentMethod($defaultPayPalPaymentId = PayPalDefinitions::EXPRESS_PAYPAL_PAYMENT_ID): void
     {
         $session = Registry::getSession();
