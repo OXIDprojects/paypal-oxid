@@ -92,13 +92,7 @@ final class PayPalDefinitions
             'constraints' => self::PAYMENT_CONSTRAINTS_PAYPAL,
             'onlybrutto' => false,
             'buttonpayment' => false,
-            'defaulton' => true,
-            'sandbox' => [
-                'url' => 'https://paypalobjects.com/devdoc/apple-pay/sandbox/apple-developer-merchantid-domain-association',
-            ],
-            'live' => [
-                'url' => 'https://paypalobjects.com/devdoc/apple-pay/well-known/apple-developer-merchantid-domain-association',
-            ],
+            'defaulton' => true
         ],
         //GooglePay
         self::GOOGLEPAY_PAYPAL_PAYMENT_ID => [
