@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\PayPal\Core\Events;
 
 use OxidEsales\DoctrineMigrationWrapper\MigrationsBuilder;
+use OxidEsales\Eshop\Application\Model\Payment as EshopModelPayment;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ModuleConfigurationDaoBridgeInterface;
@@ -23,7 +24,6 @@ use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 class Events
@@ -52,6 +52,24 @@ class Events
      */
     public static function onDeactivate(): void
     {
+        $activePayments = [];
+        foreach (PayPalDefinitions::getPayPalDefinitions() as $paymentId => $paymentDefinitions) {
+            $paymentMethod = oxNew(EshopModelPayment::class);
+            if (
+                $paymentMethod->load($paymentId) &&
+                $paymentMethod->getFieldData('oxactive')
+            ) {
+                $activePayments[] = $paymentId;
+                $paymentMethod->assign([
+                    'oxactive' => false
+                ]);
+                $paymentMethod->save();
+            }
+        }
+        $service = self::getModuleSettingsService();
+        if ($service) {
+            $service->saveActivePayments($activePayments);
+        }
     }
 
     /**
