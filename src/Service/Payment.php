@@ -331,6 +331,7 @@ class Payment
                         $checkoutOrderId,
                         $shopOrderId
                     );
+
                     /** @var $result ApiOrderModel */
                     $result = $orderService->capturePaymentForOrder(
                         '',
