@@ -199,7 +199,28 @@ $aModule = [
         [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'basket_btn_next_bottom',
-            'file' => 'views/smarty/frontend/blocks/page/checkout/inc/basket__basket_btn_next_bottom.tpl',
+            'file' => '/views/blocks/page/checkout/basket_btn_next_bottom.tpl',
+        ],
+        [
+            'template' => 'widget/minibasket/minibasket.tpl',
+            'block' => 'dd_layout_page_header_icon_menu_minibasket_functions',
+            'file' => '/views/blocks/widget/minibasket/dd_layout_page_header_icon_menu_minibasket_functions.tpl',
+        ],
+        [
+            'template' => 'payment_main.tpl',
+            'block' => 'admin_payment_main_form',
+            'file' => '/views/blocks/admin/admin_payment_main_form.tpl',
+        ],
+        // @Todo PAYPAL-486: Using the same file, with 2 themes. Should be more generic, if possible.
+        [
+            'template' => 'page/checkout/payment.tpl',
+            'block' => 'select_payment',
+            'file' => '/views/blocks/page/checkout/select_payment.tpl',
+        ],
+        [
+            'template' => 'page/checkout/payment.tpl',
+            'block' => 'change_payment',
+            'file' => '/views/blocks/page/checkout/change_payment.tpl',
         ],
         [
             'template' => 'page/checkout/basket.tpl',

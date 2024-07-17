@@ -118,6 +118,21 @@ class StaticContent
         }
     }
 
+    /**
+     * Try to load payment model based on given id an set payment inactive
+     *
+     * @param string $paymentId
+     * @return void
+     * @throws \Exception
+     */
+    protected function deactivatePaymentMethod(string $paymentId) : void {
+        $paymentModel = oxNew(EshopModelPayment::class);
+        if ($paymentModel->load($paymentId)) {
+            $paymentModel->oxpayments__oxactive = new Field(false);
+            $paymentModel->save();
+        }
+    }
+
     public function ensureStaticContents(): void
     {
         foreach (PayPalDefinitions::getPayPalStaticContents() as $content) {
