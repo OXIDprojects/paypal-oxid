@@ -32,7 +32,6 @@ class VaultingService extends BaseService
         }
 
         $path = '/v1/oauth2/token';
-        $method = 'post';
 
         $response = $this->send('POST', $path, $params, $headers);
         $body = $response->getBody();
@@ -69,7 +68,6 @@ class VaultingService extends BaseService
         $headers = $this->getVaultingHeaders();
 
         $path = '/v3/vault/setup-tokens';
-        $method = 'post';
 
         $response = $this->send(
             'POST',
@@ -177,7 +175,6 @@ class VaultingService extends BaseService
         $headers = $this->getVaultingHeaders();
 
         $path = '/v3/vault/payment-tokens';
-        $method = 'post';
 
         $requestBody = [
             "payment_source" => [
@@ -202,9 +199,8 @@ class VaultingService extends BaseService
         }
 
         $path = '/v3/vault/payment-tokens?customer_id=' . $paypalCustomerId;
-        $method = 'get';
 
-        $response = $this->send($method, $path);
+        $response = $this->send('GET', $path);
         $body = $response->getBody();
 
         return json_decode((string)$body, true);
