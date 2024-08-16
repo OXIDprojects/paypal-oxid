@@ -59,7 +59,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - first Version for OXID7 with APEX-Theme as Twig-Frontend-Standard-Theme, without Smarty-Support
 
-## [2.5.0] - 2024-??-??
+## [2.5.0] - 2024-08-16
 
 ### FIX
 
