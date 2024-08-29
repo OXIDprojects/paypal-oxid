@@ -284,6 +284,7 @@ class OrderController extends OrderController_parent
                 $checkoutOrderId,
                 $request,
                 '',
+                Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
             );
         } catch (ApiException $exception) {
             $this->handlePayPalApiError($exception);
@@ -449,6 +450,7 @@ class OrderController extends OrderController_parent
                 $orderId,
                 $request,
                 '',
+                Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
             );
         } catch (ApiException $exception) {
             $logger = $this->getServiceFromContainer(Logger::class);
