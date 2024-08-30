@@ -63,6 +63,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### FIX
 
+- [0007711](https://bugs.oxid-esales.com/view.php?id=7711): Temporary orders that are no longer needed and already have an order number will be cancelled. Temporary orders without an order number will still be deleted
 - [0007713](https://bugs.oxid-esales.com/view.php?id=7713): Correct SQL for select temporary Orders
 - provide correct encoded Shopname to PayPal
 - Fix order of closing brackets in applepay-template
