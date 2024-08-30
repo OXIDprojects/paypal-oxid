@@ -390,9 +390,11 @@ class ModuleSettings
         return (bool)$this->getSettingValue('oscPayPalSandboxGooglePayEligibility');
     }
 
-    public function getIsVaultingActive(): bool
+    public function getActivePayments(): array
     {
-        return (bool)$this->getSettingValue('oscPayPalSetVaulting');
+        /** @var array|null $activePayments */
+        $activePayments = $this->getSettingValue('oscPayPalActivePayments');
+        return $activePayments ?: [];
     }
 
     /**
@@ -505,10 +507,6 @@ class ModuleSettings
         }
     }
 
-    public function saveActivePayments(array $activePayments): void
-    {
-        $this->save('oscPayPalActivePayments', $activePayments);
-    }
     public function saveGooglePayEligibility(bool $isGooglePayEligibility): void
     {
         if ($this->isSandbox()) {

@@ -65,12 +65,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - [0007713](https://bugs.oxid-esales.com/view.php?id=7713): Correct SQL for select temporary Orders
 
-## [2.5.1] - 2024-??-??
-
-### FIX
-
-- [0007584](https://bugs.oxid-esales.com/view.php?id=7584): Provide additional oxrights-elements for PayPal-Express, ApplePay and GooglePay-Buttons
-
 ## [2.5.0] - 2024-08-16
 
 ### FIX
