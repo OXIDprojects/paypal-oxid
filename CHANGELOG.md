@@ -65,6 +65,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - [0007713](https://bugs.oxid-esales.com/view.php?id=7713): Correct SQL for select temporary Orders
 - provide correct encoded Shopname to PayPal
+- Fix order of closing brackets in applepay-template
 
 ## [2.5.0] - 2024-08-16
 
