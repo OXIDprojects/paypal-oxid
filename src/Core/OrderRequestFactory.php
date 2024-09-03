@@ -754,7 +754,7 @@ class OrderRequestFactory
 
     private function getUsersPayPalCustomerId()
     {
-        $config = Registry::getConfig();
-        return $config->getUser()->getFieldData("oscpaypalcustomerid");
+        $user = Registry::getConfig()->getUser();
+        return $user ? $user->getFieldData("oscpaypalcustomerid") : '';
     }
 }
