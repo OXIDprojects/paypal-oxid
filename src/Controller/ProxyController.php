@@ -83,13 +83,10 @@ class ProxyController extends FrontendController
             null,
             '',
             '',
-            '',
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
             null,
             null,
-            false,
-            false,
-            null
+            false
         );
 
         if ($response->id) {
@@ -195,13 +192,10 @@ class ProxyController extends FrontendController
             null,
             '',
             '',
-            '',
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
             null,
             null,
-            false,
-            false,
-            null
+            false
         );
 
         if ($response->id) {
@@ -565,13 +559,10 @@ class ProxyController extends FrontendController
             null,
             '',
             '',
-            '',
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
             null,
             null,
-            false,
-            false,
-            null
+            false
         );
         if ($response->id) {
             PayPalSession::storePayPalOrderId($response->id);
