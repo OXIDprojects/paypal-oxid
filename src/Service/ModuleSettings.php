@@ -400,7 +400,7 @@ class ModuleSettings
 
     public function getShopName(): string
     {
-        $value = 'OXID-eSales Shop without name';
+        $value = '';
         /** @var Shop $shop */
         $shop = Registry::getConfig()->getActiveShop();
         if (isset($shop->oxshops__oxname->rawValue)) {
@@ -413,6 +413,20 @@ class ModuleSettings
 
         // method "getRawFieldData" available only with shop v6.5+
         //return Registry::getConfig()->getActiveShop()->getRawFieldData('oxname');
+    }
+
+    public function getInfoEMail(): string
+    {
+        $value = '';
+        /** @var Shop $shop */
+        $shop = Registry::getConfig()->getActiveShop();
+        if (isset($shop->oxshops__oxinfoemail->rawValue)) {
+            $value = $shop->oxshops__oxinfoemail->rawValue;
+        }
+        elseif(isset($shop->oxshops__oxinfoemail->value)) {
+            $value = $shop->oxshops__oxinfoemail->value;
+        }
+        return $value;
     }
 
     /**
