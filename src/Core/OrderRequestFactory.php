@@ -343,12 +343,12 @@ class OrderRequestFactory
         }
 
         $wrapping = $basket->getPayPalCheckoutWrapping();
-        if ($wrapping && $wrapping->getBruttoPrice()) {
+        if ($wrapping) {
             $item = new Item();
             $item->name = $language->translateString('GIFT_WRAPPING');
 
             $item->unit_amount = PriceToMoney::convert(
-                $wrapping->getBruttoPrice(),
+                $wrapping,
                 $currency
             );
             // tax - we use 0% and calculate with brutto to avoid rounding errors
@@ -361,12 +361,12 @@ class OrderRequestFactory
         }
 
         $giftCard = $basket->getPayPalCheckoutGiftCard();
-        if ($giftCard && $giftCard->getBruttoPrice()) {
+        if ($giftCard) {
             $item = new Item();
             $item->name = $language->translateString('GREETING_CARD');
 
             $item->unit_amount = PriceToMoney::convert(
-                $giftCard->getBruttoPrice(),
+                $giftCard,
                 $currency
             );
             // tax - we use 0% and calculate with brutto to avoid rounding errors
@@ -379,12 +379,12 @@ class OrderRequestFactory
         }
 
         $payment = $basket->getPayPalCheckoutPayment();
-        if ($payment && $payment->getBruttoPrice()) {
+        if ($payment) {
             $item = new Item();
             $item->name = $language->translateString('PAYMENT_METHOD');
 
             $item->unit_amount = PriceToMoney::convert(
-                $payment->getBruttoPrice(),
+                $payment,
                 $currency
             );
             // tax - we use 0% and calculate with brutto to avoid rounding errors
@@ -398,12 +398,12 @@ class OrderRequestFactory
 
         //Shipping cost
         $delivery = $basket->getPayPalCheckoutDeliveryCosts();
-        if ($delivery && $delivery->getBruttoPrice()) {
+        if ($delivery) {
             $item = new Item();
             $item->name = $language->translateString('SHIPPING_COST');
 
             $item->unit_amount = PriceToMoney::convert(
-                $delivery->getBruttoPrice(),
+                $delivery,
                 $currency
             );
             // tax - we use 0% and calculate with brutto to avoid rounding errors
