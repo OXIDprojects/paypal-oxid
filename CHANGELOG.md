@@ -63,13 +63,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### FIX
 
+- [0007706](https://bugs.oxid-esales.com/view.php?id=7706): If Customer change the invoice-address on last page in checkout and use this address as deliveryaddress (checkbox invoiceaddress as deliveryaddress), then this changed address would be transferred to PayPal
 - [0007711](https://bugs.oxid-esales.com/view.php?id=7711): Temporary orders that are no longer needed and already have an order number will be cancelled. Temporary orders without an order number will still be deleted
 - [0007713](https://bugs.oxid-esales.com/view.php?id=7713): Correct SQL for select temporary Orders
 - provide correct encoded Shopname to PayPal
 - Fix order of closing brackets in applepay-template
 - Temporary orders that are no longer needed and already have an order number will be cancelled. Temporary orders without an order number will still be deleted
 - Provide BN codes even to previously overlooked API calls
-- [0007706](https://bugs.oxid-esales.com/view.php?id=7706): If Customer change the invoice-address on last page in checkout and use this address as deliveryaddress (checkbox invoiceaddress as deliveryaddress), then this changed address would be transferred to PayPal
+- Fix PHP7.3 Compatibility-Issues (remove functionalities that comes with later PHP-Versions)
 
 ## [2.5.0] - 2024-08-16
 
