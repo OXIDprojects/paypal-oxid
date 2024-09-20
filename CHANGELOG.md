@@ -59,10 +59,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - first Version for OXID7 with APEX-Theme as Twig-Frontend-Standard-Theme, without Smarty-Support
 
-## [2.5.1] - 2024-??-??
+## [2.5.1] - 2024-09-20
 
 ### FIX
 
+- [0007161](https://bugs.oxid-esales.com/view.php?id=7161): Removing payment method deactivation during module deactivation. Merchants must now do this themselves
+- [0007584](https://bugs.oxid-esales.com/view.php?id=7584): Provide additional oxrights-elements for PayPal-Express, ApplePay and GooglePay-Buttons
 - [0007706](https://bugs.oxid-esales.com/view.php?id=7706): If Customer change the invoice-address on last page in checkout and use this address as deliveryaddress (checkbox invoiceaddress as deliveryaddress), then this changed address would be transferred to PayPal
 - [0007711](https://bugs.oxid-esales.com/view.php?id=7711): Temporary orders that are no longer needed and already have an order number will be cancelled. Temporary orders without an order number will still be deleted
 - [0007713](https://bugs.oxid-esales.com/view.php?id=7713): Correct SQL for select temporary Orders
