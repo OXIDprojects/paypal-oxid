@@ -59,6 +59,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - first Version for OXID7 with APEX-Theme as Twig-Frontend-Standard-Theme, without Smarty-Support
 
+## [2.5.2] - 2024-??-??
+
+### FIX
+
+- Catch possible thrown Error by getting DataClientToken
+
 ## [2.5.1] - 2024-09-20
 
 ### FIX
