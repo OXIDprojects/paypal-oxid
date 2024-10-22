@@ -156,11 +156,11 @@
                         <div class="form-group sandbox">
                             <label for="special-payments-sandbox">{{ translate({ ident: "OSC_PAYPAL_SPECIAL_PAYMENTS", suffix:"COLON" }) }}</label>
                             <div>
-                                {{ translate({ ident: "OSC_PAYPAL_SPECIAL_PAYMENTS_PUI", suffix:"COLON" }) }} {% if config.isLivePuiEligibility() %}{{ translate({ ident: "GENERAL_YES" }) }}{% else %}{{ translate({ ident: "GENERAL_NO" }) }}{% endif %}<br />
+                                {{ translate({ ident: "OSC_PAYPAL_SPECIAL_PAYMENTS_PUI", suffix:"COLON" }) }} {% if config.isSandboxPuiEligibility() %}{{ translate({ ident: "GENERAL_YES" }) }}{% else %}{{ translate({ ident: "GENERAL_NO" }) }}{% endif %}<br />
                                 <br>
-                                {{ translate({ ident: "OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC", suffix:"COLON" }) }} {% if config.isLiveAcdcEligibility() %}{{ translate({ ident: "GENERAL_YES" }) }}{% else %}{{ translate({ ident: "GENERAL_NO" }) }} {{ translate({ ident: "OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC_FALLBACK" }) }}{% endif %}
+                                {{ translate({ ident: "OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC", suffix:"COLON" }) }} {% if config.isSandboxAcdcEligibility() %}{{ translate({ ident: "GENERAL_YES" }) }}{% else %}{{ translate({ ident: "GENERAL_NO" }) }} {{ translate({ ident: "OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC_FALLBACK" }) }}{% endif %}
                                 <br>
-                                {{ translate({ ident: "OSC_PAYPAL_SPECIAL_PAYMENTS_VAULTING", suffix:"COLON" }) }} {% if config.isVaultingEligibility() %}{{ translate({ ident: "GENERAL_YES" }) }}{% else %}{{ translate({ ident: "GENERAL_NO" }) }} {% endif %}
+                                {{ translate({ ident: "OSC_PAYPAL_SPECIAL_PAYMENTS_VAULTING", suffix:"COLON" }) }} {% if config.isSandboxVaultingEligibility() %}{{ translate({ ident: "GENERAL_YES" }) }}{% else %}{{ translate({ ident: "GENERAL_NO" }) }} {% endif %}
                             </div>
                         </div>
 
@@ -521,7 +521,6 @@
                         {{ translate({ ident: "OSC_PAYPAL_VAULTING_TITLE" }) }}
                     </h4>
                 </div>
-
                 <div id="collapse10" class="collapse" aria-labelledby="heading10" data-parent="#accordion">
                     <div class="card-body">
                         <div class="form-group">
@@ -531,7 +530,7 @@
                                         <div class="checkbox">
                                             <label>
                                                 {% if config.isSandbox() %}selected
-                                                    <input type="checkbox" name="conf[oscPayPalSetVaulting]" {% if config.getIsVaultingActive() %}checked{% endif %} value="1" {% if config.isVaultingEligibility() == false %}disabled{% endif %}>
+                                                    <input type="checkbox" name="conf[oscPayPalSetVaulting]" {% if config.getIsVaultingActive() %}checked{% endif %} value="1" {% if config.isSandboxVaultingEligibility() == false %}disabled{% endif %}>
                                                 {% else %}
                                                     <input type="checkbox" name="conf[oscPayPalSetVaulting]" {% if config.getIsVaultingActive() %}checked{% endif %} value="1" {% if config.isLiveVaultingEligibility() == false %}disabled{% endif %}>
                                                 {% endif %}

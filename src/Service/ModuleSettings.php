@@ -156,14 +156,7 @@ class ModuleSettings
         return $this->isSandbox() ?
             $this->isSandboxPuiEligibility() :
             $this->isLivePuiEligibility();
-    }
 
-    public function isVaultingEligibility(): bool
-    {
-        return $this->isSandbox() ?
-            $this->isSandBoxVaultingEligibility() :
-            $this->isLiveVaultingEligibility();
-    }
 
     public function getLiveClientId(): string
     {
@@ -575,11 +568,6 @@ class ModuleSettings
     {
         $value = (string)$this->getSettingValue('oscPayPalSCAContingency');
         return $value === Constants::PAYPAL_SCA_DISABLED;
-    }
-
-    public function getIsVaultingActive(): bool
-    {
-        return (bool)$this->getSettingValue('oscPayPalSetVaulting');
     }
 
     /**
