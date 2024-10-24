@@ -14,6 +14,7 @@ use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Session as EshopSession;
+use OxidSolutionCatalysts\PayPal\Controller\PaymentController;
 use OxidSolutionCatalysts\PayPal\Core\ConfirmOrderRequestFactory;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\OrderRequestFactory;
@@ -32,7 +33,6 @@ use OxidSolutionCatalysts\PayPalApi\Model\Orders\ConfirmOrderRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as ApiModelOrder;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as ApiOrderModel;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as OrderResponse;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderAuthorizeRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderCaptureRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Payments\CaptureRequest;
@@ -156,6 +156,15 @@ class Payment
         }
 
         return $response;
+    }
+    
+    public function isVaultingAllowed($paymentId, $paypalPaymentType)
+    {
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
+
+        return $this->getIsPaymentActive($paymentId)
+            && $moduleSettings->getIsVaultingActive()
+            && PayPalDefinitions::isPayPalVaultingPossible($paymentId, $paypalPaymentType);
     }
 
     public function doCreatePatchedOrder(
@@ -807,5 +816,20 @@ class Payment
                 'paypal_error'
             );
         }
+    }
+
+    private function getIsPaymentActive($paymentId): bool
+    {
+        $paymentController = oxNew(PaymentController::class);
+        $paymentList = $paymentController->getPaymentList();
+
+        /** @var \OxidEsales\Eshop\Application\Model\Payment $payment */
+        foreach ($paymentList as $payment) {
+            if ($payment->getId() == $paymentId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

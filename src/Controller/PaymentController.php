@@ -62,14 +62,12 @@ class PaymentController extends PaymentController_parent
                     $vaultedPaymentSources = [];
                     foreach ($vaultedPaymentTokens as $vaultedPaymentToken) {
                         foreach ($vaultedPaymentToken["payment_source"] as $paymentType => $paymentSource) {
-                            if (!$this->paymentTypeExists($paymentType)) {
-                                continue;
-                            }
-                            if ($paymentType === "card") {
+                            $viewConfig = oxNew(\OxidEsales\Eshop\Core\ViewConfig::class);
+                            if ($paymentType === "card" && $viewConfig->isVaultingAllowedForACDC()) {
                                 $string = $lang->translateString("OSC_PAYPAL_CARD_ENDING_IN");
                                 $vaultedPaymentSources[$paymentType][] = $paymentSource["brand"] . " " .
                                     $string . $paymentSource["last_digits"];
-                            } elseif ($paymentType === "paypal") {
+                            } elseif ($paymentType === "paypal"&& $viewConfig->isVaultingAllowedForPayPal()) {
                                 $string = $lang->translateString("OSC_PAYPAL_CARD_PAYPAL_PAYMENT");
                                 $vaultedPaymentSources[$paymentType][] =
                                     $string . " " . $paymentSource["email_address"];
@@ -86,22 +84,6 @@ class PaymentController extends PaymentController_parent
         Registry::getSession()->deleteVariable("selectedVaultPaymentSourceIndex");
 
         return parent::render();
-    }
-
-    /**
-     * @param $paymentList
-     * @param $paymentType
-     * @return bool
-     */
-    protected function paymentTypeExists($paymentType): bool
-    {
-        $paymentList = $this->getPaymentList();
-        foreach ($paymentList as $payment) {
-            if (PayPalDefinitions::isPayPalVaultingPossible($payment->getId(), $paymentType)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public function getPayPalPuiFraudnetCmId(): string
