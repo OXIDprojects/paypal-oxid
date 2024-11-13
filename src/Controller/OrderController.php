@@ -228,7 +228,6 @@ class OrderController extends OrderController_parent
     {
         try {
             $paymentService = $this->getServiceFromContainer(PaymentService::class);
-            $paymentService->removeTemporaryOrder();
             Registry::getSession()->setVariable('sess_challenge', $this->getUtilsObjectInstance()->generateUID());
 
             $_POST['sDeliveryAddressMD5'] = $this->getDeliveryAddressMD5();
@@ -241,24 +240,22 @@ class OrderController extends OrderController_parent
             return;
         }
 
-        $response = $paymentService->doCreatePatchedOrder(
-            Registry::getSession()->getBasket()
-        );
-        if (!($paypalOrderId = $response['id'])) {
-            $this->outputJson(['googlepayerror' => 'cannot create paypal order']);
-            return;
-        }
-
-        if (!$status) {
-            $response = ['googlepayerror' => 'unexpected order status ' . $status];
-            $paymentService->removeTemporaryOrder();
-        } else {
-            PayPalSession::storePayPalOrderId($paypalOrderId);
+        $paypalOrderId = PayPalSession::getCheckoutOrderId();
+        if($status == "thankyou") {
+            $status = "CREATED";
             $sessionOrderId = (string) Registry::getSession()->getVariable('sess_challenge');
             $payPalOrder = $paymentService->getPayPalCheckoutOrder($sessionOrderId, $paypalOrderId);
-            $payPalOrder->setStatus($response['status']);
+            $payPalOrder->setStatus($status);
             $payPalOrder->save();
+        } else {
+            $status = "ERROR";
+            $paymentService->removeTemporaryOrder();
         }
+
+        $response = [
+            "id" => $paypalOrderId,
+            "status" => $status
+        ];
 
         $this->outputJson($response);
     }

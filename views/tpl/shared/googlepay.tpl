@@ -214,12 +214,12 @@
                         console.log(orderResponse);
                         [{/if}]
                         await onApprove(orderResponse);
-                        await onCreated(orderResponse);
+                        onCreated(orderResponse);
                     }
                     function onCreated(confirmOrderResponse, actions) {
                         captureData = new FormData();
                         captureData.append('orderID', confirmOrderResponse.id);
-                        return fetch('[{$sSelfLink|cat:"cl=order&fnc=captureGooglePayOrder&context=continue&aid="|cat:$aid|cat:"&stoken="|cat:$sToken|cat:"&sDeliveryAddressMD5="|cat:$oView->getDeliveryAddressMD5()}]', {
+                        fetch('[{$sSelfLink|cat:"cl=order&fnc=captureGooglePayOrder&context=continue&aid="|cat:$aid|cat:"&stoken="|cat:$sToken|cat:"&sDeliveryAddressMD5="|cat:$oView->getDeliveryAddressMD5()}]', {
                             method: 'post',
                             body: captureData
                         }).then(function (res) {
@@ -242,12 +242,11 @@
                         });
                     }
 
-                    function onApprove(confirmOrderResponse, actions) {
-
+                    async function onApprove(confirmOrderResponse, actions) {
                         const url = '[{$sSelfLink|cat:"cl=order&fnc=createGooglePayOrder&context=continue&aid="|cat:$aid|cat:"&stoken="|cat:$sToken|cat:"&sDeliveryAddressMD5="|cat:$oView->getDeliveryAddressMD5()}]';
                         createData = new FormData();
                         createData.append('orderID', confirmOrderResponse.id);
-                        fetch(url, {
+                        return await fetch(url, {
                             method: 'POST',
                             body: createData
                         }).then(function (res) {
