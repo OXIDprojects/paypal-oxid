@@ -274,7 +274,7 @@
         }
     }
 
-    [{if false}]</style>[{/if}]
+    [{if false}]</script>[{/if}]
 [{/capture}]
 [{oxscript include="https://pay.google.com/gp/p/js/pay.js"}]
 [{oxscript add=$smarty.capture.detailsGooglePayScript}]
