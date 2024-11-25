@@ -89,6 +89,7 @@ class OrderRequestFactory
         ?string $invoiceId = null,
         ?string $returnUrl = null,
         ?string $cancelUrl = null,
+        bool $withArticles = true,
         bool $setProvidedAddress = true
     ): OrderRequest {
         $request = $this->request = new OrderRequest();

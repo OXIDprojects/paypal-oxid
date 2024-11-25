@@ -348,6 +348,18 @@ class ViewConfig extends ViewConfig_parent
     }
 
     /**
+     * API URL getter for use with the installment banner feature
+     */
+    public function getPayPalApiBannerUrl(): string
+    {
+        $params['client-id'] = $this->getPayPalClientId();
+
+        $params['components'] = 'messages';
+
+        return Constants::PAYPAL_JS_SDK_URL . '?' . http_build_query($params);
+    }
+
+    /**
      * API ID getter for use with the installment banner feature
      */
     public function getPayPalPartnerAttributionIdForBanner(): string
