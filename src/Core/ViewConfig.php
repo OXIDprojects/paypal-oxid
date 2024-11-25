@@ -236,6 +236,48 @@ class ViewConfig extends ViewConfig_parent
         return Constants::PAYPAL_JS_SDK_URL . '?' . http_build_query($params);
     }
 
+    /**
+     * Gets PayPal JS SDK url for Button Payments like SEPA and CreditCardFallback
+     *
+     * @return string
+     */
+    public function getPayPalJsSdkUrlForButtonPayments(): string
+    {
+        return $this->getBasePayPalJsSdkUrl('funding-eligibility', true);
+    }
+
+    protected function getBasePayPalJsSdkUrl($type = '', $continueFlow = false): string
+    {
+        $config = Registry::getConfig();
+        $lang = Registry::getLang();
+
+        $localeCode = $this->getServiceFromContainer(LanguageLocaleMapper::class)
+            ->mapLanguageToLocale($lang->getLanguageAbbr());
+
+        $params = [];
+
+        $params['client-id'] = $this->getPayPalClientId();
+        $params['integration-date'] = Constants::PAYPAL_INTEGRATION_DATE;
+
+        if ($currency = $config->getActShopCurrencyObject()) {
+            $params['currency'] = strtoupper($currency->name);
+        }
+
+        if ($continueFlow) {
+            $params['intent'] = strtolower(Constants::PAYPAL_ORDER_INTENT_CAPTURE);
+            $params['commit'] = 'false';
+        }
+
+        $params['components'] = 'buttons,' . $type;
+
+        if ($this->isPayPalBannerActive()) {
+            $params['components'] .= ',messages';
+        }
+        $params['locale'] = $localeCode;
+
+        return Constants::PAYPAL_JS_SDK_URL . '?' . http_build_query($params);
+    }
+
     public function showPayPalExpressInMiniBasket(): bool
     {
         $className = $this->getTopActiveClassName();
