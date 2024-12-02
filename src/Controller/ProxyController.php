@@ -180,6 +180,7 @@ class ProxyController extends FrontendController
         $this->addToBasket();
         $this->setPayPalPaymentMethod($paymentId);
         $basket = Registry::getSession()->getBasket();
+        $config = Registry::getConfig();
 
         if ($basket->getItemsCount() === 0) {
             $this->outputJson(['ERROR' => 'No Article in the Basket']);
@@ -193,8 +194,9 @@ class ProxyController extends FrontendController
             '',
             '',
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
-            null,
-            null,
+
+            $config->getSslShopUrl() . 'index.php?cl=order&fnc=finalizepaypalsession',
+            $config->getSslShopUrl() . 'index.php?cl=order&fnc=cancelpaypalsession',
             false
         );
 

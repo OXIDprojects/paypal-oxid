@@ -7,7 +7,8 @@ module.exports = {
         browser: true,
         globals: {
             jQuery: true
-        }
+        },
+        esversion: 9
     },
     moduleproduction: {
         src: [

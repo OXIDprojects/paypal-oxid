@@ -9,10 +9,12 @@ namespace OxidSolutionCatalysts\PayPal\Core;
 
 use Exception;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\EshopCommunity\Core\Config;
 use OxidSolutionCatalysts\PayPal\Service\LanguageLocaleMapper;
 use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
+use OxidSolutionCatalysts\PayPal\Core\Config as PayPalConfig;
 
 /**
  * @mixin \OxidEsales\Eshop\Core\ViewConfig
@@ -106,12 +108,9 @@ class ViewConfig extends ViewConfig_parent
         return $this->getServiceFromContainer(ModuleSettings::class)->isVaultingEligibility();
     }
 
-    /**
-     * @return Config
-     */
-    public function getPayPalCheckoutConfig(): Config
+    public function getPayPalCheckoutConfig(): PayPalConfig
     {
-        return oxNew(Config::class);
+        return oxNew(PayPalConfig::class);
     }
 
     /**
@@ -233,7 +232,9 @@ class ViewConfig extends ViewConfig_parent
 
         $params['locale'] = $localeCode;
 
-        return Constants::PAYPAL_JS_SDK_URL . '?' . http_build_query($params);
+        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ? Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
+
+        return $baseJsSdkUrl . '?' . http_build_query($params);
     }
 
     /**
@@ -275,7 +276,9 @@ class ViewConfig extends ViewConfig_parent
         }
         $params['locale'] = $localeCode;
 
-        return Constants::PAYPAL_JS_SDK_URL . '?' . http_build_query($params);
+        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ? Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
+
+        return $baseJsSdkUrl . '?' . http_build_query($params);
     }
 
     public function showPayPalExpressInMiniBasket(): bool
@@ -398,7 +401,9 @@ class ViewConfig extends ViewConfig_parent
 
         $params['components'] = 'messages';
 
-        return Constants::PAYPAL_JS_SDK_URL . '?' . http_build_query($params);
+        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ? Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
+
+        return $baseJsSdkUrl . '?' . http_build_query($params);
     }
 
     /**
@@ -654,5 +659,20 @@ class ViewConfig extends ViewConfig_parent
     public function isAcdcEligibility(): bool
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->isAcdcEligibility();
+    }
+
+    public function getMerchantId(): string
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->getMerchantId();
+    }
+
+    public function getClientId(): string
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->getClientId();
+    }
+
+    public function getConfig(): Config
+    {
+        return Registry::getConfig();
     }
 }

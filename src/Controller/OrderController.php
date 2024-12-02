@@ -25,6 +25,7 @@ use OxidSolutionCatalysts\PayPal\Model\Order as PayPalOrderModel;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Service\Payment as PaymentService;
 use OxidSolutionCatalysts\PayPal\Service\UserRepository;
+use OxidSolutionCatalysts\PayPal\Service\HateoasLinkService;
 use OxidSolutionCatalysts\PayPal\Traits\JsonTrait;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
@@ -203,13 +204,7 @@ class OrderController extends OrderController_parent
             return;
         }
 
-        $order = oxNew(\OxidEsales\Eshop\Application\Model\Order::class);
-        $orderId = \OxidEsales\Eshop\Core\Registry::getSession()->getVariable('sess_challenge');
-        $order->load($orderId);
-        $response = $paymentService->doCreatePatchedOrder(
-            Registry::getSession()->getBasket(),
-            $order
-        );
+        $response = $this->doCreatePatchedOrder();
         if (!($paypalOrderId = $response['id'])) {
             $this->outputJson(['acdcerror' => 'cannot create paypal order']);
             return;
@@ -245,9 +240,7 @@ class OrderController extends OrderController_parent
             return;
         }
 
-        $response = $paymentService->doCreatePatchedOrder(
-            Registry::getSession()->getBasket()
-        );
+        $response = $this->doCreatePatchedOrder();
         if (!($paypalOrderId = $response['id'])) {
             $this->outputJson(['googlepayerror' => 'cannot create paypal order']);
             return;
@@ -264,8 +257,17 @@ class OrderController extends OrderController_parent
             $payPalOrder->save();
         }
 
+        if ($response['hateoasLinks']) {
+            $hateoasLinkService = new HateoasLinkService($response['hateoasLinks']);
+            $approveLink = $hateoasLinkService->getApproveLink();
+            if ($approveLink) {
+                $response['approveUrl'] = $approveLink->getUrl();
+            }
+        }
+
         $this->outputJson($response);
     }
+
     public function captureGooglePayOrder(): void
     {
         $orderService = Registry::get(ServiceFactory::class)->getOrderService();
@@ -423,9 +425,7 @@ class OrderController extends OrderController_parent
             return;
         }
 
-        $response = $paymentService->doCreatePatchedOrder(
-            Registry::getSession()->getBasket()
-        );
+        $response = $this->doCreatePatchedOrder();
         if (!($paypalOrderId = $response['id'])) {
             $this->outputJson(['error' => 'cannot create paypal order']);
             return;
@@ -698,5 +698,17 @@ class OrderController extends OrderController_parent
         }
 
         return parent::getNextStep($success);
+    }
+
+    private function doCreatePatchedOrder(): array
+    {
+        $paymentService = $this->getServiceFromContainer(PaymentService::class);
+        $order = oxNew(EshopModelOrder::class);
+        $orderId = Registry::getSession()->getVariable('sess_challenge');
+        $order->load($orderId);
+        return $paymentService->doCreatePatchedOrder(
+            Registry::getSession()->getBasket(),
+            $order
+        );
     }
 }

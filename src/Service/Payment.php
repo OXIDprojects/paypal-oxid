@@ -176,8 +176,8 @@ class Payment
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
             null,
             null,
-            false,
             true,
+            $order,
             $order
         );
 
@@ -194,7 +194,8 @@ class Payment
 
         $return = [
             'id' => $paypalOrderId,
-            'status' => $status
+            'status' => $status,
+            'hateoasLinks' => $response?->links ?? [],
         ];
 
         return $return;

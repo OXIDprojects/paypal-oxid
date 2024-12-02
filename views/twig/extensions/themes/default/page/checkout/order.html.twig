@@ -54,3 +54,20 @@
         {{ parent() }}
     {% endif %}
 {% endblock %}
+
+{% block checkout_order_next_step_side %}
+    <button type="button" class="btn btn-highlight btn-lg w-100"
+            onclick="document.getElementById('orderConfirmAgbBottom').submit();">
+        {{ translate({ ident: "SUBMIT_ORDER" }) }}
+    </button>
+    {% set payment = oView.getPayment() %}
+    {% set paymentId = oView.getPayment().getId() %}
+    {{ paymentId }}
+    {% if paymentId == "oscpaypal_googlepay" %}
+        {% include "@osc_paypal/frontend/googlepay_button.html.twig" %}
+    {% endif %}
+
+    {% if paymentId == "oscpaypal_apple_pay"%}
+        <div id="{{paymentId}}" class="paypal-button-container paypal-button-wrapper large"></div>
+    {% endif %}
+{% endblock %}
