@@ -17,6 +17,8 @@ window.OxidPayPalGooglePay = {
     totalPrice: null,
     currency: null,
     deliveryAddressMD5: null,
+    language: null,
+    loadingContainer: null,
     init: async function () {
         this.googlePayContainer = document.getElementById('oscpaypal_googlepay');
         if (this.googlePayContainer) {
@@ -25,10 +27,13 @@ window.OxidPayPalGooglePay = {
             this.selfLink = this.googlePayContainer.dataset.selfLink;
             this.useGooglePayAddress = !!Number(this.googlePayContainer.dataset.useGooglePayAddress);
             this.isSandbox = !!Number(this.googlePayContainer.dataset.isSandbox);
-            this.merchantName = !!Number(this.googlePayContainer.dataset.merchantName);
+            this.merchantName = this.googlePayContainer.dataset.merchantName;
             this.totalPrice = this.googlePayContainer.dataset.totalPrice;
             this.currency = this.googlePayContainer.dataset.currency;
             this.deliveryAddressMD5 = this.googlePayContainer.dataset.deliveryAddressMd5;
+            this.language = this.googlePayContainer.dataset.language;
+            let elements = document.getElementsByClassName(this.googlePayContainer.dataset.loadingContainerClassName);
+            this.loadingContainer = elements[0];
 
             await window.googlePayReady;
             this.onGooglePayLoaded();
@@ -36,7 +41,7 @@ window.OxidPayPalGooglePay = {
     },
     getGoogleIsReadyToPayRequest: function (allowedPaymentMethods) {
         return Object.assign({}, this.baseRequest, {
-            allowedPaymentMethods: allowedPaymentMethods,
+            allowedPaymentMethods: allowedPaymentMethods
         });
     },
 
@@ -46,6 +51,7 @@ window.OxidPayPalGooglePay = {
             const googlePayConfig = await paypal.Googlepay().config();
             this.allowedPaymentMethods = googlePayConfig.allowedPaymentMethods;
             this.merchantInfo = googlePayConfig.merchantInfo;
+            this.merchantInfo.merchantName = this.merchantName;
         }
         return {
             allowedPaymentMethods: this.allowedPaymentMethods,
@@ -57,20 +63,25 @@ window.OxidPayPalGooglePay = {
     getGooglePaymentDataRequest: async function () {
         const paymentDataRequest = Object.assign({}, this.baseRequest);
         const {allowedPaymentMethods, merchantInfo} = await this.getGooglePayConfig();
-        paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
+
         paymentDataRequest.transactionInfo = this.getGoogleTransactionInfo();
+        paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
         paymentDataRequest.merchantInfo = merchantInfo;
         paymentDataRequest.callbackIntents = ["PAYMENT_AUTHORIZATION"];
+        paymentDataRequest.emailRequired = true;
+        paymentDataRequest.shippingAddressRequired = this.useGooglePayAddress;
+        paymentDataRequest.shippingAddressParameters = {'phoneNumberRequired': true};
+
         return paymentDataRequest;
     },
 
     onPaymentAuthorized: function (paymentData) {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             this.processPayment(paymentData)
-                .then(function (data) {
+                .then(function () {
                     resolve({transactionState: "SUCCESS"});
                 })
-                .catch(function (errDetails) {
+                .catch(function () {
                     resolve({transactionState: "ERROR"});
                 });
         }.bind(this));
@@ -79,7 +90,7 @@ window.OxidPayPalGooglePay = {
     getGooglePaymentsClient: function () {
         if (this.paymentsClient === null) {
             this.paymentsClient = new google.payments.api.PaymentsClient({
-                environment: "TEST",
+                environment: this.isSandbox ? "TEST" : "PRODUCTION",
                 paymentDataCallbacks: {
                     onPaymentAuthorized: this.onPaymentAuthorized.bind(this),
                 },
@@ -95,6 +106,7 @@ window.OxidPayPalGooglePay = {
                 .isReadyToPay(this.getGoogleIsReadyToPayRequest(allowedPaymentMethods))
                 .then(function (response) {
                     if (response.result) {
+                        this.loadingContainer.style.display = 'none';
                         this.addGooglePayButton();
                     }
                 }.bind(this))
@@ -109,6 +121,8 @@ window.OxidPayPalGooglePay = {
     addGooglePayButton: function () {
         const paymentsClient = this.getGooglePaymentsClient();
         const button = paymentsClient.createButton({
+            buttonType: 'buy',
+            buttonLocale: this.language,
             onClick: this.onGooglePaymentButtonClicked.bind(this),
         });
         document.getElementById("oscpaypal_googlepay").appendChild(button);
@@ -132,7 +146,6 @@ window.OxidPayPalGooglePay = {
 
     processPayment: async function (paymentData) {
         try {
-            /*** Create oxid Order ***/
             const createOrderUrl = this.selfLink + '&cl=oscpaypalproxy&fnc=createGooglepayOrder&paymentid=oscpaypal_googlepay&context=continue&stoken=' + this.token;
 
             const {id: orderId, status, links} = await fetch(createOrderUrl, {
@@ -166,7 +179,6 @@ window.OxidPayPalGooglePay = {
             };
         }
     },
-
     googlePayUserActionRequired: function (orderId) {
         paypal
             .Googlepay()
@@ -176,14 +188,6 @@ window.OxidPayPalGooglePay = {
                 await this.createOxidOrder(orderId);
             });
     },
-    confirnOrder: async function (orderId) {
-        const {status} = await paypal.Googlepay().confirmOrder({
-            orderId: orderId,
-            paymentMethodData: paymentData.paymentMethodData,
-        });
-
-        return status;
-    },
     createOxidOrder: async function (orderId) {
         const url = this.selfLink + '&cl=order&fnc=createGooglePayOrder&context=continue&stoken=' + this.token + '&sDeliveryAddressMD5=' + this.deliveryAddressMD5;
         createData = new FormData();
@@ -191,16 +195,8 @@ window.OxidPayPalGooglePay = {
         fetch(url, {
             method: 'POST',
             body: createData
-        }).then(async function (response) {
-            if (response.ok) {
-                const jsonData = await response.json();
-                window.location.href = jsonData.approveUrl;
-            }
-            // @todo we need to capture the order after the payer action is completed
-            // await this.captureOrder(orderId);
-            // console.log(" ===== Order Capture Completed ===== ");
-            // return {transactionState: "SUCCESS"};
-            return response.json();
+        }).then(function (res) {
+            return res.json();
         }).then(function (data) {
             if (data.status === "ERROR") {
                 location.reload();
@@ -210,7 +206,7 @@ window.OxidPayPalGooglePay = {
     captureOrder: async function (orderId) {
         captureData = new FormData();
         captureData.append('orderID', orderId);
-        const captureResponse = await fetch(this.selfLink + '&cl=order&fnc=captureGooglePayOrder&context=continue&stoken=' + this.token + '&sDeliveryAddressMD5=' + this.deliveryAddressMD5, {
+        await fetch(this.selfLink + '&cl=order&fnc=captureGooglePayOrder&context=continue&stoken=' + this.token + '&sDeliveryAddressMD5=' + this.deliveryAddressMD5, {
             method: 'post',
             body: captureData
         }).then(function (res) {

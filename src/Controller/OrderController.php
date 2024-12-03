@@ -12,7 +12,6 @@ use OxidEsales\Eshop\Application\Model\Order as EshopModelOrder;
 use OxidEsales\Eshop\Core\DisplayError;
 use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Registry;
-use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
 use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
@@ -22,10 +21,12 @@ use OxidSolutionCatalysts\PayPal\Exception\PayPalException;
 use OxidSolutionCatalysts\PayPal\Exception\Redirect;
 use OxidSolutionCatalysts\PayPal\Exception\RedirectWithMessage;
 use OxidSolutionCatalysts\PayPal\Model\Order as PayPalOrderModel;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Service\Payment as PaymentService;
 use OxidSolutionCatalysts\PayPal\Service\UserRepository;
-use OxidSolutionCatalysts\PayPal\Service\HateoasLinkService;
+use OxidSolutionCatalysts\PayPal\Service\GooglePay\GooglePayPayPalService;
+use OxidSolutionCatalysts\PayPal\Service\OrderPayPalService;
 use OxidSolutionCatalysts\PayPal\Traits\JsonTrait;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
@@ -229,57 +230,33 @@ class OrderController extends OrderController_parent
             $paymentService = $this->getServiceFromContainer(PaymentService::class);
             $paymentService->removeTemporaryOrder();
             Registry::getSession()->setVariable('sess_challenge', $this->getUtilsObjectInstance()->generateUID());
-
-            $_POST['sDeliveryAddressMD5'] = $this->getDeliveryAddressMD5();
-            $status = $this->execute();
-        } catch (Exception $exception) {
             /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
+
+            $_POST['sDeliveryAddressMD5'] = $this->getDeliveryAddressMD5();
+            $paypalOrderId = Registry::getRequest()->getRequestParameter('token');
+            $_POST['orderID'] = $paypalOrderId;
+            $this->execute();
+        } catch (Exception $exception) {
             $logger->log('error', $exception->getMessage(), [$exception]);
             $this->outputJson(['googlepayerror' => 'failed to execute shop order']);
             return;
         }
 
-        $response = $this->doCreatePatchedOrder();
-        if (!($paypalOrderId = $response['id'])) {
-            $this->outputJson(['googlepayerror' => 'cannot create paypal order']);
-            return;
-        }
-
-        if (!$status) {
-            $response = ['googlepayerror' => 'unexpected order status ' . $status];
-            $paymentService->removeTemporaryOrder();
-        } else {
-            PayPalSession::storePayPalOrderId($paypalOrderId);
-            $sessionOrderId = (string) Registry::getSession()->getVariable('sess_challenge');
-            $payPalOrder = $paymentService->getPayPalCheckoutOrder($sessionOrderId, $paypalOrderId);
-            $payPalOrder->setStatus($response['status']);
-            $payPalOrder->save();
-        }
-
-        if ($response['hateoasLinks']) {
-            $hateoasLinkService = new HateoasLinkService($response['hateoasLinks']);
-            $approveLink = $hateoasLinkService->getApproveLink();
-            if ($approveLink) {
-                $response['approveUrl'] = $approveLink->getUrl();
-            }
-        }
-
-        $this->outputJson($response);
+        $paymentService->doPatchPayPalOrder(
+            Registry::getSession()->getBasket(),
+            $paypalOrderId
+        );
     }
 
     public function captureGooglePayOrder(): void
     {
         $orderService = Registry::get(ServiceFactory::class)->getOrderService();
-        $sessionOrderId = (string) Registry::getSession()->getVariable('sess_challenge');
-        $checkoutOrderId = (string) PayPalSession::getCheckoutOrderId();
+        $checkoutOrderId = $_GET['token'];
 
-        /** @var Logger $logger */
-        $logger = $this->getServiceFromContainer(Logger::class);
         $request = new OrderCaptureRequest();
         try {
-            /** @var $result ApiOrderModel */
-            $result = $orderService->capturePaymentForOrder(
+            $orderService->capturePaymentForOrder(
                 '',
                 $checkoutOrderId,
                 $request,
@@ -300,38 +277,7 @@ class OrderController extends OrderController_parent
 
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
-
-            $result = [
-                'location' => [
-                    'cl=order'
-                ]
-            ];
-            $this->outputJson($result);
         }
-
-        try {
-            $order = oxNew(EshopModelOrder::class);
-            $order->setId($sessionOrderId);
-            $order->load($sessionOrderId);
-
-            $result = [
-                'location' => [
-                    'cl=order&fnc=finalizeGooglePay'
-                ]
-            ];
-            //track status in session
-            Registry::getSession()->setVariable('SessionGooglePay', $sessionOrderId);
-            Registry::getSession()->setVariable('GooglePayOrderId', $checkoutOrderId);
-        } catch (Exception $exception) {
-            $logger->log(
-                'debug',
-                $exception->getMessage(),
-                [$exception]
-            );
-            $this->getServiceFromContainer(PaymentService::class)->removeTemporaryOrder();
-        }
-
-        $this->outputJson($result);
     }
 
     public function captureAcdcOrder(): void
@@ -512,7 +458,7 @@ class OrderController extends OrderController_parent
                 'failure during finalizeOrderAfterExternalPayment',
                 [$exception]
             );
-            $this->cancelpaypalsession('cannot finalize order');
+            $this->getServiceFromContainer(OrderPayPalService::class)->cancelPayPalSession('cannot finalize order');
             $goNext = 'payment?payerror=2';
         }
 
@@ -529,7 +475,7 @@ class OrderController extends OrderController_parent
             !$sessionCheckoutOrderId ||
             ($standardRequestId !== $sessionCheckoutOrderId);
         if (!$vaulting && $cancelSession) {
-            $this->cancelpaypalsession('request to session mismatch');
+            $this->getServiceFromContainer(OrderPayPalService::class)->cancelPayPalSession('request to session mismatch');
         }
 
         try {
@@ -562,7 +508,7 @@ class OrderController extends OrderController_parent
                 'PayPal Checkout error during order finalization ' . $exception->getMessage(),
                 [$exception]
             );
-            $this->cancelpaypalsession('cannot finalize order');
+            $this->getServiceFromContainer(OrderPayPalService::class)->cancelPayPalSession('cannot finalize order');
             return 'payment?payerror=2';
         }
 
@@ -589,7 +535,7 @@ class OrderController extends OrderController_parent
                 'failure during finalizeOrderAfterExternalPayment',
                 [$exception]
             );
-            $this->cancelpaypalsession('cannot finalize order');
+            $this->getServiceFromContainer(OrderPayPalService::class)->cancelPayPalSession('cannot finalize order');
             $goNext = 'payment?payerror=2';
         }
 
@@ -597,45 +543,21 @@ class OrderController extends OrderController_parent
     }
     public function finalizeGooglePay(): string
     {
-        $sessionOrderId = Registry::getSession()->getVariable('sess_challenge');
-        $sessionGooglePayOrderId = Registry::getSession()->getVariable('GooglePayOrderId');
-
+        $paypalOrderId = $_GET['token'];
         $forceFetchDetails = (bool) Registry::getRequest()->getRequestParameter('fallbackfinalize');
 
-        try {
-            $order = oxNew(EshopModelOrder::class);
-            $order->load($sessionOrderId);
-            $order->finalizeOrderAfterExternalPayment($sessionGooglePayOrderId, $forceFetchDetails);
-            $goNext = 'thankyou';
-        } catch (Exception $exception) {
-            /** @var Logger $logger */
-            $logger = $this->getServiceFromContainer(Logger::class);
-            $logger->log(
-                'error',
-                'failure during finalizeOrderAfterExternalPayment',
-                [$exception]
-            );
-            $this->cancelpaypalsession('cannot finalize order');
-            $goNext = 'payment?payerror=2';
-        }
+        $this->createGooglePayOrder();
+        $this->captureGooglePayOrder();
 
-        return $goNext;
-    }
-    public function cancelpaypalsession(string $errorcode = null): string
-    {
-        //TODO: we get the PayPal order id retuned in token parameter, can be used for paranoia checks
-        //(string) Registry::getRequest()->getRequestParameter('token')
-        $requestErrorcode = (string) Registry::getRequest()->getRequestParameter('errorcode');
+        $oxidOrderId = Registry::getSession()->getBasket()->getOrderId();
 
-        $this->getServiceFromContainer(PaymentService::class)
-            ->removeTemporaryOrder();
+        /** @var GooglePayPayPalService $googlePayPayPalService */
+        $googlePayPayPalService = $this->getServiceFromContainer(GooglePayPayPalService::class);
+        $sucesss = $googlePayPayPalService->finalizeGooglePay($oxidOrderId, $paypalOrderId, $forceFetchDetails);
 
-        $goNext = 'payment';
-        if ($errorcode || $requestErrorcode) {
-            $goNext = 'payment?payerror=2';
-        }
-
-        return $goNext;
+        return $sucesss ?
+            'thankyou' :
+            $this->getServiceFromContainer(OrderPayPalService::class)->cancelPayPalSession('cannot finalize order');
     }
 
     /**

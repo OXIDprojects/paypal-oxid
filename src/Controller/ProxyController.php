@@ -19,19 +19,21 @@ use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
-use OxidSolutionCatalysts\PayPal\Module;
-use OxidSolutionCatalysts\PayPal\Service\Logger;
+use OxidSolutionCatalysts\PayPal\Core\Config;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
-use OxidSolutionCatalysts\PayPal\Service\Payment as PaymentService;
-use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
-use OxidSolutionCatalysts\PayPal\Service\UserRepository;
 use OxidSolutionCatalysts\PayPal\Core\OrderRequestFactory;
 use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
 use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
 use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Core\Utils\PayPalAddressResponseToOxidAddress;
+use OxidSolutionCatalysts\PayPal\Module;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
+use OxidSolutionCatalysts\PayPal\Service\Payment as PaymentService;
+use OxidSolutionCatalysts\PayPal\Service\UserRepository;
+use OxidSolutionCatalysts\PayPal\Service\PayPalUrlService;
 use OxidSolutionCatalysts\PayPal\Traits\JsonTrait;
+use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\AddressPortable;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as PayPalApiOrder;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderRequest;
@@ -186,6 +188,9 @@ class ProxyController extends FrontendController
             $this->outputJson(['ERROR' => 'No Article in the Basket']);
         }
 
+        /** @var PayPalUrlService $payPalUrlService */
+        $payPalUrlService = $this->getServiceFromContainer(PayPalUrlService::class);
+
         $response = $this->getServiceFromContainer(PaymentService::class)->doCreatePayPalOrder(
             $basket,
             OrderRequest::INTENT_CAPTURE,
@@ -195,8 +200,8 @@ class ProxyController extends FrontendController
             '',
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
 
-            $config->getSslShopUrl() . 'index.php?cl=order&fnc=finalizepaypalsession',
-            $config->getSslShopUrl() . 'index.php?cl=order&fnc=cancelpaypalsession',
+            $payPalUrlService->getReturnUrl(),
+            $payPalUrlService->getCancelUrl(),
             false
         );
 

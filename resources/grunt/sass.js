@@ -5,7 +5,7 @@ module.exports = {
         options: {
             implementation: sass,
             update: true,
-            style: 'nested'
+            outputStyle: 'nested'
         },
         files: {
             "../assets/css/bootstrap.css": "node_modules/bootstrap/scss/bootstrap.scss",
@@ -18,7 +18,7 @@ module.exports = {
         options: {
             implementation: sass,
             update: true,
-            style: 'compressed'
+            outputStyle: 'compressed'
         },
         files: {
             "../assets/css/bootstrap.css": "node_modules/bootstrap/scss/bootstrap.scss",

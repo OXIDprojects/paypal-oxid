@@ -5,11 +5,9 @@
     {% set oConfig = oViewConf.getConfig() %}
     {% set buttonId = oView.getPayment().getId() %}
     {% set bGooglePayDelivery = oConfig.getConfigParam('oscPayPalUseGooglePayAddress') %}
-    <style>
-        #oscpaypal_googlepay {
-            float: right;
-        }
-    </style>
+    <div class="google-pay-loading-container">
+        <img src="{{ oViewConf.getModuleUrl('osc_paypal') }}img/loading.svg" width="24" height="24" alt="loading animation"/>
+    </div>
     <div id="{{paymentId}}"
          class="paypal-button-container paypal-button-wrapper large"
          data-button-id="{{ buttonId }}"
@@ -21,6 +19,8 @@
          data-total-price="{{ oxcmp_basket.getPrice().getBruttoPrice() }}"
          data-currency="{{ oView.getActCurrency().name }}"
          data-delivery-address-md5="{{ oView.getDeliveryAddressMD5() }}"
+         data-language="{{ oView.getActiveLangAbbr()|lower }}"
+         data-loading-container-class-name="google-pay-loading-container"
     ></div>
     <script>
         window.googlePayReady = new Promise(resolve => {

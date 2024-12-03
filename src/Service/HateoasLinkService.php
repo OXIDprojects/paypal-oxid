@@ -7,29 +7,23 @@ use OxidSolutionCatalysts\PayPal\Model\HateoasLinks;
 
 class HateoasLinkService
 {
-    private HateoasLinks $hateoasLinks;
-    public function __construct(array $links)
+    public function getSelfLink(array $links): HateoasLink
     {
-        $this->hateoasLinks = HateoasLinks::fromArray($links);
+        return HateoasLinks::fromArray($links)->getSelfLink();
     }
 
-    public function getSelfLink(): HateoasLink
+    public function getApproveLink(array $links): HateoasLink
     {
-        return $this->hateoasLinks->getSelfLink();
+        return HateoasLinks::fromArray($links)->getApproveLink();
     }
 
-    public function getApproveLink(): HateoasLink
+    public function getUpdateLink(array $links): HateoasLink
     {
-        return $this->hateoasLinks->getApproveLink();
+        return HateoasLinks::fromArray($links)->getUpdateLink();
     }
 
-    public function getUpdateLink(): HateoasLink
+    public function getCaptureLink(array $links): HateoasLink
     {
-        return $this->hateoasLinks->getUpdateLink();
-    }
-
-    public function getCaptureLink(): HateoasLink
-    {
-        return $this->hateoasLinks->getCaptureLink();
+        return HateoasLinks::fromArray($links)->getCaptureLink();
     }
 }
