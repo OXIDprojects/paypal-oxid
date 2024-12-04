@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\PayPal\Service;
 
+use OxidEsales\Eshop\Core\Registry;
 use PDO;
 use Doctrine\DBAL\Query\QueryBuilder;
 use OxidEsales\Eshop\Core\Registry as EshopRegistry;
@@ -109,14 +110,14 @@ class StaticContent
 
     protected function reActivatePaymentMethod(string $paymentId): void
     {
-        $activePayments = $this->moduleSettings->getActivePayments();
+        $activePayments = Registry::get(ModuleSettings::class)->getActivePayments();
         if (!in_array($paymentId, $activePayments, true)) {
             return;
         }
 
         /**
- * @var EshopModelPayment $paymentModel
-*/
+         * @var EshopModelPayment $paymentModel
+         */
         $paymentModel = oxNew(EshopModelPayment::class);
         $paymentModel->load($paymentId);
 

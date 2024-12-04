@@ -106,6 +106,7 @@ class ProxyController extends FrontendController
         $basket = Registry::getSession()->getBasket();
         $lang = Registry::getLang();
         $actShopCurrency = Registry::getConfig()->getActShopCurrencyObject();
+        $blIsAdd = false;
 
         if ($basket->getItemsCount() === 0) {
             $this->addToBasket();
@@ -194,9 +195,11 @@ class ProxyController extends FrontendController
         }
 
         /**
- * @var PayPalUrlService $payPalUrlService
-*/
+         * @var PayPalUrlService $payPalUrlService
+        */
         $payPalUrlService = $this->getServiceFromContainer(PayPalUrlService::class);
+        $isLoggedIn = false;
+        $nonGuestAccountDetected = false;
 
         $response = $this->getServiceFromContainer(PaymentService::class)->doCreatePayPalOrder(
             $basket,
@@ -229,7 +232,6 @@ class ProxyController extends FrontendController
             $userRepository = $this->getServiceFromContainer(UserRepository::class);
             $paypalEmail = $data['email'];
 
-            $nonGuestAccountDetected = false;
             if ($userRepository->userAccountExists($paypalEmail)) {
                 //got a non-guest account, so either we log in or redirect customer to login step
                 $isLoggedIn = $this->handleUserLogin($response);
@@ -243,8 +245,8 @@ class ProxyController extends FrontendController
 
         if ($user = $this->getUser()) {
             /**
- * @var array $userInvoiceAddress
-*/
+             * @var array $userInvoiceAddress
+            */
             $userInvoiceAddress = $user->getInvoiceAddress();
             // add PayPal-Address as Delivery-Address
             if (($response !== null) && !empty($response->purchase_units[0]->shipping)) {
@@ -304,6 +306,8 @@ class ProxyController extends FrontendController
 */
         $serviceFactory = Registry::get(ServiceFactory::class);
         $service = $serviceFactory->getOrderService();
+        $nonGuestAccountDetected = false;
+        $isLoggedIn = false;
 
         try {
             $response = $service->showOrderDetails(
@@ -313,8 +317,8 @@ class ProxyController extends FrontendController
             );
         } catch (Exception $exception) {
             /**
- * @var Logger $logger
-*/
+             * @var Logger $logger
+            */
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', "Error on order capture call.", [$exception]);
         }
@@ -566,6 +570,8 @@ class ProxyController extends FrontendController
             //TODO: improve
         }
         $paymentId = Registry::getSession()->getVariable('paymentid');
+        $nonGuestAccountDetected = false;
+        $isLoggedIn = false;
 
         $this->addToBasket();
         $this->setPayPalPaymentMethod($paymentId);
@@ -620,8 +626,8 @@ class ProxyController extends FrontendController
 
         if ($user = $this->getUser()) {
             /**
- * @var array $userInvoiceAddress
-*/
+             * @var array $userInvoiceAddress
+            */
             $userInvoiceAddress = $user->getInvoiceAddress();
 
             // add PayPal-Address as Delivery-Address

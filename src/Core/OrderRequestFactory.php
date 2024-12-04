@@ -70,7 +70,7 @@ class OrderRequestFactory
      * @param Basket      $basket
      * @param string      $intent                Order::INTENT_CAPTURE or Order::INTENT_AUTHORIZE constant values
      * @param null|string $userAction            USER_ACTION_CONTINUE constant values
-     * @param null|string $customId              custom id reference
+     * @param null|string $transactionId         custom id reference
      * @param null|string $processingInstruction processing instruction
      * @param null|string $paymentSource         Payment-Source Name
      * @param null|string $invoiceId             custom invoice number
@@ -109,7 +109,7 @@ class OrderRequestFactory
             $request->payment_source = $this->getGooglePayPaymentSource($basket, 'google_pay');
         }
         $request->intent = $intent;
-        $request->purchase_units = $this->getPurchaseUnits($customId, $invoiceId, $withItems);
+        $request->purchase_units = $this->getPurchaseUnits($transactionId, $invoiceId, $withItems);
 
         $useVaultedPayment = $setVaulting && !is_null($selectedVaultPaymentSourceIndex);
         if ($useVaultedPayment) {
