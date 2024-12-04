@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          backupGlobals="true"
-         bootstrap="../../../../source/bootstrap.php"
+         bootstrap="../../../source/bootstrap.php"
          backupStaticAttributes="false"
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
@@ -16,6 +16,11 @@
          verbose="false"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
     <testsuites>
+        <!-- those tests are currently running -->
+        <testsuite name="RunningTests">
+            <file>Unit/Model/HateoasLinksTest.php</file>
+        </testsuite>
+        <!-- those tests are currently not running -->
         <testsuite name="UnitTests">
             <directory>Unit/</directory>
             <directory>Integration/</directory>
