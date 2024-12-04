@@ -213,7 +213,8 @@ class Basket extends Basket_parent
 
     /**
      * Check if variants of the given product are already in the basket
-     * @param \OxidEsales\Eshop\Application\Model\Article $product
+     *
+     * @param  \OxidEsales\Eshop\Application\Model\Article $product
      * @return bool
      */
     public function hasProductVariantInBasket(\OxidEsales\Eshop\Application\Model\Article $product)
@@ -233,6 +234,7 @@ class Basket extends Basket_parent
 
     /**
      * add a ShippingPrice for PPExpress if it is not defined before to prevent overcharge.
+     *
      * @param float $defaultShippingPriceExpress
      */
     public function addShippingPriceForExpress(float $defaultShippingPriceExpress): void

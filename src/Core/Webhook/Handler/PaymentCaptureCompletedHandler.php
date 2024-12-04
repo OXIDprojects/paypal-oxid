@@ -46,7 +46,9 @@ class PaymentCaptureCompletedHandler extends WebhookHandlerBase
                     Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
                 );
         } catch (ApiException $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log(
                 'debug',

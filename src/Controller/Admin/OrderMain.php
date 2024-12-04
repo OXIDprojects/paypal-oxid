@@ -16,16 +16,18 @@ use OxidSolutionCatalysts\PayPal\Traits\JsonTrait;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
 
 /**
-* OrderMain class
-*
-* @mixin \OxidEsales\Eshop\Application\Controller\Admin\OrderMain
-*/
+ * OrderMain class
+ *
+ * @mixin \OxidEsales\Eshop\Application\Controller\Admin\OrderMain
+ */
 class OrderMain extends OrderMain_parent
 {
     use AdminOrderTrait;
     use JsonTrait;
 
-    /** @var array|null  */
+    /**
+     * @var array|null
+     */
     protected $trackingCarrierCountries = null;
 
     /**

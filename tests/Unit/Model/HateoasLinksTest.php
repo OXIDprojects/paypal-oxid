@@ -51,7 +51,10 @@ class HateoasLinksTest extends TestCase
         $approveLink = $hateoasLinks->getApproveLink();
 
         $this->assertNotNull($approveLink);
-        $this->assertEquals('https://www.sandbox.paypal.com/checkoutnow?token=8XK895404V5164229', $approveLink->getUrl());
+        $this->assertEquals(
+            'https://www.sandbox.paypal.com/checkoutnow?token=8XK895404V5164229',
+            $approveLink->getUrl()
+        );
         $this->assertEquals('GET', $approveLink->getMethod());
     }
 
@@ -61,7 +64,10 @@ class HateoasLinksTest extends TestCase
         $updateLink = $hateoasLinks->getUpdateLink();
 
         $this->assertNotNull($updateLink);
-        $this->assertEquals('https://api.sandbox.paypal.com/v2/checkout/orders/8XK895404V5164229', $updateLink->getUrl());
+        $this->assertEquals(
+            'https://api.sandbox.paypal.com/v2/checkout/orders/8XK895404V5164229',
+            $updateLink->getUrl()
+        );
         $this->assertEquals('PATCH', $updateLink->getMethod());
     }
 
@@ -71,7 +77,10 @@ class HateoasLinksTest extends TestCase
         $captureLink = $hateoasLinks->getCaptureLink();
 
         $this->assertNotNull($captureLink);
-        $this->assertEquals('https://api.sandbox.paypal.com/v2/checkout/orders/8XK895404V5164229/capture', $captureLink->getUrl());
+        $this->assertEquals(
+            'https://api.sandbox.paypal.com/v2/checkout/orders/8XK895404V5164229/capture',
+            $captureLink->getUrl()
+        );
         $this->assertEquals('POST', $captureLink->getMethod());
     }
 

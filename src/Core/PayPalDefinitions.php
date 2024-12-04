@@ -518,12 +518,12 @@ final class PayPalDefinitions
     /**
      * Check if payment is deprecated
      *
-     * @param string $paymentId
+     * @param  string $paymentId
      * @return bool
      */
     public static function isDeprecatedPayment(string $paymentId): bool
     {
-        if ( isset(self::PAYPAL_DEFINTIONS[$paymentId]['deprecated']) && self::PAYPAL_DEFINTIONS[$paymentId]['deprecated'] === true ) {
+        if (isset(self::PAYPAL_DEFINTIONS[$paymentId]['deprecated']) && self::PAYPAL_DEFINTIONS[$paymentId]['deprecated'] === true) {
             return true;
         }
         return false;

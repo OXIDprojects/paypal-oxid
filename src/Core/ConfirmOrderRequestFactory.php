@@ -20,6 +20,7 @@ use OxidSolutionCatalysts\PayPalApi\Model\Orders\ConfirmOrderRequest;
 
 /**
  * Class ConfirmOrderRequestFactory
+ *
  * @package OxidSolutionCatalysts\PayPal\Core
  */
 class ConfirmOrderRequestFactory
@@ -76,16 +77,18 @@ class ConfirmOrderRequestFactory
             $paymentSource->$requestName->attributes->verification = new \stdClass();
             $paymentSource->$requestName->attributes->verification->method = 'SCA_ALWAYS';
         } else {
-            $paymentSource = new PaymentSource([
+            $paymentSource = new PaymentSource(
+                [
                 $requestName => [
                     'name' => $userName,
                     'country_code' => $country->getFieldData('oxisoalpha2')
                 ]
-            ]);
+                ]
+            );
         }
 
         Registry::getLogger()->error('ConfirmOrder');
-        Registry::getLogger()->error(print_r($paymentSource,true));
+        Registry::getLogger()->error(print_r($paymentSource, true));
 
 
         return $paymentSource;

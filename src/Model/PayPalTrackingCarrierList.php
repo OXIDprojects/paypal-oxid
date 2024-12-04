@@ -45,14 +45,15 @@ class PayPalTrackingCarrierList extends ListModel
 
     /**
      * Load allowed Tracking-Carrier Country-Codes
-     *
      */
     public function getAllowedTrackingCarrierCountryCodes(): array
     {
         $result = [];
 
         $queryBuilderFactory = $this->getServiceFromContainer(QueryBuilderFactoryInterface::class);
-        /** @var QueryBuilder $queryBuilder */
+        /**
+ * @var QueryBuilder $queryBuilder
+*/
         $queryBuilder = $queryBuilderFactory->create();
         $inQueryBuilder = $queryBuilderFactory->create();
         $notInQueryBuilder = $queryBuilderFactory->create();
@@ -64,7 +65,9 @@ class PayPalTrackingCarrierList extends ListModel
         $notInQueryBuilder->select('oxisoalpha2')
             ->from('oxcountry');
 
-        /** @var Result $resultDB */
+        /**
+ * @var Result $resultDB
+*/
         $resultDB = $queryBuilder->select('count(oxid), oxcountrycode')
             ->from('oscpaypal_trackingcarrier')
             ->where($queryBuilder->expr()->in('CONVERT(oxcountrycode USING utf8)', $inQueryBuilder->getSQL()))

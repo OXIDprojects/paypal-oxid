@@ -78,7 +78,7 @@ class UserComponent extends UserComponent_parent
 
     /**
      * @param string $paramName
-     * @param mixed $paramValue
+     * @param mixed  $paramValue
      */
     protected function setRequestParameterByPayPal(string $paramName, $paramValue): void
     {

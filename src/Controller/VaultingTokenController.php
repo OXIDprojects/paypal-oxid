@@ -28,6 +28,7 @@ class VaultingTokenController extends FrontendController
 
     /**
      * Generate a Payment Token using a previously generated setup token
+     *
      * @return void
      */
     public function generatePaymentToken()
@@ -53,7 +54,7 @@ class VaultingTokenController extends FrontendController
     }
 
     /**
-     * @param string $token
+     * @param  string $token
      * @return bool
      */
     protected function storeSetupToken($token)
@@ -65,7 +66,7 @@ class VaultingTokenController extends FrontendController
     }
 
     /**
-     * @param string $id
+     * @param  string $id
      * @return bool
      */
     protected function storePayPalUserId($id)

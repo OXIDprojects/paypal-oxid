@@ -16,6 +16,7 @@ use OxidSolutionCatalysts\PayPal\Core\Utils\PriceToMoney;
 
 /**
  * Class PayPalRequestFactory
+ *
  * @package OxidSolutionCatalysts\PayPal\Core
  */
 class PayPalRequestAmountFactory

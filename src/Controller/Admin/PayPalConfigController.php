@@ -61,11 +61,14 @@ class PayPalConfigController extends AdminController
     /**
      * Template Getter: Get a Link for SignUp the Live Merchant Integration
      * see getSignUpMerchantIntegrationLink
+     *
      * @return string
      */
     public function getLiveSignUpMerchantIntegrationLink(): string
     {
-        /** @var PartnerConfig $partnerConfig */
+        /**
+ * @var PartnerConfig $partnerConfig
+*/
         $partnerConfig = oxNew(PartnerConfig::class);
 
         return $this->buildSignUpLink(
@@ -79,11 +82,14 @@ class PayPalConfigController extends AdminController
     /**
      * Template Getter: Get a Link for SignUp the Live Merchant Integration
      * see getSignUpMerchantIntegrationLink
+     *
      * @return string
      */
     public function getSandboxSignUpMerchantIntegrationLink(): string
     {
-        /** @var PartnerConfig $partnerConfig */
+        /**
+ * @var PartnerConfig $partnerConfig
+*/
         $partnerConfig = oxNew(PartnerConfig::class);
 
         return $this->buildSignUpLink(
@@ -153,7 +159,9 @@ class PayPalConfigController extends AdminController
             return $session->getVariable('PAYPAL_MODULE_NONCE');
         }
 
-        /** @var PartnerConfig $partnerConfig */
+        /**
+ * @var PartnerConfig $partnerConfig
+*/
         $partnerConfig = oxNew(PartnerConfig::class);
         $nonce = $partnerConfig->createNonce();
 
@@ -191,17 +199,19 @@ class PayPalConfigController extends AdminController
     /**
      * check Eligibility if config would be changed
      *
-     * @param $confArr array
+     * @param  $confArr array
      * @throws OnboardingException
      */
     protected function checkEligibility(array $confArr): void
     {
         $config = new Config();
-        /** skip check if no client ID provided */
+        /**
+ * skip check if no client ID provided
+*/
         if (
-            $config->getClientId() === '' ||
-            $config->getMerchantId() === '' ||
-            $config->getWebhookId() === ''
+            $config->getClientId() === ''
+            || $config->getMerchantId() === ''
+            || $config->getWebhookId() === ''
         ) {
             return;
         }
@@ -223,7 +233,9 @@ class PayPalConfigController extends AdminController
             }
         } catch (ClientException | ApiException $exception) {
 
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', 'Error on checkEligibility', [$exception]);
         }
@@ -313,6 +325,7 @@ class PayPalConfigController extends AdminController
 
     /**
      * Template variable getter,  check whether legacy oepaypal module exists and show button when config value is false
+     *
      * @return bool
      */
     public function showTransferLegacySettingsButton(): bool
@@ -372,6 +385,7 @@ class PayPalConfigController extends AdminController
 
     /**
      * Get ClientID, ClientSecret, WebhookID
+     *
      * @throws JsonException
      */
     public function autoConfigurationFromCallback()
@@ -380,7 +394,9 @@ class PayPalConfigController extends AdminController
             $requestReader = oxNew(RequestReader::class);
             PayPalSession::storeOnboardingPayload($requestReader->getRawPost());
         } catch (\Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
         }
@@ -399,7 +415,9 @@ class PayPalConfigController extends AdminController
             $request = Registry::getRequest();
 
             if ($merchantId = (string)$request->getRequestParameter('merchantIdInPayPal')) {
-                /** @var ModuleSettings $moduleSettings */
+                /**
+ * @var ModuleSettings $moduleSettings
+*/
                 $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
                 $isSandbox = (string)$request->getRequestParameter('isSandbox');
                 $isSandbox = $isSandbox === '1';
@@ -425,11 +443,15 @@ class PayPalConfigController extends AdminController
         $credentials = [];
 
         try {
-            /** @var Onboarding $handler */
+            /**
+ * @var Onboarding $handler
+*/
             $handler = oxNew(Onboarding::class);
             $credentials = $handler->autoConfigurationFromCallback();
         } catch (\Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
         }
@@ -444,13 +466,17 @@ class PayPalConfigController extends AdminController
         $webhookId = '';
 
         try {
-            /** @var Webhook $handler */
+            /**
+ * @var Webhook $handler
+*/
             $handler = oxNew(Webhook::class);
             $webhookId = $handler->ensureWebhook();
         } catch (OnboardingException $exception) {
             Registry::getUtilsView()->addErrorToDisplay($exception->getMessage());
         } catch (\Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
         }

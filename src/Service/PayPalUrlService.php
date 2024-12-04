@@ -10,7 +10,6 @@ class PayPalUrlService
 {
     public function __construct(private Config $config, private Session $session)
     {
-        
     }
     public function getCancelUrl(): string
     {

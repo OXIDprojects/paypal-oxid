@@ -68,7 +68,10 @@ class ProxyController extends FrontendController
         $moduleSettingService = ContainerFactory::getInstance()
             ->getContainer()
             ->get(ModuleSettingServiceInterface::class);
-        $defaultShippingPriceExpress =  $moduleSettingService->getFloat('oscPayPalDefaultShippingPriceExpress', Module::MODULE_ID);
+        $defaultShippingPriceExpress = $moduleSettingService->getFloat(
+            'oscPayPalDefaultShippingPriceExpress',
+            Module::MODULE_ID
+        );
         $calculateDelCostIfNotLoggedIn = (bool) $config->getConfigParam('blCalculateDelCostIfNotLoggedIn');
         $isDeliverySet = (bool) $session->getVariable('sShipSet');
         if ($basket && $defaultShippingPriceExpress && !$calculateDelCostIfNotLoggedIn && !$isDeliverySet) {
@@ -173,9 +176,11 @@ class ProxyController extends FrontendController
 
         if (PayPalSession::isPayPalExpressOrderActive()) {
             //TODO: improve
-            $this->outputJson([
+            $this->outputJson(
+                [
                 'ERROR' => 'PayPal session already started.' . PayPalSession::isPayPalExpressOrderActive()
-            ]);
+                ]
+            );
         }
         $paymentId = Registry::getSession()->getVariable('paymentid');
 
@@ -188,7 +193,9 @@ class ProxyController extends FrontendController
             $this->outputJson(['ERROR' => 'No Article in the Basket']);
         }
 
-        /** @var PayPalUrlService $payPalUrlService */
+        /**
+ * @var PayPalUrlService $payPalUrlService
+*/
         $payPalUrlService = $this->getServiceFromContainer(PayPalUrlService::class);
 
         $response = $this->getServiceFromContainer(PaymentService::class)->doCreatePayPalOrder(
@@ -199,7 +206,6 @@ class ProxyController extends FrontendController
             '',
             '',
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
-
             $payPalUrlService->getReturnUrl(),
             $payPalUrlService->getCancelUrl(),
             false
@@ -236,7 +242,9 @@ class ProxyController extends FrontendController
         }
 
         if ($user = $this->getUser()) {
-            /** @var array $userInvoiceAddress */
+            /**
+ * @var array $userInvoiceAddress
+*/
             $userInvoiceAddress = $user->getInvoiceAddress();
             // add PayPal-Address as Delivery-Address
             if (($response !== null) && !empty($response->purchase_units[0]->shipping)) {
@@ -291,7 +299,9 @@ class ProxyController extends FrontendController
             //TODO: improve
             $this->outputJson(['ERROR' => 'OrderId not found in PayPal session.']);
         }
-        /** @var ServiceFactory $serviceFactory */
+        /**
+ * @var ServiceFactory $serviceFactory
+*/
         $serviceFactory = Registry::get(ServiceFactory::class);
         $service = $serviceFactory->getOrderService();
 
@@ -302,7 +312,9 @@ class ProxyController extends FrontendController
                 Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
             );
         } catch (Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', "Error on order capture call.", [$exception]);
         }
@@ -323,7 +335,9 @@ class ProxyController extends FrontendController
         }
 
         if ($user = $this->getUser()) {
-            /** @var array $userInvoiceAddress */
+            /**
+ * @var array $userInvoiceAddress
+*/
             $userInvoiceAddress = $user->getInvoiceAddress();
             // add PayPal-Address as Delivery-Address
             $deliveryAddress = PayPalAddressResponseToOxidAddress::mapUserDeliveryAddress($response);
@@ -413,7 +427,9 @@ class ProxyController extends FrontendController
             $basket->setPayment($requestedPayPalPaymentId);
 
             // get the active shippingSetId
-            /** @psalm-suppress InvalidArgument */
+            /**
+ * @psalm-suppress InvalidArgument
+*/
             [, $shippingSetId,] =
                 Registry::get(DeliverySetList::class)->getDeliverySetData('', $user, $basket);
 
@@ -603,7 +619,9 @@ class ProxyController extends FrontendController
         }
 
         if ($user = $this->getUser()) {
-            /** @var array $userInvoiceAddress */
+            /**
+ * @var array $userInvoiceAddress
+*/
             $userInvoiceAddress = $user->getInvoiceAddress();
 
             // add PayPal-Address as Delivery-Address
@@ -630,9 +648,9 @@ class ProxyController extends FrontendController
 
                         $this->setPayPalPaymentMethod($paymentId);
                     } catch (StandardException $exception) {
-                     //   Registry::getUtilsView()->addErrorToDisplay($exception);
-                       // $response->status = 'ERROR';
-                   //     PayPalSession::unsetPayPalOrderId();
+                        //   Registry::getUtilsView()->addErrorToDisplay($exception);
+                        // $response->status = 'ERROR';
+                        //     PayPalSession::unsetPayPalOrderId();
                         Registry::getSession()->getBasket()->setPayment(null);
                     }
                 }
@@ -643,9 +661,9 @@ class ProxyController extends FrontendController
         } else {
             //TODO: we might end up in order step redirecting to start page without showing a message
             // if we have no user, we stop the process
-       ////     $response->status = 'ERROR';
-       //     PayPalSession::unsetPayPalOrderId();
-          //  Registry::getSession()->getBasket()->setPayment(null);
+            ////     $response->status = 'ERROR';
+            //     PayPalSession::unsetPayPalOrderId();
+            //  Registry::getSession()->getBasket()->setPayment(null);
         }
         $this->outputJson($response);
     }

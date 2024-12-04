@@ -36,6 +36,7 @@ use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderCaptureRequest;
 
 /**
  * Class OrderController
+ *
  * @package OxidSolutionCatalysts\PayPal\Controller
  *
  * @mixin \OxidEsales\Eshop\Application\Controller\OrderController
@@ -82,11 +83,11 @@ class OrderController extends OrderController_parent
         }
 
         if (
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::SEPA_PAYPAL_PAYMENT_ID ||
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::CCALTERNATIVE_PAYPAL_PAYMENT_ID ||
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID ||
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::PAYLATER_PAYPAL_PAYMENT_ID ||
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::GOOGLEPAY_PAYPAL_PAYMENT_ID
+            $paymentService->getSessionPaymentId() === PayPalDefinitions::SEPA_PAYPAL_PAYMENT_ID
+            || $paymentService->getSessionPaymentId() === PayPalDefinitions::CCALTERNATIVE_PAYPAL_PAYMENT_ID
+            || $paymentService->getSessionPaymentId() === PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID
+            || $paymentService->getSessionPaymentId() === PayPalDefinitions::PAYLATER_PAYPAL_PAYMENT_ID
+            || $paymentService->getSessionPaymentId() === PayPalDefinitions::GOOGLEPAY_PAYPAL_PAYMENT_ID
         ) {
             $paymentService->removeTemporaryOrder();
         }
@@ -105,9 +106,9 @@ class OrderController extends OrderController_parent
             $selectedVaultPaymentSourceIndex = $session->getVariable("selectedVaultPaymentSourceIndex");
 
             if (
-                $isVaultingPossible &&
-                !is_null($selectedVaultPaymentSourceIndex) &&
-                $payPalCustomerId = $user->getFieldData("oscpaypalcustomerid")
+                $isVaultingPossible
+                && !is_null($selectedVaultPaymentSourceIndex)
+                && $payPalCustomerId = $user->getFieldData("oscpaypalcustomerid")
             ) {
                 $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();
 
@@ -143,9 +144,9 @@ class OrderController extends OrderController_parent
         $order->load(Registry::getSession()->getVariable('sess_challenge'));
 
         if (
-            !$order->getFieldData('oxtransid') &&
-            $retryRequest &&
-             isset($this->retryPaymentMessages[$retryRequest])
+            !$order->getFieldData('oxtransid')
+            && $retryRequest
+            && isset($this->retryPaymentMessages[$retryRequest])
         ) {
             $displayError = oxNew(DisplayError::class);
             $displayError->setMessage($this->retryPaymentMessages[$retryRequest]);
@@ -183,9 +184,9 @@ class OrderController extends OrderController_parent
         $acdcStatus = Registry::getSession()->getVariable(Constants::SESSION_ACDC_PAYPALORDER_STATUS);
 
         if (
-            $sessionOrderId &&
-            $sessionAcdcOrderId &&
-            $acdcStatus === Constants::PAYPAL_STATUS_COMPLETED
+            $sessionOrderId
+            && $sessionAcdcOrderId
+            && $acdcStatus === Constants::PAYPAL_STATUS_COMPLETED
         ) {
             //we already have a completed acdc order
             $this->outputJson(['acdcerror' => 'shop order already completed']);
@@ -198,7 +199,9 @@ class OrderController extends OrderController_parent
             Registry::getSession()->setVariable('sess_challenge', $this->getUtilsObjectInstance()->generateUID());
             $status = $this->execute();
         } catch (Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
             $this->outputJson(['acdcerror' => 'failed to execute shop order']);
@@ -230,7 +233,9 @@ class OrderController extends OrderController_parent
             $paymentService = $this->getServiceFromContainer(PaymentService::class);
             $paymentService->removeTemporaryOrder();
             Registry::getSession()->setVariable('sess_challenge', $this->getUtilsObjectInstance()->generateUID());
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
 
             $_POST['sDeliveryAddressMD5'] = $this->getDeliveryAddressMD5();
@@ -287,13 +292,15 @@ class OrderController extends OrderController_parent
         $sessionAcdcOrderId = (string) PayPalSession::getCheckoutOrderId();
         $acdcStatus = Registry::getSession()->getVariable(Constants::SESSION_ACDC_PAYPALORDER_STATUS);
 
-        /** @var Logger $logger */
+        /**
+ * @var Logger $logger
+*/
         $logger = $this->getServiceFromContainer(Logger::class);
 
         if (
-            'COMPLETED' === $acdcStatus &&
-            $sessionOrderId &&
-            $sessionAcdcOrderId
+            'COMPLETED' === $acdcStatus
+            && $sessionOrderId
+            && $sessionAcdcOrderId
         ) {
             $logger->log(
                 'debug',
@@ -364,7 +371,9 @@ class OrderController extends OrderController_parent
             $_POST['sDeliveryAddressMD5'] = $this->getDeliveryAddressMD5();
             $status = $this->execute();
         } catch (Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
             $this->outputJson(['error' => 'failed to execute shop order' . $exception->getMessage()]);
@@ -400,7 +409,9 @@ class OrderController extends OrderController_parent
         $request = new OrderCaptureRequest();
         $logger = $this->getServiceFromContainer(Logger::class);
         try {
-            /** @var $result ApiOrderModel */
+            /**
+ * @var $result ApiOrderModel
+*/
             $result = $orderService->capturePaymentForOrder(
                 '',
                 $orderId,
@@ -451,7 +462,9 @@ class OrderController extends OrderController_parent
             $order->finalizeOrderAfterExternalPayment($sessionGooglePayOrderId, $forceFetchDetails);
             $goNext = 'thankyou';
         } catch (Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log(
                 'error',
@@ -475,13 +488,16 @@ class OrderController extends OrderController_parent
             !$sessionCheckoutOrderId ||
             ($standardRequestId !== $sessionCheckoutOrderId);
         if (!$vaulting && $cancelSession) {
-            $this->getServiceFromContainer(OrderPayPalService::class)->cancelPayPalSession('request to session mismatch');
+            $this->getServiceFromContainer(OrderPayPalService::class)
+                ->cancelPayPalSession('request to session mismatch');
         }
 
         try {
             $paymentService = $this->getServiceFromContainer(PaymentService::class);
 
-            /** @var PayPalApiModelOrder $payPalOrder */
+            /**
+ * @var PayPalApiModelOrder $payPalOrder
+*/
             $payPalOrder = $paymentService->fetchOrderFields((string) $sessionCheckoutOrderId, '');
             $vaultingPaymentCompleted = $vaulting && $payPalOrder->status === "COMPLETED";
             if (!$vaultingPaymentCompleted && 'APPROVED' !== $payPalOrder->status) {
@@ -501,7 +517,9 @@ class OrderController extends OrderController_parent
             $order->finalizeOrderAfterExternalPayment($sessionCheckoutOrderId);
             $order->save();
         } catch (PayPalException $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log(
                 'debug',
@@ -528,7 +546,9 @@ class OrderController extends OrderController_parent
             $order->finalizeOrderAfterExternalPayment($sessionAcdcOrderId, $forceFetchDetails);
             $goNext = 'thankyou';
         } catch (Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log(
                 'error',
@@ -551,7 +571,9 @@ class OrderController extends OrderController_parent
 
         $oxidOrderId = Registry::getSession()->getBasket()->getOrderId();
 
-        /** @var GooglePayPayPalService $googlePayPayPalService */
+        /**
+ * @var GooglePayPayPalService $googlePayPayPalService
+*/
         $googlePayPayPalService = $this->getServiceFromContainer(GooglePayPayPalService::class);
         $sucesss = $googlePayPayPalService->finalizeGooglePay($oxidOrderId, $paypalOrderId, $forceFetchDetails);
 
@@ -563,7 +585,7 @@ class OrderController extends OrderController_parent
     /**
      * Template-Getter get a Fraudnet CmId
      *
-     * @param $response
+     * @param          $response
      * @psalm-suppress InternalMethod
      */
     public function getPayPalPuiFraudnetCmId(): string
@@ -578,8 +600,8 @@ class OrderController extends OrderController_parent
     protected function getNextStep($success) // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
     {
         if (
-            (PayPalOrderModel::ORDER_STATE_SESSIONPAYMENT_INPROGRESS == $success) &&
-            ($redirectLink = PayPalSession::getSessionRedirectLink())
+            (PayPalOrderModel::ORDER_STATE_SESSIONPAYMENT_INPROGRESS == $success)
+            && ($redirectLink = PayPalSession::getSessionRedirectLink())
         ) {
             PayPalSession::unsetSessionRedirectLink();
             throw new Redirect($redirectLink);
@@ -611,9 +633,9 @@ class OrderController extends OrderController_parent
         }
 
         if (
-            EshopModelOrder::ORDER_STATE_ORDEREXISTS == $success &&
-            Registry::getSession()->getVariable(Constants::SESSION_ACDC_PAYPALORDER_STATUS) ==
-            Constants::PAYPAL_STATUS_COMPLETED
+            EshopModelOrder::ORDER_STATE_ORDEREXISTS == $success
+            && Registry::getSession()->getVariable(Constants::SESSION_ACDC_PAYPALORDER_STATUS)
+                == Constants::PAYPAL_STATUS_COMPLETED
         ) {
             Registry::getSession()->deleteVariable(Constants::SESSION_ACDC_PAYPALORDER_STATUS);
             PayPalSession::unsetPayPalSession();

@@ -5,7 +5,6 @@
     <!-- Paths to check -->
     <file>../src/</file>
     <file>./</file>
-    <file>../Application/translations</file>
     <file>../migration</file>
 
     <exclude-pattern>\.env\.dist</exclude-pattern>

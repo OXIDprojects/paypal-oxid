@@ -18,6 +18,7 @@ use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 
 /**
  * Class WebhookController
+ *
  * @package OxidSolutionCatalysts\PayPal\Controller
  */
 class WebhookController extends WidgetController
@@ -31,7 +32,9 @@ class WebhookController extends WidgetController
     {
         parent::init();
 
-        /** @var Logger $logger */
+        /**
+ * @var Logger $logger
+*/
         $logger = $this->getServiceFromContainer(Logger::class);
 
         try {

@@ -68,19 +68,29 @@ class Payment
      */
     private $orderRepository;
 
-    /** @var ServiceFactory */
+    /**
+     * @var ServiceFactory
+     */
     private $serviceFactory;
 
-    /** @var PatchRequestFactory */
+    /**
+     * @var PatchRequestFactory
+     */
     private $patchRequestFactory;
 
-    /** @var OrderRequestFactory */
+    /**
+     * @var OrderRequestFactory
+     */
     private $orderRequestFactory;
 
-    /** @var SCAValidatorInterface */
+    /**
+     * @var SCAValidatorInterface
+     */
     private $scaValidator;
 
-    /** @var ModuleSettingsService */
+    /**
+     * @var ModuleSettingsService
+     */
     private $moduleSettingsService;
 
     private $logger;
@@ -117,12 +127,14 @@ class Payment
         string $cancelUrl = null,
         bool $setProvidedAddress = true,
         ?EshopModelOrder $order = null
-        #): ?ApiModelOrder
+        // ): ?ApiModelOrder
     ) {
         //TODO return value
         $this->setPaymentExecutionError(self::PAYMENT_ERROR_NONE);
         $order instanceof EshopModelOrder ?? $order->setOrderNumber();
-        /** @var ApiOrderService $orderService */
+        /**
+ * @var ApiOrderService $orderService
+*/
         $orderService = $this->serviceFactory->getOrderService();
 
         $request = $this->orderRequestFactory->getRequest(
@@ -206,7 +218,9 @@ class Payment
         string $checkoutOrderId,
         string $shopOrderId = ''
     ): void {
-        /** @var ApiOrderService $orderService */
+        /**
+ * @var ApiOrderService $orderService
+*/
         $orderService = $this->serviceFactory->getOrderService();
 
         $request = $this->patchRequestFactory
@@ -232,7 +246,9 @@ class Payment
         ApiOrderModel $payPalOrder = null
     ): ApiOrderModel {
 
-        /** @var ApiOrderModel $payPalOrder */
+        /**
+ * @var ApiOrderModel $payPalOrder
+*/
         if (is_null($payPalOrder) || !isset($payPalOrder->payment_source)) {
             $payPalOrder = $this->fetchOrderFields($checkoutOrderId);
         }
@@ -242,9 +258,13 @@ class Payment
             throw oxNew(StandardException::class, 'OSC_PAYPAL_3DSECURITY_ERROR');
         }
 
-        /** @var ApiPaymentService $paymentService */
+        /**
+ * @var ApiPaymentService $paymentService
+*/
         $paymentService = Registry::get(ServiceFactory::class)->getPaymentService();
-        /** @var ApiOrderService $orderService */
+        /**
+ * @var ApiOrderService $orderService
+*/
         $orderService = $this->serviceFactory->getOrderService();
 
         // Capture Order
@@ -263,7 +283,9 @@ class Payment
                     );
                 }
 
-                /** @var AuthorizationWithAdditionalData $authorization */
+                /**
+ * @var AuthorizationWithAdditionalData $authorization
+*/
                 $authorization = $payPalOrder->purchase_units[0]->payments->authorizations[0];
                 $authorizationId = $authorization->id;
 
@@ -330,7 +352,9 @@ class Payment
                         $shopOrderId
                     );
 
-                    /** @var $result ApiOrderModel */
+                    /**
+ * @var $result ApiOrderModel
+*/
                     $result = $orderService->capturePaymentForOrder(
                         '',
                         $checkoutOrderId,
@@ -343,7 +367,9 @@ class Payment
 
                     $issue = $exception->getErrorIssue();
                     $this->displayErrorIfInstrumentDeclined($issue);
-                    /** @var Config $payPalConfig */
+                    /**
+ * @var Config $payPalConfig
+*/
                     $payPalConfig = oxNew(Config::class);
                     if ($payPalConfig->isLogLevel('debug')) {
                         $this->logger->log('debug', $exception->getMessage(), [$exception]);
@@ -362,7 +388,9 @@ class Payment
             $status = $result && $result->purchase_units[0]->payments->captures[0]->status ?
                 $result->purchase_units[0]->payments->captures[0]->status : ApiOrderModel::STATUS_SAVED;
 
-            /** @var PayPalOrderModel $paypalOrder */
+            /**
+ * @var PayPalOrderModel $paypalOrder
+*/
             $this->trackPayPalOrder(
                 $order->getId(),
                 $checkoutOrderId,
@@ -424,9 +452,13 @@ class Payment
     ): string {
         $redirectLink = '';
 
-        /** @var OrderRequestFactory $requestFactory */
+        /**
+ * @var OrderRequestFactory $requestFactory
+*/
         $requestFactory = Registry::get(ConfirmOrderRequestFactory::class);
-        /** @var ConfirmOrderRequest $request */
+        /**
+ * @var ConfirmOrderRequest $request
+*/
         $request = $requestFactory->getRequest(
             $basket,
             $uapmName
@@ -437,10 +469,14 @@ class Payment
         // Transactions that do not include a client metadata ID are not eligible for PayPal Seller Protection.
         $payPalClientMetadataId = '';
 
-        /** @var ApiOrderService $orderService */
+        /**
+ * @var ApiOrderService $orderService
+*/
         $orderService = $this->serviceFactory->getOrderService();
 
-        /** @var ApiModelOrder $response */
+        /**
+ * @var ApiModelOrder $response
+*/
         $response = $orderService->confirmTheOrder(
             $payPalClientMetadataId,
             $checkoutOrderId,
@@ -502,16 +538,22 @@ class Payment
             $orderModel->isLoaded()
         ) {
             $orderModel->cancelOrder();
-            $this->logger->log('debug', sprintf(
-                'Temporary order with id %s was canceled',
-                $sessionOrderId
-            ));
+            $this->logger->log(
+                'debug',
+                sprintf(
+                    'Temporary order with id %s was canceled',
+                    $sessionOrderId
+                )
+            );
             if (!$orderModel->hasOrderNumber()) {
                 $orderModel->delete();
-                $this->logger->log('debug', sprintf(
-                    'Temporary order without Order number and with id %s was deleted',
-                    $sessionOrderId
-                ));
+                $this->logger->log(
+                    'debug',
+                    sprintf(
+                        'Temporary order without Order number and with id %s was deleted',
+                        $sessionOrderId
+                    )
+                );
             }
         }
 
@@ -695,9 +737,9 @@ class Payment
             $this->logger->log('error', 'Error on pui order creation call.', [$exception]);
         }
 
-        # TODO: check what we created, ensure it is a pui order
-        # $paymentSource = $this->fetchOrderFields((string) $payPalOrderId, 'payment_source');
-        # $this->logger->log('error', serialize($paymentSource));
+        // TODO: check what we created, ensure it is a pui order
+        // $paymentSource = $this->fetchOrderFields((string) $payPalOrderId, 'payment_source');
+        // $this->logger->log('error', serialize($paymentSource));
 
         if (!$payPalOrderId) {
             return false;
@@ -733,7 +775,9 @@ class Payment
         string $payPalTransactionId = '',
         string $transactionType = Constants::PAYPAL_TRANSACTION_TYPE_CAPTURE
     ): PayPalOrderModel {
-        /** @var PayPalOrderModel $payPalOrder */
+        /**
+ * @var PayPalOrderModel $payPalOrder
+*/
         $payPalOrder = $this->getPayPalCheckoutOrder($shopOrderId, $payPalOrderId, $payPalTransactionId);
 
         $payPalOrder->setPaymentMethodId($paymentMethodId);
@@ -750,7 +794,9 @@ class Payment
         string $payPalOrderId,
         string $payPalTransactionId = ''
     ) {
-        /** @var PayPalOrderModel $payPalOrder */
+        /**
+ * @var PayPalOrderModel $payPalOrder
+*/
         return $this->orderRepository->paypalOrderByOrderIdAndPayPalId(
             $shopOrderId,
             $payPalOrderId,
@@ -784,8 +830,8 @@ class Payment
         }
         //case check is to be done automatic but we have no result to check
         if (
-            (Constants::PAYPAL_SCA_WHEN_REQUIRED === $this->moduleSettingsService->getPayPalSCAContingency()) &&
-            is_null($this->scaValidator->getCardAuthenticationResult($payPalOrder))
+            (Constants::PAYPAL_SCA_WHEN_REQUIRED === $this->moduleSettingsService->getPayPalSCAContingency())
+            && is_null($this->scaValidator->getCardAuthenticationResult($payPalOrder))
         ) {
             return true;
         }

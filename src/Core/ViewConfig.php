@@ -25,12 +25,14 @@ class ViewConfig extends ViewConfig_parent
 
     /**
      * is this a "Flow"-Theme Compatible Theme?
+     *
      * @param boolean
      */
     protected $isFlowCompatibleTheme = null;
 
     /**
      * is this a "Wave"-Theme Compatible Theme?
+     *
      * @param boolean
      */
     protected $isWaveCompatibleTheme = null;
@@ -232,7 +234,8 @@ class ViewConfig extends ViewConfig_parent
 
         $params['locale'] = $localeCode;
 
-        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ? Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
+        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ?
+            Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
 
         return $baseJsSdkUrl . '?' . http_build_query($params);
     }
@@ -276,7 +279,8 @@ class ViewConfig extends ViewConfig_parent
         }
         $params['locale'] = $localeCode;
 
-        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ? Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
+        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ?
+            Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
 
         return $baseJsSdkUrl . '?' . http_build_query($params);
     }
@@ -291,17 +295,13 @@ class ViewConfig extends ViewConfig_parent
         $ppExpressSessionActive = $this->isPayPalExpressSessionActive();
         $acdcSessionActive = $this->isPayPalACDCSessionActive();
         if (
-            $className !== 'payment' &&
-            $ppActive &&
-            $configShowMiniBasketButton &&
-            !$ppExpressSessionActive &&
-            (
-                (
-                    $className === 'order' &&
-                    !$acdcSessionActive
-                ) ||
-                $className !== 'order'
-            )
+            $className !== 'payment'
+            && $ppActive
+            && $configShowMiniBasketButton
+            && !$ppExpressSessionActive
+            && (            (            $className === 'order'
+            && !$acdcSessionActive            )
+            || $className !== 'order')
         ) {
             $showButton = true;
         }
@@ -361,13 +361,17 @@ class ViewConfig extends ViewConfig_parent
         $result = '';
 
         try {
-            /** @var \OxidSolutionCatalysts\PayPal\Core\Api\IdentityService $identityService */
+            /**
+ * @var \OxidSolutionCatalysts\PayPal\Core\Api\IdentityService $identityService
+*/
             $identityService = Registry::get(ServiceFactory::class)->getIdentityService();
 
             $response = $identityService->requestClientToken();
             $result = $response['client_token'] ?? '';
         } catch (Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
         }
@@ -401,7 +405,8 @@ class ViewConfig extends ViewConfig_parent
 
         $params['components'] = 'messages';
 
-        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ? Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
+        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ?
+            Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
 
         return $baseJsSdkUrl . '?' . http_build_query($params);
     }
@@ -600,7 +605,7 @@ class ViewConfig extends ViewConfig_parent
     /**
      * Template variable getter. Check if is a ??? Theme Compatible Theme
      *
-     * @return boolean
+     * @return         boolean
      * @psalm-suppress InternalMethod
      */
     public function isCompatibleTheme($themeId = null)
@@ -611,8 +616,8 @@ class ViewConfig extends ViewConfig_parent
             $theme->load($theme->getActiveThemeId());
             // check active theme or parent theme
             if (
-                $theme->getActiveThemeId() == $themeId ||
-                $theme->getInfo('parentTheme') == $themeId
+                $theme->getActiveThemeId() == $themeId
+                || $theme->getInfo('parentTheme') == $themeId
             ) {
                 $result = true;
             }

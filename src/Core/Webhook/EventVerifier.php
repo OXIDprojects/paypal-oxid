@@ -34,8 +34,8 @@ class EventVerifier
     ];
 
     /**
-     * @param array $headers Event request headers
-     * @param string $body Event request body
+     * @param array  $headers Event request headers
+     * @param string $body    Event request body
      *
      * @throws ApiException|WebhookEventVerificationException
      */
@@ -64,13 +64,15 @@ class EventVerifier
         $headers = [];
         $headers['PayPal-Partner-Attribution-Id'] = Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP;
 
-        /** @var GenericService $notificationService */
+        /**
+ * @var GenericService $notificationService
+*/
         $notificationService = Registry::get(ServiceFactory::class)->getNotificationService();
         $response = $notificationService->request('POST', $payload, [], $headers);
 
         if (
-            !$response['verification_status'] || (
-            $response['verification_status'] !== self::VERIFICATION_STATUS_SUCCESS)
+            !$response['verification_status']
+            || ($response['verification_status'] !== self::VERIFICATION_STATUS_SUCCESS)
         ) {
             throw new WebhookEventVerificationException('Event verification failed');
         }

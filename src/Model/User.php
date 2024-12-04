@@ -35,15 +35,19 @@ class User extends User_parent
         // to add the customers to the correct usergroup
 
         if (
-            in_array($success, [
+            in_array(
+                $success,
+                [
                 Order::ORDER_STATE_ACDCINPROGRESS,
                 Order::ORDER_STATE_ACDCCOMPLETED,
                 Order::ORDER_STATE_NEED_CALL_ACDC_FINALIZE,
                 Order::ORDER_STATE_SESSIONPAYMENT_INPROGRESS,
                 Order::ORDER_STATE_TIMEOUT_FOR_WEBHOOK_EVENTS,
                 Order::ORDER_STATE_WAIT_FOR_WEBHOOK_EVENTS
-            ], true) &&
-            PayPalDefinitions::isPayPalPayment($basket->getPaymentId())
+                ],
+                true
+            )
+            && PayPalDefinitions::isPayPalPayment($basket->getPaymentId())
         ) {
             $success = 1;
         }
@@ -92,6 +96,7 @@ class User extends User_parent
 
     /**
      * get the InvoiceAddress from user with all required fields
+     *
      * @return array
      */
     public function getInvoiceAddress(): array

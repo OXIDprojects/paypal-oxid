@@ -40,6 +40,7 @@ use stdClass;
 
 /**
  * Class OrderRequestBuilder
+ *
  * @package OxidSolutionCatalysts\PayPal\Core
  */
 class OrderRequestFactory
@@ -66,16 +67,16 @@ class OrderRequestFactory
     private $basket;
 
     /**
-     * @param Basket $basket
-     * @param string $intent Order::INTENT_CAPTURE or Order::INTENT_AUTHORIZE constant values
-     * @param null|string $userAction USER_ACTION_CONTINUE constant values
-     * @param null|string $customId custom id reference
+     * @param Basket      $basket
+     * @param string      $intent                Order::INTENT_CAPTURE or Order::INTENT_AUTHORIZE constant values
+     * @param null|string $userAction            USER_ACTION_CONTINUE constant values
+     * @param null|string $customId              custom id reference
      * @param null|string $processingInstruction processing instruction
-     * @param null|string $paymentSource Payment-Source Name
-     * @param null|string $invoiceId custom invoice number
-     * @param null|string $returnUrl Return Url
-     * @param null|string $cancelUrl Cancel Url
-     * @param bool $setProvidedAddress Address changeable in PayPal?
+     * @param null|string $paymentSource         Payment-Source Name
+     * @param null|string $invoiceId             custom invoice number
+     * @param null|string $returnUrl             Return Url
+     * @param null|string $cancelUrl             Cancel Url
+     * @param bool        $setProvidedAddress    Address changeable in PayPal?
      *
      * @return OrderRequest
      */
@@ -170,7 +171,9 @@ class OrderRequestFactory
         }
 
         if ($paymentSource == PayPalDefinitions::PUI_REQUEST_PAYMENT_SOURCE_NAME) {
-            /** @var PaymentSource $puiPaymentSource */
+            /**
+ * @var PaymentSource $puiPaymentSource
+*/
             $puiPaymentSource = $this->getPuiPaymentSource();
             $request->payment_source = $puiPaymentSource;
         }
@@ -193,12 +196,14 @@ class OrderRequestFactory
         if ($deliveryId && $deliveryAddress->load($deliveryId)) {
             $country->load($deliveryAddress->getFieldData('oxcountryid'));
         }
-        $paymentSource = new PaymentSource([
+        $paymentSource = new PaymentSource(
+            [
             $requestName => [
                 'name' => $userName,
                 'country_code' => $country->getFieldData('oxisoalpha2')
             ]
-        ]);
+            ]
+        );
         return $paymentSource;
     }
 
@@ -229,10 +234,10 @@ class OrderRequestFactory
     /**
      * Sets application context
      *
-     * @param string|null $userAction
-     * @param string|null $returnUrl
-     * @param string|null $cancelUrl
-     * @param bool|null $setProvidedAddress
+     * @param  string|null $userAction
+     * @param  string|null $returnUrl
+     * @param  string|null $cancelUrl
+     * @param  bool|null   $setProvidedAddress
      * @return OrderApplicationContext
      */
     protected function getApplicationContext(
@@ -303,7 +308,7 @@ class OrderRequestFactory
     }
 
     /**
-     * @return array
+     * @return         array
      * @psalm-suppress UndefinedDocblockClass
      */
     public function getItems(): array
@@ -314,7 +319,9 @@ class OrderRequestFactory
         $language = Registry::getLang();
         $items = [];
 
-        /** @var BasketItem $basketItem */
+        /**
+ * @var BasketItem $basketItem
+*/
         foreach ($basket->getContents() as $basketItem) {
             $item = new Item();
             $item->name = substr($basketItem->getTitle(), 0, 120);
@@ -434,6 +441,7 @@ class OrderRequestFactory
     /**
      * Determine the item category based on the entire basket contents. If all items in the basket are virtual
      * the category "DIGITAL_GOODS" is used, in any other case it'll be "PHYSICAL_GOODS".
+     *
      * @return string
      */
     public function getItemCategoryByBasketContent(): string
@@ -462,7 +470,9 @@ class OrderRequestFactory
 
         $birthDate = $user->getFieldData('oxbirthdate');
         if ($birthDate && $birthDate !== '0000-00-00') {
-            /** @var DateTime $birthDate */
+            /**
+ * @var DateTime $birthDate
+*/
             $birthDate = oxNew(DateTime::class, $user->getFieldData('oxbirthdate'));
             $payer->birth_date = $birthDate->format('Y-m-d');
         }
@@ -634,7 +644,9 @@ class OrderRequestFactory
         $paymentSource->email = $payer->email_address;
         $paymentSource->billing_address = $billingAddress;
 
-        /** @var ApiModelPhone $phoneNumberForPuiRequest */
+        /**
+ * @var ApiModelPhone $phoneNumberForPuiRequest
+*/
         $phoneNumberForPuiRequest = $user->getPhoneNumberForPuiRequest();
         $paymentSource->phone = $phoneNumberForPuiRequest;
         if ($birthdate = $user->getBirthDateForPuiRequest()) {
@@ -654,7 +666,7 @@ class OrderRequestFactory
     }
 
     /**
-     * @param OrderRequest $request
+     * @param  OrderRequest $request
      * @return void
      */
     protected function modifyPaymentSourceForVaulting(OrderRequest $request, $useCard = false): void

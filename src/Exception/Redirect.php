@@ -9,7 +9,9 @@ namespace OxidSolutionCatalysts\PayPal\Exception;
 
 class Redirect extends PayPalException
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     private $destination;
 
     /**

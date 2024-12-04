@@ -35,6 +35,7 @@ class PartnerConfig
      * For this purpose, this ClientId is unencrypted, here as part
      * of this open Source Module
      * this method is private see getTechnicalClientId which respects the sandbox mode for you
+     *
      * @return string
      */
     public function getLiveOxidClientId(): string
@@ -61,6 +62,7 @@ class PartnerConfig
      * the request for the merchant ClientId and Secret.
      * For this purpose, this PartnerId is unencrypted, here as part
      * of this open Source Module
+     *
      * @return string
      */
     public function getLiveOxidPartnerId(): string

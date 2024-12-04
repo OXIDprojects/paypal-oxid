@@ -61,14 +61,18 @@ class Onboarding
         Registry::getSession()->deleteVariable('PAYPAL_MODULE_NONCE');
 
         try {
-        /** @var ApiOnboardingClient $apiClient */
-        $apiClient = $this->getOnboardingClient($onboardingResponse['isSandBox']);
-        $apiClient->authAfterWebLogin($onboardingResponse['authCode'], $onboardingResponse['sharedId'], $nonce);
+            /**
+ * @var ApiOnboardingClient $apiClient
+*/
+            $apiClient = $this->getOnboardingClient($onboardingResponse['isSandBox']);
+            $apiClient->authAfterWebLogin($onboardingResponse['authCode'], $onboardingResponse['sharedId'], $nonce);
 
-        $credentials = $apiClient->getCredentials();
+            $credentials = $apiClient->getCredentials();
             $credentials = $apiClient->getCredentials();
         } catch (ApiException $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
         }
@@ -133,7 +137,7 @@ class Onboarding
     }
 
     /**
-     * @param Filesystem $filesystem
+     * @param  Filesystem $filesystem
      * @return void
      */
     private function ensureDirectoryExists(Filesystem $filesystem): void
@@ -147,9 +151,9 @@ class Onboarding
     }
 
     /**
-     * @param Filesystem $filesystem
-     * @param string $environment
-     * @param array $config
+     * @param  Filesystem $filesystem
+     * @param  string     $environment
+     * @param  array      $config
      * @return void
      */
     private function updateCertificateIfChanged(Filesystem $filesystem, bool $isSandbox): void
@@ -189,7 +193,9 @@ class Onboarding
             $merchantId = $paypalConfig->getMerchantId();
         }
 
-        /** @var LoggerInterface $logger */
+        /**
+ * @var LoggerInterface $logger
+*/
         $logger = $this->getServiceFromContainer('OxidSolutionCatalysts\PayPal\Logger');
 
         return new ApiOnboardingClient(
@@ -230,20 +236,20 @@ class Onboarding
 
         foreach ($merchantInformations['capabilities'] as $capability) {
             if (
-                $capability['name'] === 'PAYPAL_WALLET_VAULTING_ADVANCED' &&
-                $capability['status'] === 'ACTIVE'
+                $capability['name'] === 'PAYPAL_WALLET_VAULTING_ADVANCED'
+                && $capability['status'] === 'ACTIVE'
             ) {
                 $isVaultingCapability = true;
             }
             if (
-                $capability['name'] === 'APPLE_PAY' &&
-                $capability['status'] === 'ACTIVE'
+                $capability['name'] === 'APPLE_PAY'
+                && $capability['status'] === 'ACTIVE'
             ) {
                 $isApplePayEligibility = true;
             }
             if (
-                $capability['name'] === 'GOOGLE_PAY' &&
-                $capability['status'] === 'ACTIVE'
+                $capability['name'] === 'GOOGLE_PAY'
+                && $capability['status'] === 'ACTIVE'
             ) {
                 $isGooglePayCapability = true;
             }
@@ -251,21 +257,21 @@ class Onboarding
 
         foreach ($merchantInformations['products'] as $product) {
             if (
-                $product['name'] === 'PAYMENT_METHODS' &&
-                in_array('PAY_UPON_INVOICE', $product['capabilities'], true)
+                $product['name'] === 'PAYMENT_METHODS'
+                && in_array('PAY_UPON_INVOICE', $product['capabilities'], true)
             ) {
                 $isPuiEligibility = true;
             } elseif (
-                $product['name'] === 'PPCP_CUSTOM' &&
-                in_array('CUSTOM_CARD_PROCESSING', $product['capabilities'], true)
+                $product['name'] === 'PPCP_CUSTOM'
+                && in_array('CUSTOM_CARD_PROCESSING', $product['capabilities'], true)
             ) {
                 $isAcdcEligibility = true;
             }
 
             if (
-                $isVaultingCapability &&
-                $product['name'] === 'PPCP_CUSTOM' &&
-                in_array('PAYPAL_WALLET_VAULTING_ADVANCED', $product['capabilities'], true)
+                $isVaultingCapability
+                && $product['name'] === 'PPCP_CUSTOM'
+                && in_array('PAYPAL_WALLET_VAULTING_ADVANCED', $product['capabilities'], true)
             ) {
                 $isVaultingEligibility = true;
             }

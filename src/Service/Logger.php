@@ -17,7 +17,9 @@ use Psr\Log\LoggerInterface;
  */
 class Logger
 {
-    /** @var LoggerInterface $moduleLogger */
+    /**
+     * @var LoggerInterface $moduleLogger
+     */
     private $moduleLogger;
 
     public function __construct(
@@ -26,7 +28,9 @@ class Logger
         $this->moduleLogger = $moduleLogger;
     }
 
-    /** @var array $possiblePayPalLevels */
+    /**
+     * @var array $possiblePayPalLevels
+     */
     private $possiblePayPalLevels = [
         'error' => 400,
         'info'  => 200,

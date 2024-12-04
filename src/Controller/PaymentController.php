@@ -35,8 +35,8 @@ class PaymentController extends PaymentController_parent
         }
 
         if (
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID ||
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::PAYLATER_PAYPAL_PAYMENT_ID
+            $paymentService->getSessionPaymentId() === PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID
+            || $paymentService->getSessionPaymentId() === PayPalDefinitions::PAYLATER_PAYPAL_PAYMENT_ID
         ) {
             $paymentService->removeTemporaryOrder();
         }
@@ -53,8 +53,8 @@ class PaymentController extends PaymentController_parent
             $this->addTplParam('oscpaypal_isVaultingPossible', $isVaultingPossible);
 
             if (
-                $isVaultingPossible &&
-                ($paypalCustomerId = $user->getFieldData("oscpaypalcustomerid"))
+                $isVaultingPossible
+                && ($paypalCustomerId = $user->getFieldData("oscpaypalcustomerid"))
             ) {
                 $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();
                 $vaultedPaymentTokens = $vaultingService->getVaultPaymentTokens($paypalCustomerId)["payment_tokens"];
@@ -89,8 +89,8 @@ class PaymentController extends PaymentController_parent
     }
 
     /**
-     * @param $paymentList
-     * @param $paymentType
+     * @param  $paymentList
+     * @param  $paymentType
      * @return bool
      */
     protected function paymentTypeExists($paymentType): bool
@@ -145,26 +145,16 @@ class PaymentController extends PaymentController_parent
 
         foreach ($paymentListRaw as $key => $payment) {
             if (
-                !isset($payPalDefinitions[$key]) ||
-                (
-                    $payPalHealth &&
-                    // don't add payment that is deprecated
-                    ( !PayPalDefinitions::isDeprecatedPayment($payment->getId()) ) &&
-                    (
-                        empty($payPalDefinitions[$key]['currencies']) ||
-                        in_array($actShopCurrency->name, $payPalDefinitions[$key]['currencies'], true)
-                    ) &&
-                    (
-                        empty($payPalDefinitions[$key]['countries']) ||
-                        in_array($userCountryIso, $payPalDefinitions[$key]['countries'], true)
-                    ) &&
-                    (
-                        $payPalDefinitions[$key]['onlybrutto'] === false ||
-                        (
-                            !$isCalculationModeNetto
-                        )
-                    )
-                )
+                !isset($payPalDefinitions[$key])
+                || (                $payPalHealth
+                // don't add payment that is deprecated
+                && ( !PayPalDefinitions::isDeprecatedPayment($payment->getId()) )
+                && (                empty($payPalDefinitions[$key]['currencies'])
+                || in_array($actShopCurrency->name, $payPalDefinitions[$key]['currencies'], true)                )
+                && (                empty($payPalDefinitions[$key]['countries'])
+                || in_array($userCountryIso, $payPalDefinitions[$key]['countries'], true)                )
+                && (                $payPalDefinitions[$key]['onlybrutto'] === false
+                || (                !$isCalculationModeNetto                )                ))
             ) {
                 $paymentList[$key] = $payment;
             }
@@ -186,8 +176,8 @@ class PaymentController extends PaymentController_parent
     /**
      * @inheritDoc
      * @SuppressWarnings(PHPMD.StaticAccess)
-     * @return  mixed
-     * @throws PayPalException
+     * @return                               mixed
+     * @throws                               PayPalException
      */
     public function validatePayment()
     {
@@ -198,9 +188,9 @@ class PaymentController extends PaymentController_parent
 
         // remove the possible exist paypal-payment, if we choose another
         if (
-            $actualPaymentId &&
-            $actualPaymentId !== $newPaymentId &&
-            PayPalDefinitions::isPayPalPayment($actualPaymentId)
+            $actualPaymentId
+            && $actualPaymentId !== $newPaymentId
+            && PayPalDefinitions::isPayPalPayment($actualPaymentId)
         ) {
             $paymentService->removeTemporaryOrder();
         }

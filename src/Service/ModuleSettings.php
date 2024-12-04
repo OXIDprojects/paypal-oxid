@@ -50,19 +50,29 @@ class ModuleSettings
      */
     protected $countryRestrictionForPayPalExpress = null;
 
-    /** @var ModuleSettingBridgeInterface */
+    /**
+     * @var ModuleSettingBridgeInterface
+     */
     private $moduleSettingBridge;
 
-    /** @var ModuleConfigurationDaoBridgeInterface */
+    /**
+     * @var ModuleConfigurationDaoBridgeInterface
+     */
     private $moduleConfigurationDaoBridgeInterface;
 
-    /** @var ModuleConfiguration */
+    /**
+     * @var ModuleConfiguration
+     */
     private $moduleConfiguration = null;
 
-    /** @var ContextInterface */
+    /**
+     * @var ContextInterface
+     */
     private $context;
 
-    /** @var Logger */
+    /**
+     * @var Logger
+     */
     private $logger;
 
     //TODO: we need service for fetching module settings from db (this one)
@@ -389,7 +399,9 @@ class ModuleSettings
 
     public function getActivePayments(): array
     {
-        /** @var array|null $activePayments */
+        /**
+ * @var array|null $activePayments
+*/
         $activePayments = $this->getSettingValue('oscPayPalActivePayments');
         return $activePayments ?: [];
     }
@@ -397,12 +409,13 @@ class ModuleSettings
     public function getShopName(): string
     {
         $value = '';
-        /** @var Shop $shop */
+        /**
+ * @var Shop $shop
+*/
         $shop = Registry::getConfig()->getActiveShop();
         if (isset($shop->oxshops__oxname->rawValue)) {
             $value = $shop->oxshops__oxname->rawValue;
-        }
-        elseif(isset($shop->oxshops__oxname->value)) {
+        } elseif (isset($shop->oxshops__oxname->value)) {
             $value = $shop->oxshops__oxname->value;
         }
         return $value;
@@ -414,12 +427,13 @@ class ModuleSettings
     public function getInfoEMail(): string
     {
         $value = '';
-        /** @var Shop $shop */
+        /**
+ * @var Shop $shop
+*/
         $shop = Registry::getConfig()->getActiveShop();
         if (isset($shop->oxshops__oxinfoemail->rawValue)) {
             $value = $shop->oxshops__oxinfoemail->rawValue;
-        }
-        elseif(isset($shop->oxshops__oxinfoemail->value)) {
+        } elseif (isset($shop->oxshops__oxinfoemail->value)) {
             $value = $shop->oxshops__oxinfoemail->value;
         }
         return $value;
@@ -557,6 +571,7 @@ class ModuleSettings
 
     /**
      * This setting indicates whether settings from the legacy modules have been transferred.
+     *
      * @return bool
      */
     public function getLegacySettingsTransferStatus(): bool
