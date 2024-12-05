@@ -208,6 +208,8 @@ jobs:
             moduleDevelopmentInstallation-${{ matrix.php }}-${{ github.sha }}
 
       - name: Start containers
+        env:
+          MYSQL_VERSION=5.7
         run: |
           make up
           sleep 2
