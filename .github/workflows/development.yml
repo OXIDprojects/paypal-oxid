@@ -1,6 +1,12 @@
 name: Development
 
 on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
   workflow_call:
     inputs:
       php:
