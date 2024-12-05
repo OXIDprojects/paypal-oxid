@@ -1,57 +1,6 @@
 name: Development
 
-on:
-  push:
-    branches:
-      - '**'
-  pull_request:
-    branches:
-      - '**'
-  workflow_call:
-    inputs:
-      php:
-        required: true
-        type: string
-      mysql:
-        required: true
-        type: string
-      template_engine:
-        type: string
-        default: 'both'
-      report_sonarcloud:
-        type: boolean
-        default: false
-
-  workflow_dispatch:
-    inputs:
-      php:
-        description: 'PHP version'
-        required: true
-        default: '8.0'
-        type: choice
-        options:
-          - '8.1'
-      mysql:
-        description: 'MySQL version'
-        required: true
-        default: '5.7.37'
-        type: choice
-        options:
-          - '5.7.37'
-      template_engine:
-        description: 'Template engine - smarty with flow theme, twig with twig theme'
-        required: true
-        default: 'twig'
-        type: choice
-        options:
-          - 'both'
-          - 'twig'
-          - 'smarty'
-      report_sonarcloud:
-        description: 'Trigger sonarcloud analize?'
-        required: true
-        default: true
-        type: boolean
+on: [ push, pull_request ]
 
 env:
   PACKAGE_NAME: 'oxid-solution-catalysts/paypal-module'
@@ -60,6 +9,9 @@ env:
   MODULE_PATH: 'osc/paypal'
   SONARCLOUD_ORGANIZATION: 'oxid-esales'
   SONARCLOUD_PROJECT_KEY: 'OXID-eSales_module-paypal_checkout'
+  PHP_VERSION: '8.0'
+  MYSQL_VERSION: '5.7.37'
+  TEMPLATE_ENGINE: 'twig'
 
 jobs:
   install_shop_with_module:
@@ -68,9 +20,9 @@ jobs:
       - name: Print run parameters
         run: |
           echo "Running job with:\
-            PHP version: ${{ inputs.php }}\
-            MySQL version: ${{ inputs.mysql }}\
-            Template engine: ${{ inputs.template_engine }}\
+            PHP version: ${{ env.PHP_VERSION }}\
+            MySQL version: ${{ env.MYSQL_VERSION }}\
+            Template engine: ${{ env.TEMPLATE_ENGINE }}\
             Trigger event: ${{ github.event_name }}"
 
       - name: Cleanup workspace
@@ -91,7 +43,7 @@ jobs:
         with:
           path: |
             ./*
-          key: installation-${{ join(inputs.*, '-') }}-${{ github.run_number }}-${{ github.run_attempt }}
+          key: installation-${{ env.PHP_VERSION }}-${{ env.MYSQL_VERSION }}-${{ env.TEMPLATE_ENGINE }}-${{ github.run_number }}-${{ github.run_attempt }}
 
       - name: Prepare container configuration
         run: |
@@ -99,8 +51,8 @@ jobs:
           make addbasicservices
           make file=services/selenium-chrome.yml addservice
           perl -pi\
-            -e 's#PHP_VERSION=.*#PHP_VERSION=${{ inputs.php }}#g;'\
-            -e "s#MYSQL_VERSION=.*#MYSQL_VERSION=${{ inputs.mysql }}#g;"\
+            -e 's#PHP_VERSION=.*#PHP_VERSION=${{ env.PHP_VERSION }}#g;'\
+            -e "s#MYSQL_VERSION=.*#MYSQL_VERSION=${{ env.MYSQL_VERSION }}#g;"\
             .env
           perl -pi\
             -e 's#display_errors =.*#display_errors = false#g;'\
@@ -180,7 +132,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: Configs-${{ inputs.php }}-${{ inputs.mysql }}-${{ inputs.template_engine }}
+          name: Configs-${{ env.PHP_VERSION }}-${{ env.MYSQL_VERSION }}-${{ env.TEMPLATE_ENGINE }}
           path: |
             docker-compose.yml
             source/composer.json
