@@ -209,7 +209,7 @@ jobs:
 
       - name: Start containers
         env:
-          MYSQL_VERSION=5.7
+          MYSQL_VERSION:5.7
         run: |
           make up
           sleep 2
