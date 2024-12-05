@@ -218,7 +218,7 @@ jobs:
       - name: Run tests
         run: |
           docker compose exec -T \
-            php vendor/bin/phpunit -c /var/www/source/test-module/tests/phpunit.xml --testsuite RunningTests
+            php vendor/bin/phpunit -c /home/runner/work/paypal-module/paypal-module/source/test-module/tests/phpunit.xml --testsuite RunningTests
 
       - name: Upload log artifact
         if: always()
