@@ -10,7 +10,7 @@ env:
   SONARCLOUD_ORGANIZATION: 'oxid-esales'
   SONARCLOUD_PROJECT_KEY: 'OXID-eSales_module-paypal_checkout'
   PHP_VERSION: '8.0'
-  MYSQL_VERSION: '5.7.37'
+  MYSQL_VERSION: '5.7'
   TEMPLATE_ENGINE: 'twig'
 
 jobs:
