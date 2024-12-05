@@ -1,6 +1,51 @@
 name: Development
 
-on: [ push, pull_request ]
+on:
+  workflow_call:
+    inputs:
+      php:
+        required: true
+        type: string
+      mysql:
+        required: true
+        type: string
+      template_engine:
+        type: string
+        default: 'both'
+      report_sonarcloud:
+        type: boolean
+        default: false
+
+  workflow_dispatch:
+    inputs:
+      php:
+        description: 'PHP version'
+        required: true
+        default: '8.0'
+        type: choice
+        options:
+          - '8.1'
+      mysql:
+        description: 'MySQL version'
+        required: true
+        default: '5.7.37'
+        type: choice
+        options:
+          - '5.7.37'
+      template_engine:
+        description: 'Template engine - smarty with flow theme, twig with twig theme'
+        required: true
+        default: 'twig'
+        type: choice
+        options:
+          - 'both'
+          - 'twig'
+          - 'smarty'
+      report_sonarcloud:
+        description: 'Trigger sonarcloud analize?'
+        required: true
+        default: true
+        type: boolean
 
 env:
   PACKAGE_NAME: 'oxid-solution-catalysts/paypal-module'
@@ -208,8 +253,6 @@ jobs:
             moduleDevelopmentInstallation-${{ matrix.php }}-${{ github.sha }}
 
       - name: Start containers
-        env:
-          MYSQL_VERSION: '5.7'
         run: |
           make up
           sleep 2
