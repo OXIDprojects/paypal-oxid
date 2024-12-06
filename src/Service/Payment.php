@@ -319,7 +319,7 @@ class Payment
                     $this->doPatchPayPalOrder(
                         Registry::getSession()->getBasket(),
                         $checkoutOrderId,
-                        $this->getCustomIdParameterJSON($order)
+                        $this->getCustomIdParameter($order)
                     );
 
                     /** @var $result ApiOrderModel */
@@ -812,16 +812,24 @@ class Payment
      * @param \OxidEsales\Eshop\Application\Model\Order|null $order
      * @return mixed|null
      */
-    public function getCustomIdParameterJSON(?EshopModelOrder $order)
+    public function getCustomIdParameter(?EshopModelOrder $order): string
     {
+        /** @var ModuleSettingsService $moduleSettings */
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
         $module = oxNew(\OxidEsales\Eshop\Core\Module\Module::class);
         $module->load(Module::MODULE_ID);
-        $customID = [
-            'oxordernr' => $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null,
-            'moduleVersion' => $module->getInfo('version'),
-            'oxidVersion' => \OxidEsales\Eshop\Core\ShopVersion::getVersion()
-        ];
+        $orderNumber = $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null;
 
-        return json_encode($customID);
+        if($moduleSettings->isCustomIdSchemaStructural()){
+            $customID = [
+                'oxordernr' => $orderNumber,
+                'moduleVersion' => $module->getInfo('version'),
+                'oxidVersion' => \OxidEsales\Eshop\Core\ShopVersion::getVersion()
+            ];
+
+            return json_encode($customID);
+        }
+
+        return $orderNumber;
     }
 }
