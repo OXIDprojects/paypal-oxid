@@ -322,6 +322,11 @@ class Config
         return $this->getServiceFromContainer(ModuleSettings::class)->getStartTimeCleanUpOrders();
     }
 
+    public function isCustomIdSchemaStructural(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isCustomIdSchemaStructural();
+    }
+
     public function tableExists(string $tableName = ''): bool
     {
         $exists = false;

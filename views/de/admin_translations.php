@@ -275,4 +275,7 @@ return [
                                                         eine höhere Checkout-Conversion bedeuten.',
 
     'OSC_PAYPAL_INSTALLPROCESS_FAILED'               => 'Da das Modul nicht korrekt per Composer installiert ist, sind Fehler bei der (De-)Aktivierung des Moduls aufgetreten. Bitte installieren Sie das Modul via Composer frisch und wiederholen den Vorgang.',
+
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE'            => 'PayPal Inhalte des benutzerdefinierten ID-Feldes',
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC'             => 'Das benutzerdefinierte PayPal-ID-Feld kann entweder nur den Bestellnummernwert oder ein JSON mit zusätzlichen Daten enthalten.',
 ];

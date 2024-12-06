@@ -363,6 +363,11 @@ class ModuleSettings
         return (bool)$this->getSettingValue('oscPayPalSetVaulting');
     }
 
+    public function isCustomIdSchemaStructural(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalUseStructuralCustomIdSchema');
+    }
+
     /**
      * @throws ModuleSettingNotFountException
      */

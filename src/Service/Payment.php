@@ -23,6 +23,7 @@ use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Exception\PayPalException;
 use OxidSolutionCatalysts\PayPal\Exception\UserPhone as UserPhoneException;
 use OxidSolutionCatalysts\PayPal\Model\PayPalOrder as PayPalOrderModel;
+use OxidSolutionCatalysts\PayPal\Module;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings as ModuleSettingsService;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\AuthorizationWithAdditionalData;
@@ -126,7 +127,7 @@ class Payment
             $basket,
             $intent,
             $userAction,
-            $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null,
+            $this->getCustomIdParameter($order),
             $processingInstruction,
             $paymentSource,
             null,
@@ -799,5 +800,28 @@ class Payment
                 'paypal_error'
             );
         }
+    }
+
+    /**
+     * @param \OxidEsales\Eshop\Application\Model\Order|null $order
+     * @return mixed|null
+     */
+    public function getCustomIdParameter(?EshopModelOrder $order): string
+    {
+        $module = oxNew(\OxidEsales\Eshop\Core\Module\Module::class);
+        $module->load(Module::MODULE_ID);
+        $orderNumber = $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null;
+
+        if($this->moduleSettingsService->isCustomIdSchemaStructural()){
+            $customID = [
+                'oxordernr' => $orderNumber,
+                'moduleVersion' => $module->getInfo('version'),
+                'oxidVersion' => \OxidEsales\Eshop\Core\ShopVersion::getVersion()
+            ];
+
+            return json_encode($customID);
+        }
+
+        return $orderNumber;
     }
 }

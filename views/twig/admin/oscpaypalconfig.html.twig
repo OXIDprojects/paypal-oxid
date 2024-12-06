@@ -510,6 +510,32 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card">
+                <div class="card-header" id="heading10">
+                    <h4 class="collapsed" data-toggle="collapse" data-target="#collapse10" aria-expanded="false" aria-controls="collapse10">
+                        {{ translate({ ident: "OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE" }) }}
+                    </h4>
+                </div>
+
+                <div id="collapse10" class="collapse" aria-labelledby="heading10" data-parent="#accordion">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="controls">
+                                <div class="controls">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="conf[oscPayPalUseStructuralCustomIdSchema]" {% if config.isCustomIdSchemaStructural() %}checked{% endif %} value="1">
+                                            {{ translate({ ident: "OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC" }) }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <button type="submit" class="btn btn-primary bottom-space">{{ translate({ ident: "GENERAL_SAVE" }) }}</button>
     </form>

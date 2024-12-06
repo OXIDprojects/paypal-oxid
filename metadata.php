@@ -469,5 +469,11 @@ $aModule = [
             'value' => 3.5,
             'group' => null
         ],
+        [
+            'name' => 'oscPayPalUseStructuralCustomIdSchema',
+            'type' => 'bool',
+            'value' => false,
+            'group' => null
+        ],
     ],
 ];
