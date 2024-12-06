@@ -24,6 +24,7 @@ use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Exception\PayPalException;
 use OxidSolutionCatalysts\PayPal\Exception\UserPhone as UserPhoneException;
 use OxidSolutionCatalysts\PayPal\Model\PayPalOrder as PayPalOrderModel;
+use OxidSolutionCatalysts\PayPal\Module;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings as ModuleSettingsService;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
@@ -128,7 +129,7 @@ class Payment
             $basket,
             $intent,
             $userAction,
-            $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null,
+            null, //customId is patched in doCapturePayPalOrder (ordernr is unavailable at this point)
             $processingInstruction,
             $paymentSource,
             null,
@@ -309,10 +310,8 @@ class Payment
             } elseif ($payPalOrder->status !== Constants::PAYPAL_STATUS_COMPLETED) {
                 $request = new OrderCaptureRequest();
                 //order number must be resolved before order patching
-                $shopOrderId = $order->getFieldData('oxordernr');
-                if (!$shopOrderId) {
+                if (!$order->hasOrderNumber()){
                     $order->setOrderNumber();
-                    $shopOrderId = $order->getFieldData('oxordernr');
                 }
 
                 try {
@@ -320,7 +319,7 @@ class Payment
                     $this->doPatchPayPalOrder(
                         Registry::getSession()->getBasket(),
                         $checkoutOrderId,
-                        $shopOrderId
+                        $this->getCustomIdParameterJSON($order)
                     );
 
                     /** @var $result ApiOrderModel */
@@ -807,5 +806,22 @@ class Payment
                 'paypal_error'
             );
         }
+    }
+
+    /**
+     * @param \OxidEsales\Eshop\Application\Model\Order|null $order
+     * @return mixed|null
+     */
+    public function getCustomIdParameterJSON(?EshopModelOrder $order)
+    {
+        $module = oxNew(\OxidEsales\Eshop\Core\Module\Module::class);
+        $module->load(Module::MODULE_ID);
+        $customID = [
+            'oxordernr' => $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null,
+            'moduleVersion' => $module->getInfo('version'),
+            'oxidVersion' => \OxidEsales\Eshop\Core\ShopVersion::getVersion()
+        ];
+
+        return json_encode($customID);
     }
 }
