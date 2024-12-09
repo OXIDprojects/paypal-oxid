@@ -251,14 +251,10 @@ jobs:
           apt update && DEBIAN_FRONTEND=noninteractive apt -y install npm
       - name: install cypress dependencies
         run: |
-          npm install
-        with:
-          working-directory: ./tests/CypressTests
+          cd ./tests/CypressTests && npm install
       - name: Cypress run
         run: |
-          npx cypress run
-        with:
-          working-directory: ./tests/CypressTests
+          cd ./tests/CypressTests && npx cypress run
         env:
           CYPRESS_TESTS_SHOP_DOMAIN: "localhost.local"
           CYPRESS_TESTS_SHOP_USER_NAME: "test@shop.de"
