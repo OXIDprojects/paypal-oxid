@@ -248,13 +248,13 @@ jobs:
           sleep 2
       - name: install npm
         run: |
-          docker exec php sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt -y install npm
+          docker-compose exec php sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt -y install npm
       - name: install cypress dependencies
         run: |
-          docker exec php cd /var/www/source/vendor/oxid-solution-catalysts/paypal-module/tests/CypressTests && npm install
+          docker-compose exec php cd /var/www/source/vendor/oxid-solution-catalysts/paypal-module/tests/CypressTests && npm install
       - name: Cypress run
         run: |
-          docker exec php cd /var/www/source/vendor/oxid-solution-catalysts/paypal-module/tests/CypressTests && npx cypress run
+          docker-compose exec php cd /var/www/source/vendor/oxid-solution-catalysts/paypal-module/tests/CypressTests && npx cypress run
         env:
           CYPRESS_TESTS_SHOP_DOMAIN: "localhost.local"
           CYPRESS_TESTS_SHOP_USER_NAME: "test@shop.de"
