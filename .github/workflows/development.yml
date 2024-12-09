@@ -235,11 +235,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Cypress run
-        uses: cypress-io/github-action@v2
-        with:
-          command: cd tests && npx cypress run
+        uses: cypress-io/github-action@v6
         env:
           CYPRESS_TESTS_SHOP_DOMAIN: "http://localhost.local"
           CYPRESS_TESTS_SHOP_USER_NAME: "test@shop.de"
