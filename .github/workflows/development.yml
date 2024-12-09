@@ -248,7 +248,7 @@ jobs:
           sleep 2
       - name: install npm
         run: |
-          apt update && DEBIAN_FRONTEND=noninteractive apt -y install npm
+          sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt -y install npm
       - name: install cypress dependencies
         run: |
           cd ./tests/CypressTests && npm install
