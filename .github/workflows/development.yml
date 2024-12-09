@@ -230,6 +230,36 @@ jobs:
             source/coverage.xml
             source/phpunit.xml
 
+  cypress_tests:
+    needs: [install_shop_with_module]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start Cypress container
+        run: |
+          docker run -d --name cypress \
+            --network=host \
+            -v "$(pwd)/source:/e2e" \
+            cypress/included:12.17.3
+          sleep 5
+
+      - name: Run Cypress tests
+        env:
+          CYPRESS_TESTS_SHOP_DOMAIN: "http://localhost.local"
+          CYPRESS_TESTS_SHOP_USER_NAME: "test@shop.de"
+          CYPRESS_TESTS_SHOP_USER_PASSWORD: "oxidoxid"
+          CYPRESS_TESTS_SHOP_USER_FIRST_NAME: "Test"
+          CYPRESS_TESTS_SHOP_USER_LAST_NAME: "Shoper"
+          CYPRESS_TESTS_SHOP_USER_STREET: "Teststreet"
+          CYPRESS_TESTS_SHOP_USER_STREET_NUMBER: "1"
+          CYPRESS_TESTS_SHOP_USER_ZIP: "12345"
+          CYPRESS_TESTS_SHOP_USER_LOCATION: "Testcity"
+        run: |
+          docker exec -it cypress \
+          bash -c "cd /e2e && npx cypress run"
+
+      - name: Stop Cypress container
+        if: always()
+        run: docker rm -f cypress
 #  codeception_tests:
 #    strategy:
 #      fail-fast: false

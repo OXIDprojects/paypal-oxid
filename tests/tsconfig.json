@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES6",                         // Set the JavaScript version to ES6
+    "module": "CommonJS",                    // Set the module format to CommonJS (which Cypress uses)
+    "strict": true,                          // Enable strict type-checking options
+    "esModuleInterop": true,                 // Ensure compatibility between TypeScript and CommonJS modules
+    "skipLibCheck": true,                    // Skip type checking for declaration files
+    "resolveJsonModule": true                // Enable importing of JSON modules
+  },
+  "include": [
+    "cypress/**/*.ts",
+    "node_modules/cypress/types/**/*.d.ts"
+  ]
+}
