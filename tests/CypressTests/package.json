@@ -1,0 +1,11 @@
+{
+  "name": "cypresstests",
+  "version": "0.0.1",
+  "description": "installs cypress",
+  "main": "cypress.config.js",
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "cypress": "^13.16.1"
+  }
+}
