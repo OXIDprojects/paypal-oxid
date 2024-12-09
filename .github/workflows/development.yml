@@ -234,6 +234,14 @@ jobs:
     needs: [install_shop_with_module]
     runs-on: ubuntu-latest
     steps:
+      - name: Load current installation from cache
+        uses: actions/cache@v4.1.1
+        with:
+          path: |
+            ./*
+          key: installation-${{ env.PHP_VERSION }}-${{ env.MYSQL_VERSION }}-${{ env.TEMPLATE_ENGINE }}-${{ github.run_number }}-${{ github.run_attempt }}
+          restore-keys: |
+            installation-${{ env.PHP_VERSION }}-${{ env.MYSQL_VERSION }}-${{ env.TEMPLATE_ENGINE }}-${{ github.run_number }}-${{ github.run_attempt }}
       - name: Start containers
         run: |
           make up
