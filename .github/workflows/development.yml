@@ -246,10 +246,17 @@ jobs:
         run: |
           make up
           sleep 2
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: install npm
+        run: |
+          apt update && DEBIAN_FRONTEND=noninteractive apt -y install npm
+      - name: install cypress dependencies
+        run: |
+          npm install
+        with:
+          working-directory: ./tests/CypressTests
       - name: Cypress run
-        uses: cypress-io/github-action@v6
+        run: |
+          npx cypress run
         with:
           working-directory: ./tests/CypressTests
         env:
@@ -262,9 +269,6 @@ jobs:
           CYPRESS_TESTS_SHOP_USER_STREET_NUMBER: "1"
           CYPRESS_TESTS_SHOP_USER_ZIP: "12345"
           CYPRESS_TESTS_SHOP_USER_LOCATION: "Testcity"
-      - name: Stop Cypress container
-        if: always()
-        run: docker rm -f cypress
 #  codeception_tests:
 #    strategy:
 #      fail-fast: false
