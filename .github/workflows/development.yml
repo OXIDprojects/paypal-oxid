@@ -234,6 +234,10 @@ jobs:
     needs: [install_shop_with_module]
     runs-on: ubuntu-latest
     steps:
+      - name: Start containers
+        run: |
+          make up
+          sleep 2
       - name: Checkout
         uses: actions/checkout@v4
       - name: Cypress run
