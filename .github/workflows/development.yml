@@ -241,7 +241,7 @@ jobs:
         with:
           working-directory: ./tests/CypressTests
         env:
-          CYPRESS_TESTS_SHOP_DOMAIN: "http://localhost.local"
+          CYPRESS_TESTS_SHOP_DOMAIN: "localhost.local"
           CYPRESS_TESTS_SHOP_USER_NAME: "test@shop.de"
           CYPRESS_TESTS_SHOP_USER_PASSWORD: "oxidoxid"
           CYPRESS_TESTS_SHOP_USER_FIRST_NAME: "Test"
