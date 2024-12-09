@@ -254,7 +254,7 @@ jobs:
           CYPRESS_TESTS_SHOP_USER_ZIP: "12345"
           CYPRESS_TESTS_SHOP_USER_LOCATION: "Testcity"
         run: |
-          docker exec -it cypress \
+          docker exec cypress \
           bash -c "cd /e2e && npx cypress run"
 
       - name: Stop Cypress container
