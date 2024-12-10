@@ -246,6 +246,8 @@ jobs:
         run: |
           make up
           sleep 2
+      - name: Debug containers
+        run: docker ps -a
       - name: install npm
         run: |
           docker-compose exec php sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt -y install npm
