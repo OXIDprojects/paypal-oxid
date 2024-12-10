@@ -280,13 +280,14 @@ $aLang = [
     'HELP_OSC_PAYPAL_VAULTING_ACTIVATE_VAULTING'    => 'Repeat purchases made easy: With PayPal you can securely store your customers preferred payment methods, making it quick and easy
                                                         Enable purchase processing. With their saved payment details, customers can make repeat purchases with just a few clicks. This can be for you
                                                         mean higher checkout conversion.',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'              => 'Pseudo shipping costs for PayPal Express',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'               => 'The shipping costs entered here are used if the store option "Calculate default Shipping costs when User is not logged in yet” in not activated.',
-    'OSC_PAYPAL_GOOGLEPAY_TITLE'                     => 'Google Pay address',
-    'OSC_PAYPAL_GOOGLEPAY_ADDRESS_ACTIVATE'           => 'Google Pay address active',
-    'HELP_OSC_OSC_PAYPAL_GOOGLEPAY_ADRESS_ACTIVATE'     => 'Takeover delivery address from googlepay',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'             => 'Pseudo shipping costs for PayPal Express',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'              => 'The shipping costs entered here are used if the store option "Calculate default Shipping costs when User is not logged in yet” in not activated.',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC_EXTENDED'     => 'If You want to use standard shipping cost calculation instead of pseudo shipping cost for not yet logged in users with PayPal Express please check `Calculate default Shipping costs when User is not logged in yet` option in Master settings | Settings tab | Other settings section.',
+    'OSC_PAYPAL_GOOGLEPAY_TITLE'                    => 'Google Pay address',
+    'OSC_PAYPAL_GOOGLEPAY_ADDRESS_ACTIVATE'         => 'Google Pay address active',
+    'HELP_OSC_OSC_PAYPAL_GOOGLEPAY_ADRESS_ACTIVATE' => 'Takeover delivery address from googlepay',
 
-    'OSC_PAYPAL_INSTALLPROCESS_FAILED'               => 'Because the module was not installed correctly via Composer, errors occurred during the (de)activation of the module. Please reinstall the module via composer and repeat the process.',
+    'OSC_PAYPAL_INSTALLPROCESS_FAILED'              => 'Because the module was not installed correctly via Composer, errors occurred during the (de)activation of the module. Please reinstall the module via composer and repeat the process.',
 
     // PayPal Payment
     'OSC_PAYPAL_PAYMENT_DEPRECATED'                 => 'This PayPal payment method can no longer be activated as it will be removed soon!',

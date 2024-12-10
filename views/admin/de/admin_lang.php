@@ -279,13 +279,14 @@ $aLang = [
     'HELP_OSC_PAYPAL_VAULTING_ACTIVATE_VAULTING'    => 'Wiederholungskäufe leicht gemacht: Mit PayPal können Sie die bevorzugten Zahlarten Ihrer Kund:innen sicher speichern und so eine schnelle und einfache
                                                         Kaufabwicklung ermöglichen. Mit ihren gespeicherten Zahlungsdaten können Kund:innen mit nur wenigen Klicks Wiederholungskäufe tätigen. Dies kann für Sie
                                                         eine höhere Checkout-Conversion bedeuten.',
-    'OSC_PAYPAL_GOOGLEPAY_TITLE'                     => 'Google Pay Adresse',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'              => 'Pseudoversandkosten für PayPal Express',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'               => 'Die hier eingegebenen Pseudeversandkosten werden verwendet, wenn die Shopoption “Versandkosten auch dann berechnen, wenn der Kunde noch nicht eingeloggt ist” nicht aktiviert ist.',
-    'OSC_PAYPAL_GOOGLEPAY_ADDRESS_ACTIVATE'          => 'Speicherung der Adresse aktivieren',
-    'HELP_OSC_OSC_PAYPAL_GOOGLEPAY_ADRESS_ACTIVATE'  => 'Übernahme der Lieferadresse von GooglePay',
+    'OSC_PAYPAL_GOOGLEPAY_TITLE'                    => 'Google Pay Adresse',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'             => 'Pseudoversandkosten für PayPal Express',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'              => 'Die hier eingegebenen Pseudeversandkosten werden verwendet, wenn die Shopoption “Versandkosten auch dann berechnen, wenn der Kunde noch nicht eingeloggt ist” nicht aktiviert ist.',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC_EXTENDED'     => 'Wenn Sie anstelle der Pseudo-Versandkosten für noch nicht angemeldete Benutzer mit PayPal Express die standardmäßige Versandkostenberechnung verwenden möchten, aktivieren Sie die Option `Standardversandkosten berechnen, wenn Benutzer noch nicht angemeldet sind` in den Mastereinstellungen | Einstellungen-Tab | Abschnitt Sonstige Einstellungen.',
+    'OSC_PAYPAL_GOOGLEPAY_ADDRESS_ACTIVATE'         => 'Speicherung der Adresse aktivieren',
+    'HELP_OSC_OSC_PAYPAL_GOOGLEPAY_ADRESS_ACTIVATE' => 'Übernahme der Lieferadresse von GooglePay',
 
-    'OSC_PAYPAL_INSTALLPROCESS_FAILED'               => 'Da das Modul nicht korrekt per Composer installiert ist, sind Fehler bei der (De-)Aktivierung des Moduls aufgetreten. Bitte installieren Sie das Modul via Composer frisch und wiederholen den Vorgang.',
+    'OSC_PAYPAL_INSTALLPROCESS_FAILED'              => 'Da das Modul nicht korrekt per Composer installiert ist, sind Fehler bei der (De-)Aktivierung des Moduls aufgetreten. Bitte installieren Sie das Modul via Composer frisch und wiederholen den Vorgang.',
 
     // PayPal Payment
     'OSC_PAYPAL_PAYMENT_DEPRECATED'                 => 'Diese PayPal Zahlungsart kann nicht mehr aktiviert werden, da diese demnächst entfernt wird!',
