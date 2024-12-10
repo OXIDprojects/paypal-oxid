@@ -262,9 +262,8 @@ return [
                                                         cancel manually.',
     'OSC_PAYPAL_STARTTIME_CLEANUP_ORDERS'           => 'Start time for automatic cancellation',
     'HELP_OSC_PAYPAL_STARTTIME_CLEANUP_ORDERS'      => 'How old do not finished orders have to be before they are automatically canceled (in minutes)?',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'             => 'Pseudo shipping costs for PayPal Express',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'              => 'The shipping costs entered here are used if the store option "Calculate default Shipping costs when User is not logged in yet” in not activated.',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC_EXTENDED'     => 'If You want to use standard shipping cost calculation instead of pseudo shipping cost for not yet logged in users with PayPal Express please check `Calculate default Shipping costs when User is not logged in yet` option in Master settings | Settings tab | Other settings section.',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'              => 'Pseudo shipping costs for PayPal Express',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'               => 'The shipping costs entered here are used if the store option "Calculate default Shipping costs when User is not logged in yet” in not activated.',
 
     'OSC_PAYPAL_ORDER_MAIN_TRACKCARRIER_COUNTRY'    => 'Tracking Carrier (Country)',
     'OSC_PAYPAL_ORDER_MAIN_TRACKCARRIER_PROVIDER'   => 'Tracking Carrier (Provider)',
@@ -276,8 +275,8 @@ return [
                                                         Enable purchase processing. With their saved payment details, customers can make repeat purchases with just a few clicks. This can be for you
                                                         mean higher checkout conversion.',
 
-    'OSC_PAYPAL_INSTALLPROCESS_FAILED'              => 'Because the module was not installed correctly via Composer, errors occurred during the (de)activation of the module. Please reinstall the module via composer and repeat the process.',
+    'OSC_PAYPAL_INSTALLPROCESS_FAILED'               => 'Because the module was not installed correctly via Composer, errors occurred during the (de)activation of the module. Please reinstall the module via composer and repeat the process.',
 
-    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE'           => 'PayPal custom id field contents',
-    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC'            => 'PayPal custom id field will be JSON encoded string with order number, shop version and the PayPal module version.',
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE'            => 'PayPal custom id field contents',
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC'             => 'PayPal custom id field will be JSON encoded string with order number, shop version and the PayPal module version.',
 ];
