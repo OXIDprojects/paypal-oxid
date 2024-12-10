@@ -264,6 +264,7 @@ return [
     'HELP_OSC_PAYPAL_STARTTIME_CLEANUP_ORDERS'      => 'Wie alt müssen nicht beendete Bestellungen sein, damit sie frühestens automatisch storniert werden (in Minuten)?',
     'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'             => 'Pseudoversandkosten für PayPal Express',
     'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'              => 'Die hier eingegebenen Pseudeversandkosten werden verwendet, wenn die Shopoption “Versandkosten auch dann berechnen, wenn der Kunde noch nicht eingeloggt ist” nicht aktiviert ist.',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC_EXTENDED'     => 'Wenn Sie anstelle der Pseudo-Versandkosten für noch nicht angemeldete Benutzer mit PayPal Express die standardmäßige Versandkostenberechnung verwenden möchten, aktivieren Sie die Option `Standardversandkosten berechnen, wenn Benutzer noch nicht angemeldet sind` in den Mastereinstellungen | Einstellungen-Tab | Abschnitt Sonstige Einstellungen.',
     'OSC_PAYPAL_ORDER_MAIN_TRACKCARRIER_COUNTRY'    => 'Versanddienstleister (Land)',
     'OSC_PAYPAL_ORDER_MAIN_TRACKCARRIER_PROVIDER'   => 'Versanddienstleister (Anbieter)',
     'OSC_PAYPAL_TRACKCARRIER_GLOBAL'                => 'weltweit',
