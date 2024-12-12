@@ -160,10 +160,6 @@ $aModule = [
         'modules/osc/paypal/vaultedpaymentsources_flow.tpl' => 'osc/paypal/views/tpl/flow/vaulting/vaultedpaymentsources.tpl',
         'modules/osc/paypal/vaultedpaymentsources_wave.tpl' => 'osc/paypal/views/tpl/wave/vaulting/vaultedpaymentsources.tpl',
     ],
-    'events' => [
-        'onActivate' => '\OxidSolutionCatalysts\PayPal\Core\Events\Events::onActivate',
-        'onDeactivate' => '\OxidSolutionCatalysts\PayPal\Core\Events\Events::onDeactivate'
-    ],
     'blocks'    => [
         [
             'template' => 'headitem.tpl',
@@ -601,7 +597,7 @@ $aModule = [
         ],
         [
             'name' => 'oscPayPalDefaultShippingPriceExpress',
-            'type' => 'str',
+            'type' => 'float',
             'value' => 3.5,
             'group' => null
         ],

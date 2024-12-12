@@ -451,9 +451,10 @@ class ModuleSettings
 
         if ($moduleSetting->getType() === 'str') {
             $value = trim($value);
-        }
-        if ($moduleSetting->getType() === 'bool') {
+        } else if ($moduleSetting->getType() === 'bool') {
             $value = (bool)$value;
+        } else if ($moduleSetting->getType() === 'float') {
+            $value = (float)trim($value);
         }
 
         $this->moduleSettingBridge->save($name, $value, Module::MODULE_ID);
