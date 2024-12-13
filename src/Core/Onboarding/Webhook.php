@@ -15,6 +15,7 @@ use OxidSolutionCatalysts\PayPal\Core\Config as PayPalConfig;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Exception\OnboardingException;
+use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
 use OxidSolutionCatalysts\PayPalApi\Service\GenericService;
 
 class Webhook
@@ -32,7 +33,12 @@ class Webhook
         $hook = $this->getHookForUrl($endpoint);
         $webhookId = isset($hook['id']) ? $hook['id'] : '';
         $registeredEvents = $this->getEnabledEvents($hook);
-        if (array_diff($this->getAvailableEventNames(), $registeredEvents)) {
+        if (
+            array_diff(
+                array_column($this->getAvailableEventNames(), "name"),
+                array_column($registeredEvents, "name")
+            )
+        ) {
             $this->removeWebhook($webhookId);
             $webhookId = $this->registerWebhooks();
         }
@@ -113,7 +119,11 @@ class Webhook
     {
         /** @var GenericService $notificationService */
         $webhookService = Registry::get(ServiceFactory::class)->getWebhookService();
-        $result = $webhookService->request('get');
+        try {
+            $result = $webhookService->request('get');
+        } catch (ApiException $e) {
+            $result = [];
+        }
 
         return $result['webhooks'] ?? [];
     }
