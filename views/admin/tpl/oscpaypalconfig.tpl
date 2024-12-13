@@ -549,6 +549,28 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card">
+                <div class="card-header" id="heading11">
+                    <h4 class="collapsed" data-toggle="collapse" data-target="#collapse11" aria-expanded="false" aria-controls="collapse11">
+                        [{oxmultilang ident="OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE"}]
+                    </h4>
+                </div>
+                <div id="collapse11" class="collapse" aria-labelledby="heading11" data-parent="#accordion">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="controls">
+                                <div class="form-group">
+                                    <div class="controls">
+                                        <input type="checkbox" name="conf[oscPayPalUseStructuralCustomIdSchema]" value="1" [{if $config->isCustomIdSchemaStructural()}] checked[{/if}]>
+                                        <span class="help-block">[{oxmultilang ident="OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC"}]</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             [{*
             <div class="card">
                 <div class="card-header" id="heading9">

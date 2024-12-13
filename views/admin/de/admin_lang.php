@@ -290,4 +290,7 @@ $aLang = [
 
     // PayPal Payment
     'OSC_PAYPAL_PAYMENT_DEPRECATED'                 => 'Diese PayPal Zahlungsart kann nicht mehr aktiviert werden, da diese demnächst entfernt wird!',
+
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE'           => 'PayPal Inhalte des benutzerdefinierten ID-Feldes',
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC'            => 'Das benutzerdefinierte PayPal-ID-Feld kann entweder nur den Bestellnummernwert oder ein JSON mit zusätzlichen Daten enthalten.',
 ];
