@@ -16,6 +16,7 @@ use OxidSolutionCatalysts\PayPal\Core\Webhook\EventHandlerMapping;
 use OxidSolutionCatalysts\PayPal\Exception\OnboardingException;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
+use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
 use OxidSolutionCatalysts\PayPalApi\Service\GenericService;
 
 class Webhook
@@ -119,7 +120,11 @@ class Webhook
     {
         /** @var GenericService $notificationService */
         $webhookService = Registry::get(ServiceFactory::class)->getWebhookService();
-        $result = $webhookService->request('GET');
+        try {
+            $result = $webhookService->request('GET');
+        } catch (ApiException $e) {
+            $result = [];
+        }
 
         return $result['webhooks'] ?? [];
     }
