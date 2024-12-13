@@ -262,8 +262,8 @@ return [
                                                         cancel manually.',
     'OSC_PAYPAL_STARTTIME_CLEANUP_ORDERS'           => 'Start time for automatic cancellation',
     'HELP_OSC_PAYPAL_STARTTIME_CLEANUP_ORDERS'      => 'How old do not finished orders have to be before they are automatically canceled (in minutes)?',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'              => 'Pseudo shipping costs for PayPal Express',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'               => 'The shipping costs entered here are used if the store option "Calculate default Shipping costs when User is not logged in yet” in not activated.',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'             => 'Pseudo shipping costs for PayPal Express',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'              => 'PayPal Express requires shipping costs to authorize the shopping cart amount. If a customer has neither logged in to the shop nor provided their shipping address, the shop cannot calculate shipping costs by default. In the shop settings (Master Settings > Core Settings > Tab Settings > Section Other Settings ) there is an option "Calculate default Shipping costs when User is not logged in yet". This allows OXID to try to calculate the shipping costs for standard cases. If you do not want to use this option, the last option is to enter pseudo shipping costs. These should be as close to the shipping costs you use most often. As soon as the customer is in the checkout and their delivery address and desired shipping method are known to the shop, the actual shipping costs are calculated. These overwrite all previously used "auxiliary" shipping costs.',
 
     'OSC_PAYPAL_ORDER_MAIN_TRACKCARRIER_COUNTRY'    => 'Tracking Carrier (Country)',
     'OSC_PAYPAL_ORDER_MAIN_TRACKCARRIER_PROVIDER'   => 'Tracking Carrier (Provider)',
@@ -275,5 +275,5 @@ return [
                                                         Enable purchase processing. With their saved payment details, customers can make repeat purchases with just a few clicks. This can be for you
                                                         mean higher checkout conversion.',
 
-    'OSC_PAYPAL_INSTALLPROCESS_FAILED'               => 'Because the module was not installed correctly via Composer, errors occurred during the (de)activation of the module. Please reinstall the module via composer and repeat the process.',
+    'OSC_PAYPAL_INSTALLPROCESS_FAILED'              => 'Because the module was not installed correctly via Composer, errors occurred during the (de)activation of the module. Please reinstall the module via composer and repeat the process.',
 ];
