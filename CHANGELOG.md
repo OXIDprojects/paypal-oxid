@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - [0007719](https://bugs.oxid-esales.com/view.php?id=7719): Tracking code also be stored in standard DB field for backwards compatibility
 - add possibility to ignore cached tokens. It helps e.g. for webhook registration
 - use PayPal-Client v2.0.17
+- [0007744](https://bugs.oxid-esales.com/view.php?id=7744): : When using vouchers shop jumps back to payment selection
 
 ### NEW
 
