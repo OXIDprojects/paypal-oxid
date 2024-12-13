@@ -682,7 +682,11 @@ class Payment
     {
         return $this->serviceFactory
             ->getOrderService()
-            ->showOrderDetails($paypalOrderId, $fields);
+            ->showOrderDetails(
+                $paypalOrderId,
+                $fields,
+                Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
+            );
     }
 
     /**

@@ -67,7 +67,7 @@ class ServiceFactory
     {
         return oxNew(
             GenericService::class,
-            $this->getClient(),
+            $this->getClient(false),
             '/v1/notifications/webhooks' . $uri
         );
     }
@@ -111,19 +111,27 @@ class ServiceFactory
      *
      * @return Client
      */
-    private function getClient(): Client
+    private function getClient(bool $useToken = true): Client
     {
         if ($this->client === null) {
             /** @var Config $config */
             $config = oxNew(Config::class);
             $logger = new PayPalLogger();
+            // prepare a unique action hash
+            $session = Registry::getSession();
+            $sessionId = $session->getId();
+            $basketId = $session->getVariable('sess_challenge');
+            $paymentId = $session->getVariable('paymentid');
+            $actionHash = md5($sessionId . $basketId . $paymentId);
+            $sTokenCacheFileName = $useToken ? $config->getTokenCacheFileName() : '';
 
             $client = new Client(
                 $logger,
                 $config->isSandbox() ? Client::SANDBOX_URL : Client::PRODUCTION_URL,
                 $config->getClientId(),
                 $config->getClientSecret(),
-                $config->getTokenCacheFileName(),
+                $sTokenCacheFileName,
+                $actionHash,
                 // must be empty. We do not have the merchant's payerid
                 //and confirmed by paypal we should not use it for auth and
                 //so not ask for it on the configuration page
