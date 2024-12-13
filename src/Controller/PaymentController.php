@@ -62,12 +62,11 @@ class PaymentController extends PaymentController_parent
                     $vaultedPaymentSources = [];
                     foreach ($vaultedPaymentTokens as $vaultedPaymentToken) {
                         foreach ($vaultedPaymentToken["payment_source"] as $paymentType => $paymentSource) {
-                            $viewConfig = oxNew(\OxidEsales\Eshop\Core\ViewConfig::class);
-                            if ($paymentType === "card" && $viewConfig->isVaultingAllowedForACDC()) {
+                            if ($paymentType === "card" && $moduleSettings->isVaultingAllowedForACDC()) {
                                 $string = $lang->translateString("OSC_PAYPAL_CARD_ENDING_IN");
                                 $vaultedPaymentSources[$paymentType][] = $paymentSource["brand"] . " " .
                                     $string . $paymentSource["last_digits"];
-                            } elseif ($paymentType === "paypal"&& $viewConfig->isVaultingAllowedForPayPal()) {
+                            } elseif ($paymentType === "paypal" && $moduleSettings->isVaultingAllowedForPayPal()) {
                                 $string = $lang->translateString("OSC_PAYPAL_CARD_PAYPAL_PAYMENT");
                                 $vaultedPaymentSources[$paymentType][] =
                                     $string . " " . $paymentSource["email_address"];

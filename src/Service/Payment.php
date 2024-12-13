@@ -14,6 +14,7 @@ use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Session as EshopSession;
+use OxidEsales\Eshop\Core\ShopVersion;
 use OxidSolutionCatalysts\PayPal\Controller\PaymentController;
 use OxidSolutionCatalysts\PayPal\Core\ConfirmOrderRequestFactory;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
@@ -23,18 +24,13 @@ use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
 use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
 use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Exception\PayPalException;
-use OxidSolutionCatalysts\PayPal\Exception\UserPhone as UserPhoneException;
 use OxidSolutionCatalysts\PayPal\Model\PayPalOrder as PayPalOrderModel;
 use OxidSolutionCatalysts\PayPal\Module;
-use OxidSolutionCatalysts\PayPal\Service\ModuleSettings as ModuleSettingsService;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\AuthorizationWithAdditionalData;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\ConfirmOrderRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as ApiModelOrder;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as ApiOrderModel;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as OrderResponse;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderAuthorizeRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderCaptureRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Payments\CaptureRequest;
@@ -81,7 +77,7 @@ class Payment
     /** @var SCAValidatorInterface */
     private $scaValidator;
 
-    /** @var ModuleSettingsService */
+    /** @var ModuleSettings */
     private $moduleSettingsService;
 
     private $logger;
@@ -90,7 +86,7 @@ class Payment
         EshopSession $eshopSession,
         OrderRepository $orderRepository,
         SCAValidatorInterface $scaValidator,
-        ModuleSettingsService $moduleSettingsService,
+        ModuleSettings $moduleSettingsService,
         Logger $logger,
         ServiceFactory $serviceFactory = null,
         PatchRequestFactory $patchRequestFactory = null,
@@ -116,9 +112,7 @@ class Payment
         string $payPalPartnerAttributionId = '',
         string $returnUrl = null,
         string $cancelUrl = null,
-        bool $setProvidedAddress = true,
-        ?EshopModelOrder $order = null
-        #): ?ApiModelOrder
+        bool $setProvidedAddress = true
     ) {
         //TODO return value
         $this->setPaymentExecutionError(self::PAYMENT_ERROR_NONE);
@@ -158,15 +152,6 @@ class Payment
         }
 
         return $response;
-    }
-
-    public function isVaultingAllowed($paymentId, $paypalPaymentType)
-    {
-        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
-
-        return $this->getIsPaymentActive($paymentId)
-            && $moduleSettings->getIsVaultingActive()
-            && PayPalDefinitions::isPayPalVaultingPossible($paymentId, $paypalPaymentType);
     }
 
     public function doCreatePatchedOrder(
@@ -235,10 +220,10 @@ class Payment
         EshopModelOrder $order,
         string $checkoutOrderId,
         string $paymentId,
-        ApiOrderModel $payPalOrder = null
-    ): ApiOrderModel {
+        Order $payPalOrder = null
+    ): Order {
 
-        /** @var ApiOrderModel $payPalOrder */
+        /** @var Order $payPalOrder */
         if (is_null($payPalOrder) || !isset($payPalOrder->payment_source)) {
             $payPalOrder = $this->fetchOrderFields($checkoutOrderId);
         }
@@ -258,7 +243,7 @@ class Payment
             //TODO: split into multiple methods
             if ($payPalOrder->intent === Constants::PAYPAL_ORDER_INTENT_AUTHORIZE) {
                 // if order approved then authorize
-                if ($payPalOrder->status === ApiOrderModel::STATUS_APPROVED) {
+                if ($payPalOrder->status === Order::STATUS_APPROVED) {
                     $request = new OrderAuthorizeRequest();
                     $payPalOrder = $orderService->authorizePaymentForOrder(
                         '',
@@ -332,7 +317,7 @@ class Payment
                         $this->getCustomIdParameter($order)
                     );
 
-                    /** @var $result ApiOrderModel */
+                    /** @var $result Order */
                     $result = $orderService->capturePaymentForOrder(
                         '',
                         $checkoutOrderId,
@@ -357,7 +342,7 @@ class Payment
                 $result->purchase_units[0]->payments->captures[0]->id : '';
 
             $status = $result && $result->purchase_units[0]->payments->captures[0]->status ?
-                $result->purchase_units[0]->payments->captures[0]->status : ApiOrderModel::STATUS_SAVED;
+                $result->purchase_units[0]->payments->captures[0]->status : Order::STATUS_SAVED;
 
             /** @var PayPalOrderModel $paypalOrder */
             $this->trackPayPalOrder(
@@ -437,7 +422,7 @@ class Payment
         /** @var ApiOrderService $orderService */
         $orderService = $this->serviceFactory->getOrderService();
 
-        /** @var ApiModelOrder $response */
+        /** @var Order $response */
         $response = $orderService->confirmTheOrder(
             $payPalClientMetadataId,
             $checkoutOrderId,
@@ -667,16 +652,9 @@ class Payment
                 Constants::PAYPAL_PUI_PROCESSING_INSTRUCTIONS,
                 PayPalDefinitions::PUI_REQUEST_PAYMENT_SOURCE_NAME,
                 $payPalClientMetadataId,
-                Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
-                null,
-                null,
-                true,
-                $order
+                Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
             );
             $payPalOrderId = $result->id;
-        } catch (UserPhoneException $e) {
-            //mistyped phone in last order step
-            $this->setPaymentExecutionError(self::PAYMENT_ERROR_PUI_PHONE);
         } catch (Exception $exception) {
             $this->setPaymentExecutionError(self::PAYMENT_ERROR_PUI_GENERIC);
             $this->logger->log('error', 'Error on pui order creation call.', [$exception]);
@@ -745,7 +723,7 @@ class Payment
         );
     }
 
-    public function fetchOrderFields(string $paypalOrderId, string $fields = ''): ApiOrderModel
+    public function fetchOrderFields(string $paypalOrderId, string $fields = ''): Order
     {
         return $this->serviceFactory
             ->getOrderService()
@@ -759,7 +737,7 @@ class Payment
     /**
      * @throws StandardException
      */
-    public function verify3D(string $paymentId, ApiOrderModel $payPalOrder): bool
+    public function verify3D(string $paymentId, Order $payPalOrder): bool
     {
         //no ACDC payment
         if ($paymentId != PayPalDefinitions::ACDC_PAYPAL_PAYMENT_ID) {
@@ -824,7 +802,7 @@ class Payment
      */
     public function getCustomIdParameter(?EshopModelOrder $order): string
     {
-        /** @var ModuleSettingsService $moduleSettings */
+        /** @var ModuleSettings $moduleSettings */
         $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
         $module = oxNew(\OxidEsales\Eshop\Core\Module\Module::class);
         $module->load(Module::MODULE_ID);
@@ -834,27 +812,12 @@ class Payment
             $customID = [
                 'oxordernr' => $orderNumber,
                 'moduleVersion' => $module->getInfo('version'),
-                'oxidVersion' => \OxidEsales\Eshop\Core\ShopVersion::getVersion()
+                'oxidVersion' => ShopVersion::getVersion()
             ];
 
             return json_encode($customID);
         }
 
         return $orderNumber;
-    }
-
-    private function getIsPaymentActive($paymentId): bool
-    {
-        $paymentController = oxNew(PaymentController::class);
-        $paymentList = $paymentController->getPaymentList();
-
-        /** @var \OxidEsales\Eshop\Application\Model\Payment $payment */
-        foreach ($paymentList as $payment) {
-            if ($payment->getId() == $paymentId) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

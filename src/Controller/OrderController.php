@@ -93,10 +93,8 @@ class OrderController extends OrderController_parent
 
         if ($user) {
             $paymentId = $this->getPayment()->getId();
-            $paymentService = $this->getServiceFromContainer(PaymentService::class);
-            $paymentType    = PayPalDefinitions::getPayPalDefinitions()[$paymentId]["vaultingtype"];
-
-            $isVaultingPossible = $paymentService->isVaultingAllowed($paymentId, $paymentType)
+            $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
+            $isVaultingPossible = $moduleSettings->isVaultingAllowedForPayment($paymentId)
                 && $user->getFieldData('oxpassword');
 
             $this->addTplParam('oscpaypal_isVaultingPossible', $isVaultingPossible);

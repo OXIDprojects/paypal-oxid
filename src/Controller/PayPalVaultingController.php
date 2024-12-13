@@ -4,7 +4,9 @@ namespace OxidSolutionCatalysts\PayPal\Controller;
 
 use OxidEsales\Eshop\Application\Controller\AccountController;
 use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
+use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
+use OxidEsales\Eshop\Core\Registry;
 
 /**
  * user account menu for saving paypal for purchase later (vaulting without purchase)
@@ -16,11 +18,12 @@ class PayPalVaultingController extends AccountController
     public function render()
     {
         $this->_aViewData['vaultingUserId'] = $this->getViewConfig()->getUserIdForVaulting();
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
 
-        if ($this->getViewConfig()->isVaultingAllowedForPayPal()) {
+        if ($moduleSettings->isVaultingAllowedForPayPal()) {
             $this->_sThisTemplate = 'modules/osc/paypal/account_vaulting_paypal.tpl';
         }
-        
+
         return parent::render();
     }
 

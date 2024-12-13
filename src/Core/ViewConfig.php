@@ -602,18 +602,4 @@ class ViewConfig extends ViewConfig_parent
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->isAcdcEligibility();
     }
-
-    public function isVaultingAllowedForPayPal()
-    {
-        /** @var PaymentService $paymentService */
-        $paymentService = $this->getServiceFromContainer(PaymentService::class);
-        return $paymentService->isVaultingAllowed(PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID, "paypal");
-    }
-
-    public function isVaultingAllowedForACDC()
-    {
-        /** @var PaymentService $paymentService */
-        $paymentService = $this->getServiceFromContainer(PaymentService::class);
-        return $paymentService->isVaultingAllowed(PayPalDefinitions::ACDC_PAYPAL_PAYMENT_ID, "card");
-    }
 }
