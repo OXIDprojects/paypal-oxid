@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Catch possible thrown Error by getting DataClientToken
 - [0007719](https://bugs.oxid-esales.com/view.php?id=7719): Tracking code also be stored in standard DB field for backwards compatibility
+- add possibility to ignore cached tokens. It helps e.g. for webhook registration
+- use PayPal-Client v2.0.17
+- [0007744](https://bugs.oxid-esales.com/view.php?id=7744): When using vouchers shop jumps back to payment selection
+- [0007745](https://bugs.oxid-esales.com/view.php?id=7745): Paypal checkout jumps back to step 2 with an error when an discount in relation to item value is used
+- [0007742](https://bugs.oxid-esales.com/view.php?id=7742): You get stuck in the checkout if the "Save payment method" option is activated for credit card payment
+- [0007695](https://bugs.oxid-esales.com/view.php?id=7695): Explain better Pseudo delivery costs
+
+### NEW
+
+- Custom id passed to PayPal as JSON with additional versioning data
 
 ## [2.5.1] - 2024-09-20
 
@@ -43,7 +53,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - [0007675](https://bugs.oxid-esales.com/view.php?id=7675): fix the possibility to finish order without redirect and login to Paypal
 - [0007676](https://bugs.oxid-esales.com/view.php?id=7676): If we have a corrupted generated_services.yaml and try to deactivate the module via the admin, we will display a more understandable error message about what happened.
 - introduce ActionHash to make the PayPal-Request-ID more unique
-- [0007695](https://bugs.oxid-esales.com/view.php?id=7695): Fix: if DeliverySet is set in Frontend, then do not add any PseudoDeliveryCosts for PPExpress
 
 ### NEW
 - PayPal-Request-Id based on serialized body, no extra PayPal-Request-Id necessary anymore

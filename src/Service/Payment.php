@@ -25,6 +25,7 @@ use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Exception\PayPalException;
 use OxidSolutionCatalysts\PayPal\Exception\UserPhone as UserPhoneException;
 use OxidSolutionCatalysts\PayPal\Model\PayPalOrder as PayPalOrderModel;
+use OxidSolutionCatalysts\PayPal\Module;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings as ModuleSettingsService;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
@@ -33,6 +34,7 @@ use OxidSolutionCatalysts\PayPalApi\Model\Orders\ConfirmOrderRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as ApiModelOrder;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as ApiOrderModel;
+use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as OrderResponse;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderAuthorizeRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderCaptureRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Payments\CaptureRequest;
@@ -128,7 +130,7 @@ class Payment
             $basket,
             $intent,
             $userAction,
-            $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null,
+            null, //customId is patched in doCapturePayPalOrder (ordernr is unavailable at this point)
             $processingInstruction,
             $paymentSource,
             null,
@@ -157,7 +159,7 @@ class Payment
 
         return $response;
     }
-    
+
     public function isVaultingAllowed($paymentId, $paypalPaymentType)
     {
         $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
@@ -318,10 +320,8 @@ class Payment
             } elseif ($payPalOrder->status !== Constants::PAYPAL_STATUS_COMPLETED) {
                 $request = new OrderCaptureRequest();
                 //order number must be resolved before order patching
-                $shopOrderId = $order->getFieldData('oxordernr');
-                if (!$shopOrderId) {
+                if (!$order->hasOrderNumber()){
                     $order->setOrderNumber();
-                    $shopOrderId = $order->getFieldData('oxordernr');
                 }
 
                 try {
@@ -329,7 +329,7 @@ class Payment
                     $this->doPatchPayPalOrder(
                         Registry::getSession()->getBasket(),
                         $checkoutOrderId,
-                        $shopOrderId
+                        $this->getCustomIdParameter($order)
                     );
 
                     /** @var $result ApiOrderModel */
@@ -816,6 +816,31 @@ class Payment
                 'paypal_error'
             );
         }
+    }
+
+    /**
+     * @param \OxidEsales\Eshop\Application\Model\Order|null $order
+     * @return mixed|null
+     */
+    public function getCustomIdParameter(?EshopModelOrder $order): string
+    {
+        /** @var ModuleSettingsService $moduleSettings */
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
+        $module = oxNew(\OxidEsales\Eshop\Core\Module\Module::class);
+        $module->load(Module::MODULE_ID);
+        $orderNumber = $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null;
+
+        if($moduleSettings->isCustomIdSchemaStructural()){
+            $customID = [
+                'oxordernr' => $orderNumber,
+                'moduleVersion' => $module->getInfo('version'),
+                'oxidVersion' => \OxidEsales\Eshop\Core\ShopVersion::getVersion()
+            ];
+
+            return json_encode($customID);
+        }
+
+        return $orderNumber;
     }
 
     private function getIsPaymentActive($paymentId): bool

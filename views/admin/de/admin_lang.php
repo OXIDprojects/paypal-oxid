@@ -279,14 +279,18 @@ $aLang = [
     'HELP_OSC_PAYPAL_VAULTING_ACTIVATE_VAULTING'    => 'Wiederholungskäufe leicht gemacht: Mit PayPal können Sie die bevorzugten Zahlarten Ihrer Kund:innen sicher speichern und so eine schnelle und einfache
                                                         Kaufabwicklung ermöglichen. Mit ihren gespeicherten Zahlungsdaten können Kund:innen mit nur wenigen Klicks Wiederholungskäufe tätigen. Dies kann für Sie
                                                         eine höhere Checkout-Conversion bedeuten.',
-    'OSC_PAYPAL_GOOGLEPAY_TITLE'                     => 'Google Pay Adresse',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'              => 'Pseudoversandkosten für PayPal Express',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'               => 'Die hier eingegebenen Pseudeversandkosten werden verwendet, wenn die Shopoption “Versandkosten auch dann berechnen, wenn der Kunde noch nicht eingeloggt ist” nicht aktiviert ist.',
-    'OSC_PAYPAL_GOOGLEPAY_ADDRESS_ACTIVATE'          => 'Speicherung der Adresse aktivieren',
-    'HELP_OSC_OSC_PAYPAL_GOOGLEPAY_ADRESS_ACTIVATE'  => 'Übernahme der Lieferadresse von GooglePay',
+    'OSC_PAYPAL_GOOGLEPAY_TITLE'                    => 'Google Pay Adresse',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'             => 'Pseudoversandkosten für PayPal Express',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'              => 'PayPal Express benötigt für die Autorisierung des Warenkorbbetrages Versandkosten. Wenn ein Kunde sich im Shop weder eingeloggt noch seine Versandadresse angegeben hat, kann der Shop standardmäßig noch keine Versandkosten berechen. In den Shopeinstellungen (Stammdaten > Grundeinstellungen > Reiter Einstellungen > Abschnitt weitere Einstellungen) gibt es eine Option "Versandkosten auch dann berechnen, wenn der Kunde noch nicht eingeloggt ist". Damit kann OXID versuchen die Versandkosten für die Standardfälle zu ermitteln. Wenn man diese Option nicht nutzen möchte, besteht hier als letzte Möglichkeit Pseudoversandkosten zu hinterlegen. Die sollten Ihren meißt genutzten Versandkosten am nächsten kommen. Sobald sich der Kunde im Checkout befindet und seine Lieferadresse sowie seine gewünschte Versandart dem Shop bekannt sind, werden die tatsächlichen Versandkosten berechnet. Diese überschreiben alle vorher genutzten "Hilfs-"Versandkosten.',
 
-    'OSC_PAYPAL_INSTALLPROCESS_FAILED'               => 'Da das Modul nicht korrekt per Composer installiert ist, sind Fehler bei der (De-)Aktivierung des Moduls aufgetreten. Bitte installieren Sie das Modul via Composer frisch und wiederholen den Vorgang.',
+    'OSC_PAYPAL_GOOGLEPAY_ADDRESS_ACTIVATE'         => 'Speicherung der Adresse aktivieren',
+    'HELP_OSC_OSC_PAYPAL_GOOGLEPAY_ADRESS_ACTIVATE' => 'Übernahme der Lieferadresse von GooglePay',
+
+    'OSC_PAYPAL_INSTALLPROCESS_FAILED'              => 'Da das Modul nicht korrekt per Composer installiert ist, sind Fehler bei der (De-)Aktivierung des Moduls aufgetreten. Bitte installieren Sie das Modul via Composer frisch und wiederholen den Vorgang.',
 
     // PayPal Payment
     'OSC_PAYPAL_PAYMENT_DEPRECATED'                 => 'Diese PayPal Zahlungsart kann nicht mehr aktiviert werden, da diese demnächst entfernt wird!',
+
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE'           => 'PayPal Inhalte des benutzerdefinierten ID-Feldes',
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC'            => 'Das benutzerdefinierte PayPal-ID-Feld kann entweder nur den Bestellnummernwert oder ein JSON mit zusätzlichen Daten enthalten.',
 ];
