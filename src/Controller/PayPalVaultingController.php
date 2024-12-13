@@ -3,10 +3,9 @@
 namespace OxidSolutionCatalysts\PayPal\Controller;
 
 use OxidEsales\Eshop\Application\Controller\AccountController;
-use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
+use OxidSolutionCatalysts\PayPal\Traits\AccountControllerTrait;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
-use OxidEsales\Eshop\Core\Registry;
 
 /**
  * user account menu for saving paypal for purchase later (vaulting without purchase)
@@ -14,10 +13,11 @@ use OxidEsales\Eshop\Core\Registry;
 class PayPalVaultingController extends AccountController
 {
     use ServiceContainer;
+    use AccountControllerTrait;
 
     public function render()
     {
-        $this->_aViewData['vaultingUserId'] = $this->getViewConfig()->getUserIdForVaulting();
+        $this->_aViewData['vaultingUserId'] = $this->getUserIdForVaulting();
         $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
 
         if ($moduleSettings->isVaultingAllowedForPayPal()) {
@@ -25,19 +25,5 @@ class PayPalVaultingController extends AccountController
         }
 
         return parent::render();
-    }
-
-    public function deleteVaultedPayment()
-    {
-        $paymentTokenId = Registry::getRequest()->getRequestEscapedParameter("paymentTokenId");
-        $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();
-
-        if (!$vaultingService->deleteVaultedPayment($paymentTokenId)) {
-            Registry::getUtilsView()->addErrorToDisplay(
-                Registry::getLang()->translateString('OSC_PAYPAL_DELETE_FAILED'),
-                false,
-                true
-            );
-        }
     }
 }
