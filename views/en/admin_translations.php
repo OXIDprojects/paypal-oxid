@@ -276,4 +276,7 @@ return [
                                                         mean higher checkout conversion.',
 
     'OSC_PAYPAL_INSTALLPROCESS_FAILED'              => 'Because the module was not installed correctly via Composer, errors occurred during the (de)activation of the module. Please reinstall the module via composer and repeat the process.',
+
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE'           => 'PayPal custom id field contents',
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC'            => 'PayPal custom id field will be JSON encoded string with order number, shop version and the PayPal module version.',
 ];
