@@ -134,7 +134,6 @@ final class PayPalDefinitions
             'onlybrutto' => false,
             'buttonpayment' => false,
             'defaulton' => true,
-            'vaultingtype' => 'paypal'
         ],
         //Express PayPal
         self::EXPRESS_PAYPAL_PAYMENT_ID => [
@@ -156,7 +155,6 @@ final class PayPalDefinitions
             'onlybrutto' => false,
             'buttonpayment' => true,
             'defaulton' => true,
-            'vaultingtype' => 'paypal'
         ],
         self::PUI_PAYPAL_PAYMENT_ID => [
             'descriptions' => [

@@ -11,6 +11,7 @@ use Exception;
 use OxidEsales\Eshop\Core\Registry;
 use OxidSolutionCatalysts\PayPal\Service\LanguageLocaleMapper;
 use OxidSolutionCatalysts\PayPal\Service\Logger;
+use OxidSolutionCatalysts\PayPal\Service\Payment as PaymentService;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 
@@ -265,20 +266,17 @@ class ViewConfig extends ViewConfig_parent
 
     public function getUserIdForVaulting(): string
     {
-        if (!$this->getUser()) {
-            return "";
-        }
+        return oxNew(Config::class)->getUserIdForVaulting();
+    }
 
-        $payPalCustomerId = $this->getUser()->getFieldData("oscpaypalcustomerid");
+    public function isVaultingAllowedForPayPal(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isVaultingAllowedForPayPal();
+    }
 
-        if (!$payPalCustomerId) {
-            return "";
-        }
-
-        $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();
-        $response = $vaultingService->generateUserIdToken($payPalCustomerId);
-
-        return $response["id_token"];
+    public function isVaultingAllowedForACDC(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isVaultingAllowedForACDC();
     }
 
     /**

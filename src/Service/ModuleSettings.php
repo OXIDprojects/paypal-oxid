@@ -22,6 +22,7 @@ use OxidEsales\EshopCommunity\Internal\Transition\Utility\ContextInterface;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
 use OxidSolutionCatalysts\PayPal\Module;
+use OxidSolutionCatalysts\PayPal\Service\Payment as PaymentService;
 
 class ModuleSettings
 {
@@ -42,6 +43,20 @@ class ModuleSettings
      * @var bool
      */
     protected $payPalCheckoutExpressPaymentEnabled = null;
+
+    /**
+     * is Vaulting allowed for PayPal
+     *
+     * @var bool
+     */
+    protected $isVaultingAllowedForPayPal = null;
+
+    /**
+     * is Vaulting allowed for ACDC
+     *
+     * @var bool
+     */
+    protected $isVaultingAllowedForACDC = null;
 
     /**
      * Country Restriction for PayPal as comma seperated string
@@ -564,7 +579,7 @@ class ModuleSettings
      */
     public function isPayPalCheckoutExpressPaymentEnabled(): bool
     {
-        if ($this->payPalCheckoutExpressPaymentEnabled === null) {
+        if (is_null($this->payPalCheckoutExpressPaymentEnabled)) {
             $expressEnabled = false;
             $payment = oxNew(Payment::class);
             $payment->load(PayPalDefinitions::EXPRESS_PAYPAL_PAYMENT_ID);
@@ -580,6 +595,40 @@ class ModuleSettings
             $this->payPalCheckoutExpressPaymentEnabled = $expressEnabled;
         }
         return $this->payPalCheckoutExpressPaymentEnabled;
+    }
+
+    /** check if Vaulting is allowed for PayPal */
+    public function isVaultingAllowedForPayPal(): bool
+    {
+        if (is_null($this->isVaultingAllowedForPayPal)) {
+            $this->isVaultingAllowedForPayPal = $this->isVaultingAllowedForPayment(
+                PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID
+            );
+        }
+        return $this->isVaultingAllowedForPayPal;
+    }
+
+    /** check if Vaulting is allowed for ACDC */
+    public function isVaultingAllowedForACDC(): bool
+    {
+        if (is_null($this->isVaultingAllowedForACDC)) {
+            $this->isVaultingAllowedForACDC = $this->isVaultingAllowedForPayment(
+                PayPalDefinitions::ACDC_PAYPAL_PAYMENT_ID
+            );
+        }
+        return $this->isVaultingAllowedForACDC;
+    }
+
+    /** check if Vaulting is allowed for Payment-Method */
+    public function isVaultingAllowedForPayment(string $paymentId): bool
+    {
+        $payment = oxNew(Payment::class);
+        $payment->load($paymentId);
+        $paymentEnabled = (bool)$payment->oxpayments__oxactive->value;
+        $paymentType = PayPalDefinitions::getPayPalDefinitions()[$paymentId]["vaultingtype"];
+        return $paymentEnabled &&
+            $this->getIsVaultingActive() &&
+            PayPalDefinitions::isPayPalVaultingPossible($paymentId, $paymentType);
     }
 
     /**
