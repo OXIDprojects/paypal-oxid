@@ -281,8 +281,8 @@ $aLang = [
                                                         eine höhere Checkout-Conversion bedeuten.',
     'OSC_PAYPAL_GOOGLEPAY_TITLE'                    => 'Google Pay Adresse',
     'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'             => 'Pseudoversandkosten für PayPal Express',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'              => 'Die hier eingegebenen Pseudeversandkosten werden verwendet, wenn die Shopoption “Versandkosten auch dann berechnen, wenn der Kunde noch nicht eingeloggt ist” nicht aktiviert ist.',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC_EXTENDED'     => 'Wenn Sie anstelle der Pseudo-Versandkosten für noch nicht angemeldete Benutzer mit PayPal Express die standardmäßige Versandkostenberechnung verwenden möchten, aktivieren Sie die Option `Standardversandkosten berechnen, wenn Benutzer noch nicht angemeldet sind` in den Mastereinstellungen | Einstellungen-Tab | Abschnitt Sonstige Einstellungen.',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'              => 'PayPal Express benötigt für die Autorisierung des Warenkorbbetrages Versandkosten. Wenn ein Kunde sich im Shop weder eingeloggt noch seine Versandadresse angegeben hat, kann der Shop standardmäßig noch keine Versandkosten berechen. In den Shopeinstellungen (Stammdaten > Grundeinstellungen > Reiter Einstellungen > Abschnitt weitere Einstellungen) gibt es eine Option "Versandkosten auch dann berechnen, wenn der Kunde noch nicht eingeloggt ist". Damit kann OXID versuchen die Versandkosten für die Standardfälle zu ermitteln. Wenn man diese Option nicht nutzen möchte, besteht hier als letzte Möglichkeit Pseudoversandkosten zu hinterlegen. Die sollten Ihren meißt genutzten Versandkosten am nächsten kommen. Sobald sich der Kunde im Checkout befindet und seine Lieferadresse sowie seine gewünschte Versandart dem Shop bekannt sind, werden die tatsächlichen Versandkosten berechnet. Diese überschreiben alle vorher genutzten "Hilfs-"Versandkosten.',
+
     'OSC_PAYPAL_GOOGLEPAY_ADDRESS_ACTIVATE'         => 'Speicherung der Adresse aktivieren',
     'HELP_OSC_OSC_PAYPAL_GOOGLEPAY_ADRESS_ACTIVATE' => 'Übernahme der Lieferadresse von GooglePay',
 
