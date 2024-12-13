@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - add possibility to ignore cached tokens. It helps e.g. for webhook registration
 - use PayPal-Client v2.0.17
 
+### NEW
+
+- Custom id passed to PayPal as JSON with additional versioning data
+
 ## [2.5.1] - 2024-09-20
 
 ### FIX

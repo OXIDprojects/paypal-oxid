@@ -290,4 +290,7 @@ $aLang = [
 
     // PayPal Payment
     'OSC_PAYPAL_PAYMENT_DEPRECATED'                 => 'This PayPal payment method can no longer be activated as it will be removed soon!',
+
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE'           => 'PayPal custom id field contents',
+    'OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC'            => 'PayPal custom id field will be JSON encoded string with order number, shop version and the PayPal module version.',
 ];
