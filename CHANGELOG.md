@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - use PayPal-Client v2.0.17
 - [0007744](https://bugs.oxid-esales.com/view.php?id=7744): When using vouchers shop jumps back to payment selection
 - [0007745](https://bugs.oxid-esales.com/view.php?id=7745): Paypal checkout jumps back to step 2 with an error when an discount in relation to item value is used
+- [0007742](https://bugs.oxid-esales.com/view.php?id=7742): You get stuck in the checkout if the "Save payment method" option is activated for credit card payment
 
 ### NEW
 
