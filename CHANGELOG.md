@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Catch possible thrown Error by getting DataClientToken
 - [0007719](https://bugs.oxid-esales.com/view.php?id=7719): Tracking code also be stored in standard DB field for backwards compatibility
+- add possibility to ignore cached tokens. It helps e.g. for webhook registration
+- use PayPal-Client v2.0.17
 
 ## [2.5.1] - 2024-09-20
 
