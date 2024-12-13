@@ -3,6 +3,7 @@
 namespace OxidSolutionCatalysts\PayPal\Controller;
 
 use OxidEsales\Eshop\Application\Controller\AccountController;
+use OxidSolutionCatalysts\PayPal\Core\Config;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Traits\AccountControllerTrait;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
@@ -17,7 +18,7 @@ class PayPalVaultingCardController extends AccountController
 
     public function render()
     {
-        $this->_aViewData['vaultingUserId'] = $this->getUserIdForVaulting();
+        $this->_aViewData['vaultingUserId'] = oxNew(Config::class)->getUserIdForVaulting();
         $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
 
         if ($moduleSettings->isVaultingAllowedForACDC()) {

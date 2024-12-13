@@ -27,22 +27,4 @@ trait AccountControllerTrait
             );
         }
     }
-
-    public function getUserIdForVaulting(): string
-    {
-        if (!$this->getUser()) {
-            return "";
-        }
-
-        $payPalCustomerId = $this->getUser()->getFieldData("oscpaypalcustomerid");
-
-        if (!$payPalCustomerId) {
-            return "";
-        }
-
-        $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();
-        $response = $vaultingService->generateUserIdToken($payPalCustomerId);
-
-        return $response["id_token"] ?? "";
-    }
 }

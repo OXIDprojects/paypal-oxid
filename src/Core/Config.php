@@ -462,6 +462,21 @@ class Config
         return $this->getServiceFromContainer(ModuleSettings::class)->getIsVaultingActive();
     }
 
+    public function getUserIdForVaulting(): string
+    {
+        $user = Registry::getConfig()->getUser();
+        $payPalCustomerId = $user ? $user->getFieldData("oscpaypalcustomerid") : '';
+
+        if (!$payPalCustomerId) {
+            return "";
+        }
+
+        $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();
+        $response = $vaultingService->generateUserIdToken($payPalCustomerId);
+
+        return $response["id_token"] ?? "";
+    }
+
     public function getIsGooglePayDeliveryAdressActive(): bool
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->getIsGooglePayDeliveryAddressActive();

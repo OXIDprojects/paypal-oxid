@@ -264,6 +264,21 @@ class ViewConfig extends ViewConfig_parent
         return $showButton;
     }
 
+    public function getUserIdForVaulting(): string
+    {
+        return oxNew(Config::class)->getUserIdForVaulting();
+    }
+
+    public function isVaultingAllowedForPayPal(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isVaultingAllowedForPayPal();
+    }
+
+    public function isVaultingAllowedForACDC(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isVaultingAllowedForACDC();
+    }
+
     /**
      * get Session Vault Success
      *
