@@ -529,9 +529,6 @@
                                 <div class="controls">
                                         <input type="text" id="shippingExpress" class="form-control" name="conf[oscPayPalDefaultShippingPriceExpress]" value="[{$config->getDefaultShippingPriceForExpress()|string_format:"%.2f"}]" />
                                     <span class="help-block">[{oxmultilang ident="OSC_PAYPAL_EXPRESS_SHIPPING_DESC"}]</span>
-                                    <br>
-                                    <br>
-                                    <span class="help-block">[{oxmultilang ident="OSC_PAYPAL_EXPRESS_SHIPPING_DESC_EXTENDED"}]</span>
                                 </div>
                             </div>
                         </div>
