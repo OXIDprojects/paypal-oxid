@@ -272,7 +272,8 @@ $aLang = [
     'OSC_PAYPAL_STARTTIME_CLEANUP_ORDERS'           => 'Startzeit für automatisches Stornieren',
     'HELP_OSC_PAYPAL_STARTTIME_CLEANUP_ORDERS'      => 'Wie alt müssen nicht beendete Bestellungen sein, damit sie frühestens automatisch storniert werden (in Minuten)?',
     'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'             => 'Pseudoversandkosten für PayPal Express',
-    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'              => 'Die hier eingegebenen Pseudeversandkosten werden verwendet, wenn die Shopoption “Versandkosten auch dann berechnen, wenn der Kunde noch nicht eingeloggt ist” nicht aktiviert ist.',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'              => 'PayPal Express benötigt für die Autorisierung des Warenkorbbetrages Versandkosten. Wenn ein Kunde sich im Shop weder eingeloggt noch seine Versandadresse angegeben hat, kann der Shop standardmäßig noch keine Versandkosten berechen. In den Shopeinstellungen (Stammdaten > Grundeinstellungen > Reiter Einstellungen > Abschnitt weitere Einstellungen) gibt es eine Option "Versandkosten auch dann berechnen, wenn der Kunde noch nicht eingeloggt ist". Damit kann OXID versuchen die Versandkosten für die Standardfälle zu ermitteln. Wenn man diese Option nicht nutzen möchte, besteht hier als letzte Möglichkeit Pseudoversandkosten zu hinterlegen. Die sollten Ihren meißt genutzten Versandkosten am nächsten kommen. Sobald sich der Kunde im Checkout befindet und seine Lieferadresse sowie seine gewünschte Versandart dem Shop bekannt sind, werden die tatsächlichen Versandkosten berechnet. Diese überschreiben alle vorher genutzten "Hilfs-"Versandkosten.',
+
     'OSC_PAYPAL_ORDER_MAIN_TRACKCARRIER_COUNTRY'    => 'Versanddienstleister (Land)',
     'OSC_PAYPAL_ORDER_MAIN_TRACKCARRIER_PROVIDER'   => 'Versanddienstleister (Anbieter)',
     'OSC_PAYPAL_TRACKCARRIER_GLOBAL'                => 'weltweit',
