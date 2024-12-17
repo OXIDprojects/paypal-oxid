@@ -49,12 +49,12 @@ class OrderMain extends OrderMain_parent
      */
     public function save()
     {
-        $config = Registry::getConfig();
-        if ($config->getRequestParameter("sendorder")) {
+        $request = Registry::getRequest();
+        if ($request->getRequestParameter("sendorder")) {
             $this->sendOrder();
         }
-        $trackingCarrier = $config->getRequestParameter("paypaltrackingcarrier");
-        $trackingCode = $config->getRequestParameter("paypaltrackingcode");
+        $trackingCarrier = $request->getRequestParameter("paypaltrackingcarrier");
+        $trackingCode = $request->getRequestParameter("paypaltrackingcode");
         if ($trackingCarrier && $trackingCode) {
             $this->getOrder()->setPayPalTracking(
                 $trackingCarrier,
@@ -65,6 +65,9 @@ class OrderMain extends OrderMain_parent
         parent::save();
     }
 
+    /**
+     * @throws StandardException
+     */
     public function getPayPalTrackingCode(): string
     {
         return $this->getOrder()->getPayPalTrackingCode();
