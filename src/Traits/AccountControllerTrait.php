@@ -14,7 +14,7 @@ use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 
 trait AccountControllerTrait
 {
-    public function deleteVaultedPayment()
+    public function deleteVaultedPayment(): void
     {
         $paymentTokenId = Registry::getRequest()->getRequestEscapedParameter("paymentTokenId");
         $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();

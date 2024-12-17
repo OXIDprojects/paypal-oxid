@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\PayPal\Service;
 
 use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Application\Model\DeliverySetList;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Application\Model\User;
@@ -80,6 +81,9 @@ class ModuleSettings
     /** @var Logger */
     private $logger;
 
+    /** @var UserRepository */
+    private $userRepository;
+
     //TODO: we need service for fetching module settings from db (this one)
     //another class for moduleconfiguration (database values/edefaults)
     //and the view configuration should go into some separate class
@@ -89,12 +93,14 @@ class ModuleSettings
         ModuleSettingBridgeInterface $moduleSettingBridge,
         ContextInterface $context,
         ModuleConfigurationDaoBridgeInterface $moduleConfigurationDaoBridgeInterface,
-        Logger $logger
+        Logger $logger,
+        UserRepository $userRepository
     ) {
         $this->moduleSettingBridge = $moduleSettingBridge;
         $this->context = $context;
         $this->moduleConfigurationDaoBridgeInterface = $moduleConfigurationDaoBridgeInterface;
         $this->logger = $logger;
+        $this->userRepository = $userRepository;
     }
 
     public function showAllPayPalBanners(): bool
@@ -626,9 +632,34 @@ class ModuleSettings
         $payment->load($paymentId);
         $paymentEnabled = (bool)$payment->oxpayments__oxactive->value;
         $paymentType = PayPalDefinitions::getPayPalDefinitions()[$paymentId]["vaultingtype"];
+
+        $session =  Registry::getSession();
+        $actShipSet = $session->getVariable('sShipSet');
+        $basket = $session->getBasket();
+        $user = $session->getUser();
+        $payPalDefinitions = PayPalDefinitions::getPayPalDefinitions();
+        $actShopCurrency = Registry::getConfig()->getActShopCurrencyObject();
+        $userCountryIso = $this->userRepository->getUserCountryIso();
+
+        [, , $paymentList] =
+            Registry::get(DeliverySetList::class)->getDeliverySetData(
+                $actShipSet,
+                $user,
+                $basket
+            );
+
         return $paymentEnabled &&
             $this->getIsVaultingActive() &&
-            PayPalDefinitions::isPayPalVaultingPossible($paymentId, $paymentType);
+            PayPalDefinitions::isPayPalVaultingPossible($paymentId, $paymentType) &&
+            array_key_exists($paymentId, $paymentList) &&
+            (
+                empty($payPalDefinitions[$paymentId]['currencies']) ||
+                in_array($actShopCurrency->name, $payPalDefinitions[$paymentId]['currencies'], true)
+            ) &&
+            (
+                empty($payPalDefinitions[$paymentId]['countries']) ||
+                in_array($userCountryIso, $payPalDefinitions[$paymentId]['countries'], true)
+            );
     }
 
     /**
