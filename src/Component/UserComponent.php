@@ -7,9 +7,11 @@
 
 namespace OxidSolutionCatalysts\PayPal\Component;
 
+use OxidEsales\Eshop\Core\Exception\UserException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidSolutionCatalysts\PayPal\Core\Utils\PayPalAddressResponseToOxidAddress;
+use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order;
 
 /**
  * @mixin \OxidEsales\Eshop\Application\Component\UserComponent
@@ -42,7 +44,7 @@ class UserComponent extends UserComponent_parent
         return $return;
     }
 
-    public function createPayPalGuestUser(\OxidSolutionCatalysts\PayPalApi\Model\Orders\Order $response): void
+    public function createPayPalGuestUser(Order $response): void
     {
         $this->setParent(oxNew('Register'));
 
@@ -59,9 +61,11 @@ class UserComponent extends UserComponent_parent
     }
 
     /**
-     * @param \OxidSolutionCatalysts\PayPalApi\Model\Orders\Order $response
+     * @param Order $response
+     * @return bool
+     * @throws UserException
      */
-    public function loginPayPalCustomer(\OxidSolutionCatalysts\PayPalApi\Model\Orders\Order $response): bool
+    public function loginPayPalCustomer(Order $response): bool
     {
         $user = oxNew(User::class);
 
@@ -69,7 +73,7 @@ class UserComponent extends UserComponent_parent
             $loginSuccess = $user->login(
                 $response->payer->email_address,
                 '',
-                Registry::getConfig()->getRequestParameter('lgn_cook')
+                Registry::getRequest()->getRequestParameter('lgn_cook')
             )
         ) {
             $this->setLoginStatus(USER_LOGIN_SUCCESS);
