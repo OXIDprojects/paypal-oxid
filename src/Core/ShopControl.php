@@ -47,7 +47,7 @@ class ShopControl extends ShopControl_parent
 
     /**
      * @param Redirect $redirectException
-     * @param bool $blAddRedirectParam
+     * @param bool     $blAddRedirectParam
      */
     protected function handlePayPalRedirectException(Redirect $redirectException, bool $blAddRedirectParam = true): void
     {

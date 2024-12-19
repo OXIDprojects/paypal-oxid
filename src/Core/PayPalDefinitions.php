@@ -20,6 +20,16 @@ final class PayPalDefinitions
     public const GIROPAY_PAYPAL_PAYMENT_ID = 'oscpaypal_giropay';
     public const SEPA_PAYPAL_PAYMENT_ID = 'oscpaypal_sepa';
     public const CCALTERNATIVE_PAYPAL_PAYMENT_ID = 'oscpaypal_cc_alternative';
+    public const APPLEPAY_PAYPAL_PAYMENT_ID = 'oscpaypal_applepay';
+    public const GOOGLEPAY_PAYPAL_PAYMENT_ID = 'oscpaypal_googlepay';
+
+    //vaulting
+    public const PAYMENT_VAULTING = [
+        "store_in_vault" => "ON_SUCCESS",
+        "usage_type" => "MERCHANT",
+        "customer_type" => "CONSUMER",
+        "permit_multiple_payment_tokens" => true,
+    ];
 
     private const PAYMENT_CONSTRAINTS_PAYPAL = [
         'oxfromamount' => 0.01,
@@ -59,6 +69,51 @@ final class PayPalDefinitions
             'constraints' => self::PAYMENT_CONSTRAINTS_PAYPAL,
             'onlybrutto' => false,
             'buttonpayment' => false,
+            'defaulton' => true,
+            'vaultingtype' => 'paypal'
+        ],
+        //GooglePay
+        self::APPLEPAY_PAYPAL_PAYMENT_ID => [
+            'descriptions' => [
+                'de' => [
+                    'desc' => 'ApplePay',
+                    'longdesc' => '',
+                    'longdesc_beta' => 'Bezahlen Sie bequem mit ApplePay. Starten Sie direkt von der Detailsseite oder im Warenkorb.'
+                ],
+                'en' => [
+                    'desc' => 'ApplePay',
+                    'longdesc' => '',
+                    'longdesc_beta' => 'Pay conveniently with ApplePay. Start directly from the details page or in the shopping cart.'
+                ]
+            ],
+            'countries' => [],
+            'currencies' => ['AUD', 'BRL', 'CAD', 'CNY', 'CZK', 'DKK', 'EUR', 'HKD', 'HUF', 'ILS', 'JPY', 'MYR', 'MXN', 'TWD', 'NZD', 'NOK', 'PHP', 'PLN', 'GBP', 'RUB', 'SGD', 'SEK', 'CHF', 'THB', 'USD'],
+            'uapmpaymentsource' => 'apple_pay',
+            'constraints' => self::PAYMENT_CONSTRAINTS_PAYPAL,
+            'onlybrutto' => false,
+            'buttonpayment' => false,
+            'defaulton' => true
+        ],
+        //GooglePay
+        self::GOOGLEPAY_PAYPAL_PAYMENT_ID => [
+            'descriptions' => [
+                'de' => [
+                    'desc' => 'GooglePay',
+                    'longdesc' => '',
+                    'longdesc_beta' => 'Bezahlen Sie bequem mit GooglePay. Starten Sie direkt von der Detailsseite oder im Warenkorb.'
+                ],
+                'en' => [
+                    'desc' => 'GooglePay',
+                    'longdesc' => '',
+                    'longdesc_beta' => 'Pay conveniently with GooglePay. Start directly from the details page or in the shopping cart.'
+                ]
+            ],
+            'countries' => [],
+            'currencies' => ['AUD', 'BRL', 'CAD', 'CNY', 'CZK', 'DKK', 'EUR', 'HKD', 'HUF', 'ILS', 'JPY', 'MYR', 'MXN', 'TWD', 'NZD', 'NOK', 'PHP', 'PLN', 'GBP', 'RUB', 'SGD', 'SEK', 'CHF', 'THB', 'USD'],
+            'uapmpaymentsource' => 'googlepay',
+            'constraints' => self::PAYMENT_CONSTRAINTS_PAYPAL,
+            'onlybrutto' => false,
+            'buttonpayment' => false,
             'defaulton' => true
         ],
         //Paylater PayPal
@@ -80,7 +135,8 @@ final class PayPalDefinitions
             'constraints' => self::PAYMENT_CONSTRAINTS_PAYPAL,
             'onlybrutto' => false,
             'buttonpayment' => false,
-            'defaulton' => true
+            'defaulton' => true,
+            'vaultingtype' => 'paypal'
         ],
         //Express PayPal
         self::EXPRESS_PAYPAL_PAYMENT_ID => [
@@ -101,7 +157,8 @@ final class PayPalDefinitions
             'constraints' => self::PAYMENT_CONSTRAINTS_PAYPAL,
             'onlybrutto' => false,
             'buttonpayment' => true,
-            'defaulton' => true
+            'defaulton' => true,
+            'vaultingtype' => 'paypal'
         ],
         self::PUI_PAYPAL_PAYMENT_ID => [
             'descriptions' => [
@@ -189,7 +246,8 @@ final class PayPalDefinitions
             'constraints' => self::PAYMENT_CONSTRAINTS_PAYPAL,
             'onlybrutto' => false,
             'buttonpayment' => false,
-            'defaulton' => true
+            'defaulton' => true,
+            'vaultingtype' => 'card'
         ],
         // uAPM Bancontact
         'oscpaypal_bancontact' => [
@@ -449,15 +507,23 @@ final class PayPalDefinitions
         return (isset(self::PAYPAL_DEFINTIONS[$paymentId]));
     }
 
+    public static function isPayPalVaultingPossible(string $paymentId, string $paypalPaymentType): bool
+    {
+        return (
+            isset(self::PAYPAL_DEFINTIONS[$paymentId]['vaultingtype'])
+            && self::PAYPAL_DEFINTIONS[$paymentId]['vaultingtype'] === $paypalPaymentType
+        );
+    }
+
     /**
      * Check if payment is deprecated
      *
-     * @param string $paymentId
+     * @param  string $paymentId
      * @return bool
      */
     public static function isDeprecatedPayment(string $paymentId): bool
     {
-        if ( isset(self::PAYPAL_DEFINTIONS[$paymentId]['deprecated']) && self::PAYPAL_DEFINTIONS[$paymentId]['deprecated'] === true ) {
+        if (isset(self::PAYPAL_DEFINTIONS[$paymentId]['deprecated']) && self::PAYPAL_DEFINTIONS[$paymentId]['deprecated'] === true) {
             return true;
         }
         return false;

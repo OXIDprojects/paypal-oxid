@@ -21,9 +21,9 @@ class PriceToMoney
 
     /**
      * @param Price | double $price
-     * @param int $mode sets which price value to use with BRUTTO_MODE or NETTO_MODE constants.
-     * If not set uses the mode set in the price object.
-     * @param stdClass $currency currency object. If not set uses the active shop currency.
+     * @param int            $mode     sets which price value to use with BRUTTO_MODE or NETTO_MODE constants.
+     *                                 If not set uses the mode set in the price object.
+     * @param stdClass       $currency currency object. If not set uses the active shop currency.
      *
      * @return Money
      */

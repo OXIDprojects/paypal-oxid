@@ -20,10 +20,14 @@ use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInt
 
 class OrderRepository
 {
-    /** @var QueryBuilderFactoryInterface */
+    /**
+     * @var QueryBuilderFactoryInterface
+     */
     private $queryBuilderFactory;
 
-    /** @var EshopCoreConfig */
+    /**
+     * @var EshopCoreConfig
+     */
     private $config;
 
     public function __construct(
@@ -114,7 +118,9 @@ class OrderRepository
 
     public function getPayPalOrderIdByShopOrderId(string $shopOrderId): string
     {
-        /** @var QueryBuilder $queryBuilder */
+        /**
+ * @var QueryBuilder $queryBuilder
+*/
         $queryBuilder = $this->queryBuilderFactory->create();
 
         $parameters = [
@@ -142,7 +148,6 @@ class OrderRepository
         $sessiontime = (int)$this->config->getConfigParam('oscPayPalStartTimeCleanUpOrders');
         $shopId = $this->config->getShopId();
 
-        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->queryBuilderFactory->create();
 
         $parameters = [
@@ -156,23 +161,23 @@ class OrderRepository
             ->from('oxorder')
             ->where('oxtransstatus = :oxtransstatus')
             ->andWhere('oxshopid = :oxshopid')
-            ->andWhere($queryBuilder->expr()->like(
-                'oxpaymenttype',
-                $queryBuilder->expr()->literal('%' . $parameters['oxpaymenttype'] . '%')
-            ))
-            ->andWhere('oxorderdate + interval :sessiontime MINUTE > now()');
+            ->andWhere(
+                $queryBuilder->expr()->like(
+                    'oxpaymenttype',
+                    $queryBuilder->expr()->literal('%' . $parameters['oxpaymenttype'] . '%')
+                )
+            )
+            ->andWhere('oxorderdate < now() - interval :sessiontime MINUTE');
 
         $ids = $queryBuilder->setParameters($parameters)
             ->execute()
-            ->fetchAll(PDO::FETCH_COLUMN);
+            ->fetchAllAssociative();
 
         foreach ($ids as $id) {
             $order = oxNew(EshopModelOrder::class);
-            if ($order->load($id)) {
+            if ($order->load($id['oxid'])) {
                 // storno
                 $order->cancelOrder();
-                // delete
-                $order->delete();
             }
         }
     }
@@ -183,7 +188,9 @@ class OrderRepository
         string $payPalTransactionId = '',
         string $payPalTransactionType = ''
     ): string {
-        /** @var QueryBuilder $queryBuilder */
+        /**
+ * @var QueryBuilder $queryBuilder
+*/
         $queryBuilder = $this->queryBuilderFactory->create();
 
         $parameters = [
@@ -226,7 +233,9 @@ class OrderRepository
 
     private function getShopOrderIdByPaypalOrderId(string $paypalOrderId): string
     {
-        /** @var QueryBuilder $queryBuilder */
+        /**
+ * @var QueryBuilder $queryBuilder
+*/
         $queryBuilder = $this->queryBuilderFactory->create();
 
         $parameters = [
@@ -248,7 +257,9 @@ class OrderRepository
 
     private function getShopOrderIdByPaypalTransactionId(string $paypalTransactionId): string
     {
-        /** @var QueryBuilder $queryBuilder */
+        /**
+ * @var QueryBuilder $queryBuilder
+*/
         $queryBuilder = $this->queryBuilderFactory->create();
 
         $parameters = [

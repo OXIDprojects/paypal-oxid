@@ -1,12 +1,8 @@
-.paypal-button-or {
-    padding: 10px;
+.google-pay-loading-container {
+    float: right;
+    margin-right: calc(50%);
 }
-.paypal-button-wrapper {
-    width: 100%;
-    &.large {
-        max-width: 250px;
-    }
-    &.small {
-        max-width: 200px;
-    }
+
+#oscpaypal_googlepay {
+    float: right;
 }

@@ -122,14 +122,14 @@ class PayPalPlusPui extends \OxidEsales\Eshop\Core\Model\BaseModel
     }
 
         /**
-     * Load entry by a field name and value.
-     * Used for loading by `OXORDERID`, `OXSALEID` and `OXPAYMENTID`.
-     *
-     * @param string $sFieldName
-     * @param string $sFieldValue
-     *
-     * @return bool
-     */
+         * Load entry by a field name and value.
+         * Used for loading by `OXORDERID`, `OXSALEID` and `OXPAYMENTID`.
+         *
+         * @param string $sFieldName
+         * @param string $sFieldValue
+         *
+         * @return bool
+         */
     protected function _loadBy($sFieldName, $sFieldValue)
     {
         if (!in_array($sFieldName, ['OXREFERENCENUMBER', 'OXPAYMENTID'])) {

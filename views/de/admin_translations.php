@@ -5,7 +5,11 @@
  * See LICENSE file for license details.
  */
 
-return [
+use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
+
+$sLangName = 'Deutsch';
+
+$aLang = [
     'charset'                                     => 'UTF-8',
     'paypal'                                      => 'PayPal',
     'tbclorder_oscpaypal'                         => 'PayPal Checkout',
@@ -47,11 +51,11 @@ return [
         besteht die Möglichkeit, sich durch ein Login bei PayPal auch automatisch im Shop anzumelden. Möglicherweise ist dieses Verhalten nicht im
         Sicherheitsinteresse Ihrer Kunden',
 
-    'HELP_OSC_PAYPAL_CREDENTIALS_PART1'           => 'Tragen Sie die API-Anmeldeinformationen (Client-ID, Client Passwort,
-         Webhook-ID) nur dann per Hand ein, wenn Sie auf die Zahlarten "Kreditkarte" und "Kauf auf Rechnung" nicht benötigen und in der Lage sind einen Webhook im PayPal-
+    'HELP_OSC_PAYPAL_CREDENTIALS_PART1'           => 'Bitte nutzen Sie für die Anmeldung und die Freischaltung neuer Features den eingeblendeten "PayPal Integration"-Button. Während der Integration werden durch PayPal die Zahlarten "Kreditkarte",
+         "Kauf auf Rechnung", "ApplePay" und "GooglePay" freigeschaltet, sowie der Webhook automatisch registriert.',
+    'HELP_OSC_PAYPAL_CREDENTIALS_PART2'           => 'Tragen Sie die API-Anmeldeinformationen (Client-ID, Client Passwort,
+         Webhook-ID) nur dann per Hand ein, wenn Sie die o.g. Zahlarten nicht benötigen und in der Lage sind einen Webhook im PayPal-
          Backend selbst zu konfigurieren.',
-    'HELP_OSC_PAYPAL_CREDENTIALS_PART2'           => 'Bitte nutzen Sie für die Anmeldung den eingeblendeten "PayPal Integration"-Button. Während der Integration werden durch PayPal die Zahlarten "Kreditkarte"
-         und "Kauf auf Rechnung" freigeschaltet, sowie der Webhook automatisch registriert.',
     'HELP_OSC_PAYPAL_CLIENT_ID'                   => 'Client-ID des Live-Account für Live-Modus',
     'HELP_OSC_PAYPAL_CLIENT_SECRET'               => 'Passwort des Live-Account für Live-Modus. Bitte geben Sie das Passwort zweimal ein.',
     'HELP_OSC_PAYPAL_MERCHANT_ID'                 => 'Merchant-ID des Live-Account für Live-Modus',
@@ -68,8 +72,13 @@ return [
     'OSC_PAYPAL_SPECIAL_PAYMENTS'                 => 'Freischaltung für besondere Zahlarten erfolgt',
     'OSC_PAYPAL_SPECIAL_PAYMENTS_PUI'             => 'Rechnungskauf',
     'OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC'            => 'Kreditkarte',
-    'OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC_FALLBACK'   => '(Alternativ zur fehlenden Zahlart wird ein zusätzlicher Button "Kreditkarte" unter den Paypal-Buttons angezeigt.)',
+    'OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC_FALLBACK'   => '<em>- Alternativ können Sie die Zahlart "PayPal Kreditkarte Fallback" (id: "' . PayPalDefinitions::CCALTERNATIVE_PAYPAL_PAYMENT_ID . '") aktivieren und nutzen. Bitte verwenden Sie für diesen Falback-Fall einen passenden Namen für diese Zahlart.</em>',
+
     'OSC_PAYPAL_SPECIAL_PAYMENTS_VAULTING'        => 'Vaulting',
+    'OSC_PAYPAL_SPECIAL_PAYMENTS_APPLEPAY'        => 'Applepay',
+
+    'OSC_PAYPAL_SPECIAL_PAYMENTS_VAULTING'        => 'Vaulting',
+    'OSC_PAYPAL_SPECIAL_PAYMENTS_GOOGLEPAY'       => 'GooglePay',
 
     'OSC_PAYPAL_LOCALISATIONS'                    => 'Spracheinstellungen',
     'OSC_PAYPAL_LOCALES'                          => 'regionale Spracheinstellungen',
@@ -274,6 +283,14 @@ return [
     'HELP_OSC_PAYPAL_VAULTING_ACTIVATE_VAULTING'    => 'Wiederholungskäufe leicht gemacht: Mit PayPal können Sie die bevorzugten Zahlarten Ihrer Kund:innen sicher speichern und so eine schnelle und einfache
                                                         Kaufabwicklung ermöglichen. Mit ihren gespeicherten Zahlungsdaten können Kund:innen mit nur wenigen Klicks Wiederholungskäufe tätigen. Dies kann für Sie
                                                         eine höhere Checkout-Conversion bedeuten.',
+    'OSC_PAYPAL_GOOGLEPAY_TITLE'                     => 'Google Pay Adresse',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_TITLE'              => 'Pseudoversandkosten für PayPal Express',
+    'OSC_PAYPAL_EXPRESS_SHIPPING_DESC'               => 'Die hier eingegebenen Pseudeversandkosten werden verwendet, wenn die Shopoption “Versandkosten auch dann berechnen, wenn der Kunde noch nicht eingeloggt ist” nicht aktiviert ist.',
+    'OSC_PAYPAL_GOOGLEPAY_ADDRESS_ACTIVATE'          => 'Speicherung der Adresse aktivieren',
+    'HELP_OSC_OSC_PAYPAL_GOOGLEPAY_ADRESS_ACTIVATE'  => 'Übernahme der Lieferadresse von GooglePay',
 
     'OSC_PAYPAL_INSTALLPROCESS_FAILED'               => 'Da das Modul nicht korrekt per Composer installiert ist, sind Fehler bei der (De-)Aktivierung des Moduls aufgetreten. Bitte installieren Sie das Modul via Composer frisch und wiederholen den Vorgang.',
+
+    // PayPal Payment
+    'OSC_PAYPAL_PAYMENT_DEPRECATED'                 => 'Diese PayPal Zahlungsart kann nicht mehr aktiviert werden, da diese demnächst entfernt wird!',
 ];

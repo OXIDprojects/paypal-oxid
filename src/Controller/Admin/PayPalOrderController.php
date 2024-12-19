@@ -11,6 +11,7 @@ use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Registry;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Model\PayPalOrder as PayPalModelPayPalOrder;
@@ -117,34 +118,38 @@ class PayPalOrderController extends AdminDetailsController
         if ($order->paidWithPayPal()) {
             // normal paypal order
             try {
-                /** @var PayPalOrder $paypalOrder */
+                /**
+ * @var PayPalOrder $paypalOrder
+*/
                 $paypalOrder = $this->getPayPalCheckoutOrder();
                 $this->addTplParam('payPalOrder', $paypalOrder);
 
-                /** @var ?Capture $capture */
+                /**
+ * @var ?Capture $capture
+*/
                 $capture = $order->getOrderPaymentCapture();
                 $this->addTplParam('capture', $capture);
                 $transactionId = $capture ? $capture->id : '';
 
-                /** @var \OxidSolutionCatalysts\PayPal\Model\PayPalOrder $paypalOrderModel */
+                /**
+ * @var \OxidSolutionCatalysts\PayPal\Model\PayPalOrder $paypalOrderModel
+*/
                 $paypalOrderModel = $this->getServiceFromContainer(OrderRepository::class)
                     ->paypalOrderByOrderIdAndPayPalId($orderId, $paypalOrder->id, $transactionId);
                 $this->addTplParam('payPalOrderDetails', $paypalOrderModel);
 
                 //TODO: refactor, this is workaround if webhook failed to update information
                 if (
-                    $capture &&
+                    $capture
+                    &&
                     (
+                        (ApiOrderModel::STATUS_SAVED === $paypalOrderModel->getStatus()
+                            && Capture::STATUS_COMPLETED === $capture->status)
+                        ||
                         (
-                            ApiOrderModel::STATUS_SAVED === $paypalOrderModel->getStatus() &&
-                            Capture::STATUS_COMPLETED === $capture->status
-                        ) ||
-                        (
-                            Capture::STATUS_COMPLETED === $paypalOrderModel->getStatus() &&
-                            (
-                                Capture::STATUS_REFUNDED === $capture->status ||
-                                Capture::STATUS_PARTIALLY_REFUNDED === $capture->status
-                            )
+                            Capture::STATUS_COMPLETED === $paypalOrderModel->getStatus()
+                            && (Capture::STATUS_REFUNDED === $capture->status
+                                || Capture::STATUS_PARTIALLY_REFUNDED === $capture->status)
                         )
                     )
                 ) {
@@ -155,8 +160,8 @@ class PayPalOrderController extends AdminDetailsController
                 $this->addTplParam('error', $lang->translateString('OSC_PAYPAL_ERROR_' . $exception->getErrorIssue()));
             }
         } elseif (
-            $order->getFieldData('oxpaymenttype') == $this->payPalPlusPaymentType &&
-            !$order->tableExitsForPayPalPlus()
+            $order->getFieldData('oxpaymenttype') == $this->payPalPlusPaymentType
+            && !$order->tableExitsForPayPalPlus()
         ) {
             $this->addTplParam('error', $lang->translateString('OSC_PAYPAL_PAYPALPLUS_TABLE_DOES_NOT_EXISTS'));
         } elseif ($order->paidWithPayPalPlus()) {
@@ -164,8 +169,8 @@ class PayPalOrderController extends AdminDetailsController
             $this->addTplParam('payPalOrder', $this->getPayPalPlusOrder());
             $result = "@osc_paypal/admin/oscpaypalorder_ppplus";
         } elseif (
-            $order->getFieldData('oxpaymenttype') == $this->payPalSoapPaymentType &&
-            !$order->tableExitsForPayPalSoap()
+            $order->getFieldData('oxpaymenttype') == $this->payPalSoapPaymentType
+            && !$order->tableExitsForPayPalSoap()
         ) {
             $this->addTplParam('error', $lang->translateString('OSC_PAYPAL_PAYPALSOAP_TABLE_DOES_NOT_EXISTS'));
         } elseif ($order->paidWithPayPalSoap()) {
@@ -194,7 +199,9 @@ class PayPalOrderController extends AdminDetailsController
         $refundAll = $request->getRequestEscapedParameter('refundAll');
         $noteToPayer = $request->getRequestEscapedParameter('noteToPayer');
 
-        /** @var Order $order */
+        /**
+ * @var Order $order
+*/
         $order = $this->getOrder();
 
         $capture = $order->getOrderPaymentCapture();
@@ -208,19 +215,27 @@ class PayPalOrderController extends AdminDetailsController
                 $request->amount->value = $refundAmount;
             }
 
-            /** @var Payments $paymentService */
+            /**
+ * @var Payments $paymentService
+*/
             $apiPaymentService = Registry::get(ServiceFactory::class)->getPaymentService();
 
-            /** @var OrderRepository $orderRepository */
+            /**
+ * @var OrderRepository $orderRepository
+*/
             $orderRepository = $this->getServiceFromContainer(OrderRepository::class);
-            /** @var PayPalModelPayPalOrder $payPalOrder */
+            /**
+ * @var PayPalModelPayPalOrder $payPalOrder
+*/
             $payPalOrder = $orderRepository->paypalOrderByOrderIdAndPayPalId(
                 $order->getId(),
                 '',
                 $order->getFieldData('oxtransid')
             );
 
-            /** @var Refund $refund */
+            /**
+ * @var Refund $refund
+*/
             $refund = $apiPaymentService->refundCapturedPayment(
                 $capture->id,
                 $request,
@@ -228,7 +243,9 @@ class PayPalOrderController extends AdminDetailsController
                 Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
             );
 
-            /** @var PaymentService $paymentService */
+            /**
+ * @var PaymentService $paymentService
+*/
             $paymentService = $this->getServiceFromContainer(PaymentService::class);
             $paymentService->trackPayPalOrder(
                 $order->getId(),

@@ -26,7 +26,7 @@ class PaymentCaptureRefundedHandler extends WebhookHandlerBase
 
     /**
      * @inheritDoc
-     * @throws ApiException
+     * @throws     ApiException
      */
     public function handle(Event $event): void
     {
@@ -35,7 +35,9 @@ class PaymentCaptureRefundedHandler extends WebhookHandlerBase
         //NOTE: it is the capture (transaction) id, not the order we get from up link
         $transactionId = $this->getPayPalOrderIdFromResource($eventPayload);
 
-        /** @var EshopModelOrder $order */
+        /**
+ * @var EshopModelOrder $order
+*/
         $order = $this->getOrderByPayPalTransactionId($transactionId);
 
         //track the refund
@@ -101,7 +103,9 @@ class PaymentCaptureRefundedHandler extends WebhookHandlerBase
     protected function getOrderByPayPalTransactionId(string $captureId): EshopModelOrder
     {
         try {
-            /** @var EshopModelOrder $order */
+            /**
+ * @var EshopModelOrder $order
+*/
             $order = $this->getOrderRepository()
                 ->getShopOrderByPayPalTransactionId($captureId);
         } catch (NotFound $exception) {
@@ -114,7 +118,9 @@ class PaymentCaptureRefundedHandler extends WebhookHandlerBase
     protected function getPayPalOrderIdByShopOrderId(string $shopOrderId): string
     {
         try {
-            /** @var EshopModelOrder $order */
+            /**
+ * @var EshopModelOrder $order
+*/
             $orderId = $this->getOrderRepository()
                 ->getPayPalOrderIdByShopOrderId($shopOrderId);
         } catch (NotFound $exception) {

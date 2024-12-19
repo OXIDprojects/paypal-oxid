@@ -22,7 +22,9 @@ class IdentityService extends BaseService
 
         $path = '/v1/identity/generate-token';
 
-        /** @var ResponseInterface $response */
+        /**
+ * @var ResponseInterface $response
+*/
         $response = $this->send('POST', $path, [], $headers);
         $body = $response->getBody();
 

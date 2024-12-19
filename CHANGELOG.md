@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - use central logger like in v2 Branch
 - mark GiroPay as deprecated
 - [0007161](https://bugs.oxid-esales.com/view.php?id=7161): Removing payment method deactivation during module deactivation. Merchants must now do this themselves
+- add GooglePay payment method for oxid 7 version
 
 
 ## [3.3.4] - 2024-01-26
@@ -60,6 +61,78 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [3.3.2] - 2023-11-17
 
 - first Version for OXID7 with APEX-Theme as Twig-Frontend-Standard-Theme, without Smarty-Support
+
+## [2.5.2] - 2024-??-??
+
+### FIX
+
+- Catch possible thrown Error by getting DataClientToken
+- [0007719](https://bugs.oxid-esales.com/view.php?id=7719): Tracking code also be stored in standard DB field for backwards compatibility
+
+## [2.5.1] - 2024-09-20
+
+### FIX
+
+- [0007161](https://bugs.oxid-esales.com/view.php?id=7161): Removing payment method deactivation during module deactivation. Merchants must now do this themselves
+- [0007584](https://bugs.oxid-esales.com/view.php?id=7584): Provide additional oxrights-elements for PayPal-Express, ApplePay and GooglePay-Buttons
+- [0007706](https://bugs.oxid-esales.com/view.php?id=7706): If Customer change the invoice-address on last page in checkout and use this address as deliveryaddress (checkbox invoiceaddress as deliveryaddress), then this changed address would be transferred to PayPal
+- [0007711](https://bugs.oxid-esales.com/view.php?id=7711): Temporary orders that are no longer needed and already have an order number will be cancelled. Temporary orders without an order number will still be deleted
+- [0007713](https://bugs.oxid-esales.com/view.php?id=7713): Correct SQL for select temporary Orders
+- provide correct encoded Shopname to PayPal
+- Fix order of closing brackets in applepay-template
+- Temporary orders that are no longer needed and already have an order number will be cancelled. Temporary orders without an order number will still be deleted
+- Provide BN codes even to previously overlooked API calls
+- Fix PHP7.3 Compatibility-Issues (remove functionalities that comes with later PHP-Versions)
+
+## [2.5.0] - 2024-08-16
+
+### FIX
+
+- Fix admin block parent call, thanks to Alpha-Sys
+- Fix Errorlog-Message "Duplicate entry ..." + fix Update send PUI-Bankdata via Webhook
+- Fix PayPalExpress Reauth is necessary if the cart amount (total is greater than before) has changed during the checkout process
+- Fix, don't show vaulting-Boxes if it is deactivated in Backend
+- [0007656](https://bugs.oxid-esales.com/view.php?id=7656): Fix incompatibility with Klarna-Module
+- better Vaulting-Check in PaymentController
+- disable Vaulting-Setting if Vaulting not possible
+- [0007666](https://bugs.oxid-esales.com/view.php?id=7666): Fix: Price surcharges on the detail page for selection lists are not taken into account
+- disable Vaulting-Option of Creditcard if Creditcard are not eligible
+- Automatically save Apple Pay certificates during the Apple Pay eligibility check
+- [0007681](https://bugs.oxid-esales.com/view.php?id=7681): fix OXID Logger.ERROR: Call to a member function getFieldData() on bool
+- [0007675](https://bugs.oxid-esales.com/view.php?id=7675): fix the possibility to finish order without redirect and login to Paypal
+- [0007676](https://bugs.oxid-esales.com/view.php?id=7676): If we have a corrupted generated_services.yaml and try to deactivate the module via the admin, we will display a more understandable error message about what happened.
+- introduce ActionHash to make the PayPal-Request-ID more unique
+- [0007695](https://bugs.oxid-esales.com/view.php?id=7695): Fix: if DeliverySet is set in Frontend, then do not add any PseudoDeliveryCosts for PPExpress
+
+### NEW
+- PayPal-Request-Id based on serialized body, no extra PayPal-Request-Id necessary anymore
+- Introduce GooglePay-Payment
+- Introduce ApplePay-Payment
+- use PayPal-Client v2.0.15
+- add Default-Shippingcosts for PP-Express to prevent overcharge.
+- mark GiroPay as deprecated
+
+## [2.4.0] - 2024-04-04
+
+### FIX
+- [0007588](https://bugs.oxid-esales.com/view.php?id=7588): Improve Error handling for Capture Order Requests (thanks to mount7)
+- remove Sofort and MyBank, Paymentmethods will soon no longer be accepted via PayPal
+- fix: Refund only with note to Buyer (required)
+- [0007595](https://bugs.oxid-esales.com/view.php?id=7595): : Fix PayPal Checkout substract discount from coupon series again, if 'Show net prices in frontend (B2B)' is active
+- use PayPal-Request-Id for every api-call
+- use PayPal-Client v2.0.12
+
+### NEW
+- PayPal Vaulting https://developer.paypal.com/braintree/docs/guides/paypal/checkout-with-vault/
+
+## [2.3.4] - 2024-01-26
+
+- Transfer OXID-Ordernumber to PayPal
+- PayPal-Log consider Shop-ErrorLogLevel
+- Composer-Installation now via packagist.
+  - https://packagist.org/packages/oxid-solution-catalysts/paypal-module
+  - https://packagist.org/packages/oxid-solution-catalysts/paypal-client
+-  "Repositories"-requirement for Source https://paypal-module.packages.oxid-esales.com/ not need anymore
 
 ## [2.3.3] - 2023-11-16
 

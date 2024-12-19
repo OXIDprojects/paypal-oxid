@@ -11,6 +11,7 @@ namespace OxidSolutionCatalysts\PayPal\Service;
 
 use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ModuleConfigurationDaoBridgeInterface;
@@ -49,19 +50,29 @@ class ModuleSettings
      */
     protected $countryRestrictionForPayPalExpress = null;
 
-    /** @var ModuleSettingBridgeInterface */
+    /**
+     * @var ModuleSettingBridgeInterface
+     */
     private $moduleSettingBridge;
 
-    /** @var ModuleConfigurationDaoBridgeInterface */
+    /**
+     * @var ModuleConfigurationDaoBridgeInterface
+     */
     private $moduleConfigurationDaoBridgeInterface;
 
-    /** @var ModuleConfiguration */
+    /**
+     * @var ModuleConfiguration
+     */
     private $moduleConfiguration = null;
 
-    /** @var ContextInterface */
+    /**
+     * @var ContextInterface
+     */
     private $context;
 
-    /** @var Logger */
+    /**
+     * @var Logger
+     */
     private $logger;
 
     //TODO: we need service for fetching module settings from db (this one)
@@ -158,6 +169,13 @@ class ModuleSettings
             $this->isLivePuiEligibility();
     }
 
+    public function isVaultingEligibility(): bool
+    {
+        return $this->isSandbox() ?
+            $this->isSandBoxVaultingEligibility() :
+            $this->isLiveVaultingEligibility();
+    }
+
     public function getLiveClientId(): string
     {
         return (string)$this->getSettingValue('oscPayPalClientId');
@@ -249,14 +267,14 @@ class ModuleSettings
     {
         return (string)$this->getSettingValue('oscPayPalBannersStartPageSelector');
     }
+    public function getDefaultShippingPriceForExpress(): string
+    {
+        return (string)$this->getSettingValue('oscPayPalDefaultShippingPriceExpress');
+    }
 
     public function showBannersOnCategoryPage(): bool
     {
         return (bool)$this->getSettingValue('oscPayPalBannersCategoryPage');
-    }
-    public function getDefaultShippingPriceForExpress(): string
-    {
-        return (string)$this->getSettingValue('oscPayPalDefaultShippingPriceExpress');
     }
     public function getCategoryPageBannerSelector(): string
     {
@@ -342,10 +360,27 @@ class ModuleSettings
     {
         return (bool)$this->getSettingValue('oscPayPalVaultingEligibility');
     }
-
+    public function isLiveApplePayEligibility(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalApplePayEligibility');
+    }
+    public function isLiveGooglePayEligibility(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalGooglePayEligibility');
+    }
+    public function isGooglePayEligibility(): bool
+    {
+        return $this->isSandbox() ?
+            $this->isSandboxGooglePayEligibility() :
+            $this->isLiveGooglePayEligibility();
+    }
     public function isSandboxAcdcEligibility(): bool
     {
         return (bool)$this->getSettingValue('oscPayPalSandboxAcdcEligibility');
+    }
+    public function isSandboxApplePayEligibility(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalSandboxApplePayEligibility');
     }
 
     public function isSandboxPuiEligibility(): bool
@@ -357,10 +392,51 @@ class ModuleSettings
     {
         return (bool)$this->getSettingValue('oscPayPalSandboxVaultingEligibility');
     }
-
-    public function getIsVaultingActive(): bool
+    public function isSandboxGooglePayEligibility(): bool
     {
-        return (bool)$this->getSettingValue('oscPayPalSetVaulting');
+        return (bool)$this->getSettingValue('oscPayPalSandboxGooglePayEligibility');
+    }
+
+    public function getActivePayments(): array
+    {
+        /**
+ * @var array|null $activePayments
+*/
+        $activePayments = $this->getSettingValue('oscPayPalActivePayments');
+        return $activePayments ?: [];
+    }
+
+    public function getShopName(): string
+    {
+        $value = '';
+        /**
+ * @var Shop $shop
+*/
+        $shop = Registry::getConfig()->getActiveShop();
+        if (isset($shop->oxshops__oxname->rawValue)) {
+            $value = $shop->oxshops__oxname->rawValue;
+        } elseif (isset($shop->oxshops__oxname->value)) {
+            $value = $shop->oxshops__oxname->value;
+        }
+        return $value;
+
+        // method "getRawFieldData" available only with shop v6.5+
+        //return Registry::getConfig()->getActiveShop()->getRawFieldData('oxname');
+    }
+
+    public function getInfoEMail(): string
+    {
+        $value = '';
+        /**
+ * @var Shop $shop
+*/
+        $shop = Registry::getConfig()->getActiveShop();
+        if (isset($shop->oxshops__oxinfoemail->rawValue)) {
+            $value = $shop->oxshops__oxinfoemail->rawValue;
+        } elseif (isset($shop->oxshops__oxinfoemail->value)) {
+            $value = $shop->oxshops__oxinfoemail->value;
+        }
+        return $value;
     }
 
     /**
@@ -375,9 +451,10 @@ class ModuleSettings
 
         if ($moduleSetting->getType() === 'str') {
             $value = trim($value);
-        }
-        if ($moduleSetting->getType() === 'bool') {
+        } else if ($moduleSetting->getType() === 'bool') {
             $value = (bool)$value;
+        } else if ($moduleSetting->getType() === 'float') {
+            $value = (float)trim($value);
         }
 
         $this->moduleSettingBridge->save($name, $value, Module::MODULE_ID);
@@ -448,6 +525,22 @@ class ModuleSettings
         }
     }
 
+    public function saveVaultingEligibility(bool $eligibility): void
+    {
+        if ($this->isSandbox()) {
+            $this->save('oscPayPalSandboxVaultingEligibility', $eligibility);
+        } else {
+            $this->save('oscPayPalVaultingEligibility', $eligibility);
+        }
+    }
+    public function saveApplePayEligibility(bool $eligibility): void
+    {
+        if ($this->isSandbox()) {
+            $this->save('oscPayPalSandboxApplePayEligibility', $eligibility);
+        } else {
+            $this->save('oscPayPalApplePayEligibility', $eligibility);
+        }
+    }
     public function saveWebhookId(string $webhookId): void
     {
         if ($this->isSandbox()) {
@@ -457,6 +550,14 @@ class ModuleSettings
         }
     }
 
+    public function saveGooglePayEligibility(bool $isGooglePayEligibility): void
+    {
+        if ($this->isSandbox()) {
+            $this->save('oscPayPalSandboxGooglePayEligibility', $isGooglePayEligibility);
+        } else {
+            $this->save('oscPayPalGooglePayEligibility', $isGooglePayEligibility);
+        }
+    }
     /**
      * add details controller to requireSession
      */
@@ -471,6 +572,7 @@ class ModuleSettings
 
     /**
      * This setting indicates whether settings from the legacy modules have been transferred.
+     *
      * @return bool
      */
     public function getLegacySettingsTransferStatus(): bool
@@ -499,21 +601,6 @@ class ModuleSettings
             $this->payPalCheckoutExpressPaymentEnabled = $expressEnabled;
         }
         return $this->payPalCheckoutExpressPaymentEnabled;
-    }
-
-    /**
-     * Checks and return true if price view mode is netto
-     *
-     * @return bool
-     */
-    public function isPriceViewModeNetto(): bool
-    {
-        $result = (bool)Registry::getConfig()->getConfigParam('blShowNetPrice');
-        $user = oxNew(User::class);
-        if ($user->loadActiveUser()) {
-            $result = $user->isPriceViewModeNetto();
-        }
-        return $result;
     }
 
     /**
@@ -552,6 +639,15 @@ class ModuleSettings
     {
         $value = (string)$this->getSettingValue('oscPayPalSCAContingency');
         return $value === Constants::PAYPAL_SCA_DISABLED;
+    }
+
+    public function getIsVaultingActive(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalSetVaulting');
+    }
+    public function getIsGooglePayDeliveryAddressActive(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalUseGooglePayAddress');
     }
 
     /**

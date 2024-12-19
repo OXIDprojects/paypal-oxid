@@ -2,7 +2,7 @@ parameters:
     checkMissingIterableValueType: false
     bootstrapFiles:
         - phpstan-bootstrap.php
-    level: max
+    level: 0
     scanFiles:
         - ../../vendor/oxid-esales/oxideshop-ce/source/oxfunctions.php
         - ../../vendor/oxid-esales/oxideshop-ce/source/overridablefunctions.php

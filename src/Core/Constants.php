@@ -12,7 +12,8 @@ namespace OxidSolutionCatalysts\PayPal\Core;
 class Constants
 {
     public const PAYPAL_JS_SDK_URL = 'https://www.paypal.com/sdk/js';
-    public const PAYPAL_INTEGRATION_DATE = '2020-07-29';
+    public const PAYPAL_SANDBOX_JS_SDK_URL = 'https://www.sandbox.paypal.com/sdk/js';
+    public const PAYPAL_INTEGRATION_DATE = '2024-04-26';
     public const PAYPAL_ORDER_INTENT_CAPTURE = 'CAPTURE';
     public const PAYPAL_ORDER_INTENT_AUTHORIZE = 'AUTHORIZE';
     public const SESSION_CHECKOUT_ORDER_ID = 'paypal-checkout-session';
@@ -26,6 +27,12 @@ class Constants
 
     public const PAYPAL_ONBOARDING_SANDBOX_URL = 'https://www.sandbox.paypal.com/bizsignup/partner/entry';
     public const PAYPAL_ONBOARDING_LIVE_URL = 'https://www.paypal.com/bizsignup/partner/entry';
+
+    public const PAYPAL_APPLEPAYCERT_SANDBOX_URL =
+        'https://paypalobjects.com/devdoc/apple-pay/sandbox/apple-developer-merchantid-domain-association';
+
+    public const PAYPAL_APPLEPAYCERT_LIVE_URL =
+        'https://paypalobjects.com/devdoc/apple-pay/well-known/apple-developer-merchantid-domain-association';
 
     public const PAYPAL_PUI_PROCESSING_INSTRUCTIONS = 'ORDER_COMPLETE_ON_PAYMENT_APPROVAL';
     public const PAYPAL_PUI_FNPARAMS = 'fnparams-dede7cc5-15fd-4c75-a9f4-36c430ee3a99';

@@ -111,10 +111,14 @@ class Events
         */
 
         try {
-            /** @var ContainerInterface $container */
+            /**
+ * @var ContainerInterface $container
+*/
             $container = ContainerFactory::getInstance()
                 ->getContainer();
-            /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+            /**
+ * @var QueryBuilderFactoryInterface $queryBuilderFactory
+*/
             $queryBuilderFactory = $container->get(QueryBuilderFactoryInterface::class);
             $moduleSettings = self::getModuleSettingsService();
 
@@ -142,16 +146,26 @@ class Events
         */
 
         try {
-            /** @var ContainerInterface $container */
+            /**
+ * @var ContainerInterface $container
+*/
             $container = ContainerFactory::getInstance()
                 ->getContainer();
-            /** @var ModuleSettingBridgeInterface $moduleSettingsBridge */
+            /**
+ * @var ModuleSettingBridgeInterface $moduleSettingsBridge
+*/
             $moduleSettingsBridge = $container->get(ModuleSettingBridgeInterface::class);
-            /** @var ContextInterface $context */
+            /**
+ * @var ContextInterface $context
+*/
             $context = $container->get(ContextInterface::class);
-            /** @var ModuleConfigurationDaoBridgeInterface $moduleConfigurationDaoBridgeInterface */
+            /**
+ * @var ModuleConfigurationDaoBridgeInterface $moduleConfigurationDaoBridgeInterface
+*/
             $moduleConfigurationDaoBridgeInterface = $container->get(ModuleConfigurationDaoBridgeInterface::class);
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $container->get(Logger::class);
 
             return new ModuleSettings(

@@ -149,29 +149,29 @@ class Basket extends Basket_parent
 
     /**
      * Collects all basket discounts (basket, payment and vouchers)
-     * and returns sum of collected discounts brut value.
+     * and returns sum of collected discounts value.
      */
     public function getPayPalCheckoutDiscount(): float
     {
         $config = Registry::getConfig();
-        $netMode = $config->getConfigParam('blShowNetPrice');
+        $netMode = $this->isCalculationModeNetto();
         $defaultVAT = $config->getConfigParam('dDefaultVAT');
         $discount = 0.0;
 
         $totalDiscount = $this->getTotalDiscount();
 
         if ($totalDiscount) {
-            $discount += $totalDiscount->getBruttoPrice();
+            $discount += $netMode ? $totalDiscount->getNettoPrice() : $totalDiscount->getBruttoPrice();
         }
 
         //vouchers
-        $vouchers = (array)$this->getVouchers();
+        $vouchers = $this->getVouchers();
         foreach ($vouchers as $voucher) {
             $voucherPrice = oxNew(Price::class);
             $voucherPrice->setNettoMode($netMode);
             $voucherPrice->setPrice($voucher->dVoucherdiscount, (float)$defaultVAT);
 
-            $discount += $voucherPrice->getBruttoPrice();
+            $discount += $netMode ? $voucherPrice->getNettoPrice() : $voucherPrice->getBruttoPrice();
         }
 
         return $discount;
@@ -213,7 +213,8 @@ class Basket extends Basket_parent
 
     /**
      * Check if variants of the given product are already in the basket
-     * @param \OxidEsales\Eshop\Application\Model\Article $product
+     *
+     * @param  \OxidEsales\Eshop\Application\Model\Article $product
      * @return bool
      */
     public function hasProductVariantInBasket(\OxidEsales\Eshop\Application\Model\Article $product)
@@ -233,6 +234,7 @@ class Basket extends Basket_parent
 
     /**
      * add a ShippingPrice for PPExpress if it is not defined before to prevent overcharge.
+     *
      * @param float $defaultShippingPriceExpress
      */
     public function addShippingPriceForExpress(float $defaultShippingPriceExpress): void
@@ -248,7 +250,6 @@ class Basket extends Basket_parent
      *  - Wrapping-Costs
      *  - Gift-Cards
      *  - Payment-Costs
-     *  - Delivery-Costs
      */
     public function getAdditionalPayPalCheckoutItemCosts(): float
     {
@@ -256,7 +257,6 @@ class Basket extends Basket_parent
         $result += $this->getPayPalCheckoutWrapping();
         $result += $this->getPayPalCheckoutGiftCard();
         $result += $this->getPayPalCheckoutPayment();
-        $result += $this->getPayPalCheckoutDeliveryCosts();
 
         return $result;
     }

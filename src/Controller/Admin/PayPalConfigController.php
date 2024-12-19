@@ -61,11 +61,14 @@ class PayPalConfigController extends AdminController
     /**
      * Template Getter: Get a Link for SignUp the Live Merchant Integration
      * see getSignUpMerchantIntegrationLink
+     *
      * @return string
      */
     public function getLiveSignUpMerchantIntegrationLink(): string
     {
-        /** @var PartnerConfig $partnerConfig */
+        /**
+ * @var PartnerConfig $partnerConfig
+*/
         $partnerConfig = oxNew(PartnerConfig::class);
 
         return $this->buildSignUpLink(
@@ -79,11 +82,14 @@ class PayPalConfigController extends AdminController
     /**
      * Template Getter: Get a Link for SignUp the Live Merchant Integration
      * see getSignUpMerchantIntegrationLink
+     *
      * @return string
      */
     public function getSandboxSignUpMerchantIntegrationLink(): string
     {
-        /** @var PartnerConfig $partnerConfig */
+        /**
+ * @var PartnerConfig $partnerConfig
+*/
         $partnerConfig = oxNew(PartnerConfig::class);
 
         return $this->buildSignUpLink(
@@ -125,11 +131,12 @@ class PayPalConfigController extends AdminController
             'partnerId' => $partnerId,
             'partnerLogoUrl' => $partnerLogoUrl,
             'returnToPartnerUrl' => $returnToPartnerUrl,
-            'product' => 'ppcp',
-            'secondaryProducts' => 'payment_methods',
-            'capabilities' => 'PAY_UPON_INVOICE',
+            'product' => 'PPCP',
+            'secondaryProducts' => 'advanced_vaulting,payment_methods',
+            'capabilities' => 'GOOGLE_PAY,APPLE_PAY,PAY_UPON_INVOICE,PAYPAL_WALLET_VAULTING_ADVANCED',
             'integrationType' => 'FO',
-            'features' => 'PAYMENT,REFUND,ACCESS_MERCHANT_INFORMATION,ADVANCED_TRANSACTIONS_SEARCH',
+            'features' =>
+                'PAYMENT,REFUND,ACCESS_MERCHANT_INFORMATION,ADVANCED_TRANSACTIONS_SEARCH,VAULT,BILLING_AGREEMENT',
             'country.x' => $countryCode,
             'locale.x' => $localeCode,
             'sellerNonce' => $this->createNonce(),
@@ -152,7 +159,9 @@ class PayPalConfigController extends AdminController
             return $session->getVariable('PAYPAL_MODULE_NONCE');
         }
 
-        /** @var PartnerConfig $partnerConfig */
+        /**
+ * @var PartnerConfig $partnerConfig
+*/
         $partnerConfig = oxNew(PartnerConfig::class);
         $nonce = $partnerConfig->createNonce();
 
@@ -171,7 +180,7 @@ class PayPalConfigController extends AdminController
 
         $confArr = $this->handleSpecialFields($confArr);
         $this->saveConfig($confArr);
-        $this->checkEligibility();
+        $this->checkEligibility($confArr);
         parent::save();
     }
 
@@ -190,16 +199,19 @@ class PayPalConfigController extends AdminController
     /**
      * check Eligibility if config would be changed
      *
+     * @param  $confArr array
      * @throws OnboardingException
      */
-    protected function checkEligibility(): void
+    protected function checkEligibility(array $confArr): void
     {
         $config = new Config();
-        /** skip check if no client ID provided */
+        /**
+ * skip check if no client ID provided
+*/
         if (
-            $config->getClientId() === '' ||
-            $config->getMerchantId() === '' ||
-            $config->getWebhookId() === ''
+            $config->getClientId() === ''
+            || $config->getMerchantId() === ''
+            || $config->getWebhookId() === ''
         ) {
             return;
         }
@@ -219,9 +231,11 @@ class PayPalConfigController extends AdminController
                     $moduleSettings->save('oscPayPalSetVaulting', false);
                 }
             }
-        } catch (ClientException|ApiException $exception) {
+        } catch (ClientException | ApiException $exception) {
 
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', 'Error on checkEligibility', [$exception]);
         }
@@ -280,7 +294,18 @@ class PayPalConfigController extends AdminController
             $dAmount = (float) str_replace(',', '.', $conf['oscPayPalDefaultShippingPriceExpress']);
             $conf['oscPayPalDefaultShippingPriceExpress'] = $dAmount;
         }
-
+        if (!isset($conf['oscPayPalSetVaulting'])) {
+            $conf['oscPayPalSetVaulting'] = false;
+        }
+        if (!isset($conf['oscPayPalUseGooglePayAddress'])) {
+            $conf['oscPayPalUseGooglePayAddress'] = false;
+        }
+        if (!isset($conf['oscPayPalDefaultShippingPriceExpress'])) {
+            $conf['oscPayPalDefaultShippingPriceExpress'] = false;
+        } else {
+            $dAmount = (string) str_replace(',', '.', $conf['oscPayPalDefaultShippingPriceExpress']);
+            $conf['oscPayPalDefaultShippingPriceExpress'] = $dAmount;
+        }
         return $conf;
     }
 
@@ -300,6 +325,7 @@ class PayPalConfigController extends AdminController
 
     /**
      * Template variable getter,  check whether legacy oepaypal module exists and show button when config value is false
+     *
      * @return bool
      */
     public function showTransferLegacySettingsButton(): bool
@@ -359,6 +385,7 @@ class PayPalConfigController extends AdminController
 
     /**
      * Get ClientID, ClientSecret, WebhookID
+     *
      * @throws JsonException
      */
     public function autoConfigurationFromCallback()
@@ -367,7 +394,9 @@ class PayPalConfigController extends AdminController
             $requestReader = oxNew(RequestReader::class);
             PayPalSession::storeOnboardingPayload($requestReader->getRawPost());
         } catch (\Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
         }
@@ -384,15 +413,15 @@ class PayPalConfigController extends AdminController
         $onboardingFile = $config->getOnboardingBlockCacheFileName();
         if (file_exists($onboardingFile) === false) {
             $request = Registry::getRequest();
-            if (
-                ('true' === (string)$request->getRequestParameter('permissionsGranted')) &&
-                ('true' === (string)$request->getRequestParameter('consentStatus'))
-            ) {
-                /** @var ModuleSettings $moduleSettings */
+
+            if ($merchantId = (string)$request->getRequestParameter('merchantIdInPayPal')) {
+                /**
+ * @var ModuleSettings $moduleSettings
+*/
                 $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
                 $isSandbox = (string)$request->getRequestParameter('isSandbox');
                 $isSandbox = $isSandbox === '1';
-                $moduleSettings->saveMerchantId($request->getRequestParameter('merchantIdInPayPal'), $isSandbox);
+                $moduleSettings->saveMerchantId($merchantId, $isSandbox);
             }
 
             $this->autoConfiguration();
@@ -414,11 +443,15 @@ class PayPalConfigController extends AdminController
         $credentials = [];
 
         try {
-            /** @var Onboarding $handler */
+            /**
+ * @var Onboarding $handler
+*/
             $handler = oxNew(Onboarding::class);
             $credentials = $handler->autoConfigurationFromCallback();
         } catch (\Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
         }
@@ -433,13 +466,17 @@ class PayPalConfigController extends AdminController
         $webhookId = '';
 
         try {
-            /** @var Webhook $handler */
+            /**
+ * @var Webhook $handler
+*/
             $handler = oxNew(Webhook::class);
             $webhookId = $handler->ensureWebhook();
         } catch (OnboardingException $exception) {
             Registry::getUtilsView()->addErrorToDisplay($exception->getMessage());
         } catch (\Exception $exception) {
-            /** @var Logger $logger */
+            /**
+ * @var Logger $logger
+*/
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
         }

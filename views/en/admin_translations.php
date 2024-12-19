@@ -5,7 +5,11 @@
  * See LICENSE file for license details.
  */
 
-return [
+use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
+
+$sLangName = 'English';
+
+$aLang = [
     'charset'                                     => 'UTF-8',
     'paypal'                                      => 'PayPal',
     'tbclorder_oscpaypal'                         => 'PayPal Checkout',
@@ -47,10 +51,10 @@ return [
         it is possible to be autonmatically be logged in to shop when logging in to PayPal. This behavior may not be in the
         security interests of your customers',
 
-    'HELP_OSC_PAYPAL_CREDENTIALS_PART1'           => 'Enter the API login information (client ID, client password, Webhook ID)
-         only if you do not need the "credit card" and "Pay upon Invoice" payment methods and are able to set up a webhook in the PayPal backend by yourself.',
-    'HELP_OSC_PAYPAL_CREDENTIALS_PART2'           => 'Please use the "PayPal integration"-button that appears to register. During the integration, PayPal will activate the "credit card"
-         and "Pay upon Invoice" payment methods and the webhook is automatically registered.',
+    'HELP_OSC_PAYPAL_CREDENTIALS_PART1'           => 'Please use the “PayPal Integration” button displayed to register and activate new features. During the integration, PayPal activates
+        the payment methods "credit card", "Pay upon Invoice", "ApplePay" and "GooglePay" and automatically registers the webhook.',
+    'HELP_OSC_PAYPAL_CREDENTIALS_PART2'           => 'Enter the API credentials (client ID, client password, Webhook ID) only if you do not need the above payment methods and are able
+        to configure a webhook in the PayPal backend yourself.',
     'HELP_OSC_PAYPAL_CLIENT_ID'                   => 'Client ID for live mode.',
     'HELP_OSC_PAYPAL_CLIENT_SECRET'               => 'Secret for live mode. Please enter the password twice.',
     'HELP_OSC_PAYPAL_MERCHANT_ID'                 => 'Merchant ID for live mode.',
@@ -67,8 +71,14 @@ return [
     'OSC_PAYPAL_SPECIAL_PAYMENTS'                 => 'Activation for special payment methods has taken place',
     'OSC_PAYPAL_SPECIAL_PAYMENTS_PUI'             => 'Pay upon Invoice',
     'OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC'            => 'Creditcard',
-    'OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC_FALLBACK'   => '(As an alternative to the missing payment method, an additional "credit card" button is displayed under the Paypal buttons.)',
+    'OSC_PAYPAL_SPECIAL_PAYMENTS_ACDC_FALLBACK'   => '<em>- Alternatively, you can activate and use the payment method "PayPal Credit Card Fallback" (id: "' . PayPalDefinitions::CCALTERNATIVE_PAYPAL_PAYMENT_ID . '"). Please use a suitable name for this payment method in this fallback case.</em>',
+
+
     'OSC_PAYPAL_SPECIAL_PAYMENTS_VAULTING'        => 'Vaulting',
+    'OSC_PAYPAL_SPECIAL_PAYMENTS_APPLEPAY'        => 'Applepay',
+
+    'OSC_PAYPAL_SPECIAL_PAYMENTS_VAULTING'        => 'Vaulting',
+    'OSC_PAYPAL_SPECIAL_PAYMENTS_GOOGLEPAY'       => 'GooglePay',
 
     'OSC_PAYPAL_LOCALISATIONS'                    => 'Locals',
     'OSC_PAYPAL_LOCALES'                          => 'regional language settings',
@@ -274,9 +284,15 @@ return [
     'HELP_OSC_PAYPAL_VAULTING_ACTIVATE_VAULTING'    => 'Repeat purchases made easy: With PayPal you can securely store your customers preferred payment methods, making it quick and easy
                                                         Enable purchase processing. With their saved payment details, customers can make repeat purchases with just a few clicks. This can be for you
                                                         mean higher checkout conversion.',
+    'OSC_PAYPAL_GOOGLEPAY_TITLE'                     => 'Google Pay address',
+    'OSC_PAYPAL_GOOGLEPAY_ADDRESS_ACTIVATE'           => 'Google Pay address active',
+    'HELP_OSC_OSC_PAYPAL_GOOGLEPAY_ADRESS_ACTIVATE'     => 'Takeover delivery address from googlepay',
 
     'OSC_PAYPAL_INSTALLPROCESS_FAILED'              => 'Because the module was not installed correctly via Composer, errors occurred during the (de)activation of the module. Please reinstall the module via composer and repeat the process.',
 
     'OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE'           => 'PayPal custom id field contents',
     'OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC'            => 'PayPal custom id field will be JSON encoded string with order number, shop version and the PayPal module version.',
+
+    // PayPal Payment
+    'OSC_PAYPAL_PAYMENT_DEPRECATED'                 => 'This PayPal payment method can no longer be activated as it will be removed soon!',
 ];

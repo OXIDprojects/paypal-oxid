@@ -12,7 +12,11 @@
                 (className == 'basket' and oViewConf.showPayPalBasketButton())
             )
         %}
-            <script src="{{ oViewConf.getPayPalJsSdkUrl()|raw }}" data-partner-attribution-id="{{ oViewConf.getPayPalPartnerAttributionIdForBanner() }}"></script>
+            <script src="{{ oViewConf.getBaseDir() }}/out/modules/osc_paypal/js/paypal-frontend.min.js?v=1"></script>
+            <script src="{{ oViewConf.getPayPalJsSdkUrl()|raw }}"
+                    data-partner-attribution-id="{{ oViewConf.getPayPalPartnerAttributionIdForBanner() }}"
+                    onload="window.OxidPayPal.onSDKLoaded()"
+            ></script>
             {% set sCountryRestriction = oViewConf.getCountryRestrictionForPayPalExpress() %}
             {% if sCountryRestriction %}
                 <script>
@@ -36,7 +40,5 @@
 
 {% block base_style %}
     {{ parent() }}
-    {% if oViewConf.isPayPalCheckoutActive() %}
-        {{ style({ include: oViewConf.getModuleUrl('osc_paypal', 'css/paypal.min.css') }) }}
-    {% endif %}
+    {{ style({ include: oViewConf.getModuleUrl('osc_paypal', 'css/paypal.css') }) }}
 {% endblock %}

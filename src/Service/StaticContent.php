@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\PayPal\Service;
 
+use OxidEsales\Eshop\Core\Registry;
 use PDO;
 use Doctrine\DBAL\Query\QueryBuilder;
 use OxidEsales\Eshop\Core\Registry as EshopRegistry;
@@ -22,7 +23,9 @@ use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInt
 //NOTE: later we will do this on module installation, for now on first activation
 class StaticContent
 {
-    /** @var QueryBuilderFactoryInterface */
+    /**
+     * @var QueryBuilderFactoryInterface
+     */
     private $queryBuilderFactory;
 
     public function __construct(
@@ -72,7 +75,9 @@ class StaticContent
 
     protected function createPaymentMethod(string $paymentId, array $definitions): void
     {
-        /** @var EshopModelPayment $paymentModel */
+        /**
+ * @var EshopModelPayment $paymentModel
+*/
         $paymentModel = oxNew(EshopModelPayment::class);
         $paymentModel->setId($paymentId);
 
@@ -103,14 +108,33 @@ class StaticContent
         }
     }
 
+    protected function reActivatePaymentMethod(string $paymentId): void
+    {
+        $activePayments = Registry::get(ModuleSettings::class)->getActivePayments();
+        if (!in_array($paymentId, $activePayments, true)) {
+            return;
+        }
+
+        /**
+         * @var EshopModelPayment $paymentModel
+         */
+        $paymentModel = oxNew(EshopModelPayment::class);
+        $paymentModel->load($paymentId);
+
+        $paymentModel->oxpayments__oxactive = new Field(true);
+
+        $paymentModel->save();
+    }
+
     /**
      * Try to load payment model based on given id an set payment inactive
      *
-     * @param string $paymentId
+     * @param  string $paymentId
      * @return void
      * @throws \Exception
      */
-    protected function deactivatePaymentMethod(string $paymentId) : void {
+    protected function deactivatePaymentMethod(string $paymentId): void
+    {
         $paymentModel = oxNew(EshopModelPayment::class);
         if ($paymentModel->load($paymentId)) {
             $paymentModel->oxpayments__oxactive = new Field(false);
@@ -162,7 +186,9 @@ class StaticContent
 
     protected function getActiveDeliverySetIds(): array
     {
-        /** @var QueryBuilder $queryBuilder */
+        /**
+ * @var QueryBuilder $queryBuilder
+*/
         $queryBuilder = $this->queryBuilderFactory->create();
         $fromDb = $queryBuilder
             ->select('oxid')

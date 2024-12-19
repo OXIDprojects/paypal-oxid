@@ -8,6 +8,8 @@
 namespace OxidSolutionCatalysts\PayPal\Controller;
 
 use OxidEsales\Eshop\Core\Registry;
+use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
+use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Exception\PayPalException;
 use OxidSolutionCatalysts\PayPal\Service\Payment as PaymentService;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
@@ -21,6 +23,8 @@ class PaymentController extends PaymentController_parent
 
     public function render()
     {
+        $lang = Registry::getLang();
+
         $paymentService = $this->getServiceFromContainer(PaymentService::class);
         if ($paymentService->isOrderExecutionInProgress()) {
             //order execution is already in progress
@@ -31,13 +35,83 @@ class PaymentController extends PaymentController_parent
         }
 
         if (
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID ||
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::PAYLATER_PAYPAL_PAYMENT_ID
+            $paymentService->getSessionPaymentId() === PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID
+            || $paymentService->getSessionPaymentId() === PayPalDefinitions::PAYLATER_PAYPAL_PAYMENT_ID
         ) {
             $paymentService->removeTemporaryOrder();
         }
 
+        $user = $this->getUser();
+
+        if ($user) {
+            $isVaultingPossible = false;
+            $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
+            if ($moduleSettings->getIsVaultingActive() && $user->getFieldData('oxpassword')) {
+                $isVaultingPossible = true;
+            }
+
+            $this->addTplParam('oscpaypal_isVaultingPossible', $isVaultingPossible);
+
+            if (
+                $isVaultingPossible
+                && ($paypalCustomerId = $user->getFieldData("oscpaypalcustomerid"))
+            ) {
+                $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();
+                $vaultedPaymentTokens = $vaultingService->getVaultPaymentTokens($paypalCustomerId)["payment_tokens"];
+                if ($vaultedPaymentTokens) {
+                    $vaultedPaymentSources = [];
+                    foreach ($vaultedPaymentTokens as $vaultedPaymentToken) {
+                        foreach ($vaultedPaymentToken["payment_source"] as $paymentType => $paymentSource) {
+                            if (!$this->paymentTypeExists($paymentType)) {
+                                continue;
+                            }
+                            if ($paymentType === "card") {
+                                $string = $lang->translateString("OSC_PAYPAL_CARD_ENDING_IN");
+                                $vaultedPaymentSources[$paymentType][] = $paymentSource["brand"] . " " .
+                                    $string . $paymentSource["last_digits"];
+                            } elseif ($paymentType === "paypal") {
+                                $string = $lang->translateString("OSC_PAYPAL_CARD_PAYPAL_PAYMENT");
+                                $vaultedPaymentSources[$paymentType][] =
+                                    $string . " " . $paymentSource["email_address"];
+                            }
+                        }
+                    }
+
+                    $this->addTplParam("vaultedPaymentSources", $vaultedPaymentSources);
+                }
+            }
+        }
+
+        //reset vaulting session var
+        Registry::getSession()->deleteVariable("selectedVaultPaymentSourceIndex");
+
         return parent::render();
+    }
+
+    /**
+     * @param  $paymentList
+     * @param  $paymentType
+     * @return bool
+     */
+    protected function paymentTypeExists($paymentType): bool
+    {
+        $paymentList = $this->getPaymentList();
+        foreach ($paymentList as $payment) {
+            if (PayPalDefinitions::isPayPalVaultingPossible($payment->getId(), $paymentType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function getPayPalPuiFraudnetCmId(): string
+    {
+
+        if (!($cmId = PayPalSession::getPayPalPuiCmId())) {
+            $cmId = Registry::getUtilsObject()->generateUId();
+            PayPalSession::storePayPalPuiCmId($cmId);
+        }
+        return $cmId;
     }
 
     /**
@@ -56,6 +130,8 @@ class PaymentController extends PaymentController_parent
         $paymentListRaw = $paymentList;
         $paymentList = [];
         $payPalHealth = $this->getServiceFromContainer(ModuleSettings::class)->checkHealth();
+        $basket = Registry::getSession()->getBasket();
+        $isCalculationModeNetto = $basket ? $basket->isCalculationModeNetto() : false;
 
         /*
          * check:
@@ -69,26 +145,16 @@ class PaymentController extends PaymentController_parent
 
         foreach ($paymentListRaw as $key => $payment) {
             if (
-                !isset($payPalDefinitions[$key]) ||
-                (
-                    $payPalHealth &&
-                    // don't add payment that is deprecated
-                    ( !PayPalDefinitions::isDeprecatedPayment($payment->getId()) ) &&
-                    (
-                        empty($payPalDefinitions[$key]['currencies']) ||
-                        in_array($actShopCurrency->name, $payPalDefinitions[$key]['currencies'], true)
-                    ) &&
-                    (
-                        empty($payPalDefinitions[$key]['countries']) ||
-                        in_array($userCountryIso, $payPalDefinitions[$key]['countries'], true)
-                    ) &&
-                    (
-                        $payPalDefinitions[$key]['onlybrutto'] === false ||
-                        (
-                        !$this->getServiceFromContainer(ModuleSettings::class)->isPriceViewModeNetto()
-                        )
-                    )
-                )
+                !isset($payPalDefinitions[$key])
+                || (                $payPalHealth
+                // don't add payment that is deprecated
+                && ( !PayPalDefinitions::isDeprecatedPayment($payment->getId()) )
+                && (                empty($payPalDefinitions[$key]['currencies'])
+                || in_array($actShopCurrency->name, $payPalDefinitions[$key]['currencies'], true)                )
+                && (                empty($payPalDefinitions[$key]['countries'])
+                || in_array($userCountryIso, $payPalDefinitions[$key]['countries'], true)                )
+                && (                $payPalDefinitions[$key]['onlybrutto'] === false
+                || (                !$isCalculationModeNetto                )                ))
             ) {
                 $paymentList[$key] = $payment;
             }
@@ -110,23 +176,30 @@ class PaymentController extends PaymentController_parent
     /**
      * @inheritDoc
      * @SuppressWarnings(PHPMD.StaticAccess)
-     * @return  mixed
-     * @throws PayPalException
+     * @return                               mixed
+     * @throws                               PayPalException
      */
     public function validatePayment()
     {
+        $request = Registry::getRequest();
         $paymentService = $this->getServiceFromContainer(PaymentService::class);
         $actualPaymentId = $paymentService->getSessionPaymentId();
-        $newPaymentId = Registry::getRequest()->getRequestParameter('paymentid');
+        $newPaymentId = $request->getRequestParameter('paymentid');
 
         // remove the possible exist paypal-payment, if we choose another
         if (
-            $actualPaymentId &&
-            $actualPaymentId !== $newPaymentId &&
-            PayPalDefinitions::isPayPalPayment($actualPaymentId)
+            $actualPaymentId
+            && $actualPaymentId !== $newPaymentId
+            && PayPalDefinitions::isPayPalPayment($actualPaymentId)
         ) {
             $paymentService->removeTemporaryOrder();
         }
+
+        //if a vaulted payment was used, store its index in the session for using it in the next step
+        if (!is_null($paymentSourceIndex = $request->getRequestParameter("vaultingpaymentsource"))) {
+            Registry::getSession()->setVariable("selectedVaultPaymentSourceIndex", $paymentSourceIndex);
+        }
+
 
         return parent::validatePayment();
     }

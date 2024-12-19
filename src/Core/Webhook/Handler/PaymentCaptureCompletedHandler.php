@@ -8,6 +8,8 @@
 namespace OxidSolutionCatalysts\PayPal\Core\Webhook\Handler;
 
 use OxidEsales\EshopCommunity\Core\Registry;
+use OxidSolutionCatalysts\PayPal\Core\Constants;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as PayPalApiModelOrder;
@@ -38,8 +40,21 @@ class PaymentCaptureCompletedHandler extends WebhookHandlerBase
         try {
             $apiOrder = Registry::get(ServiceFactory::class)
                 ->getOrderService()
-                ->showOrderDetails($payPalOrderId, '');
+                ->showOrderDetails(
+                    $payPalOrderId,
+                    '',
+                    Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
+                );
         } catch (ApiException $exception) {
+            /**
+ * @var Logger $logger
+*/
+            $logger = $this->getServiceFromContainer(Logger::class);
+            $logger->log(
+                'debug',
+                'Exception during PaymentCaptureCompletedHandler::getPayPalOrderDetails().',
+                [$exception]
+            );
             $apiOrder = null;
         }
 

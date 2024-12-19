@@ -35,7 +35,7 @@
                     ratio: '{{ size }}'
                 }
             }).render('#paypal-installment-banner-container').then(function () {
-                if (addClass) {
+                if (addClass && referenceNode) {
                     document.getElementById("paypal-installment-banner-container").classList.add(addClass);
                 }
             });

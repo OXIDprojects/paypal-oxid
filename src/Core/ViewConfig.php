@@ -7,10 +7,14 @@
 
 namespace OxidSolutionCatalysts\PayPal\Core;
 
+use Exception;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\EshopCommunity\Core\Config;
 use OxidSolutionCatalysts\PayPal\Service\LanguageLocaleMapper;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
+use OxidSolutionCatalysts\PayPal\Core\Config as PayPalConfig;
 
 /**
  * @mixin \OxidEsales\Eshop\Core\ViewConfig
@@ -21,12 +25,14 @@ class ViewConfig extends ViewConfig_parent
 
     /**
      * is this a "Flow"-Theme Compatible Theme?
+     *
      * @param boolean
      */
     protected $isFlowCompatibleTheme = null;
 
     /**
      * is this a "Wave"-Theme Compatible Theme?
+     *
      * @param boolean
      */
     protected $isWaveCompatibleTheme = null;
@@ -94,13 +100,19 @@ class ViewConfig extends ViewConfig_parent
         return $this->getServiceFromContainer(ModuleSettings::class)->isPayPalCheckoutExpressPaymentEnabled();
     }
 
-
-    /**
-     * @return Config
-     */
-    public function getPayPalCheckoutConfig(): Config
+    public function getIsVaultingActive(): bool
     {
-        return oxNew(Config::class);
+        return $this->getServiceFromContainer(ModuleSettings::class)->getIsVaultingActive();
+    }
+
+    public function isVaultingEligibility(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isVaultingEligibility();
+    }
+
+    public function getPayPalCheckoutConfig(): PayPalConfig
+    {
+        return oxNew(PayPalConfig::class);
     }
 
     /**
@@ -142,7 +154,7 @@ class ViewConfig extends ViewConfig_parent
      */
     public function getCancelPayPalPaymentUrl(): string
     {
-        return $this->getSslSelfLink() . 'cl=oscpaypalproxy&fnc=cancelPayPalPayment';
+        return $this->getSslSelfLink() . 'cl=oscpaypalproxy&fnc=cancelPayPalPayment&redirect=1';
     }
 
     /**
@@ -154,12 +166,32 @@ class ViewConfig extends ViewConfig_parent
     {
         $config = Registry::getConfig();
         $lang = Registry::getLang();
+        $params = [];
+        $enableFunding = [];
+        $disableFunding = [
+            'bancontact',
+            'blik',
+            'eps',
+            'giropay',
+            'ideal',
+            'mercadopago',
+            'p24',
+            'venmo',
+        ];
+        $components = [
+            'buttons',
+            'googlepay',
+            'applepay',
+        ];
+
+        if ($this->getTopActiveClassName() !== 'payment') {
+            $disableFunding[] = 'sepa';
+        }
 
         $localeCode = $this->getServiceFromContainer(LanguageLocaleMapper::class)
             ->mapLanguageToLocale($lang->getLanguageAbbr());
 
         $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
-        $params = [];
 
         $params['client-id'] = $this->getPayPalClientId();
         $params['integration-date'] = Constants::PAYPAL_INTEGRATION_DATE;
@@ -170,40 +202,42 @@ class ViewConfig extends ViewConfig_parent
             $params['currency'] = strtoupper($currency->name);
         }
 
-        $params['components'] = 'buttons';
-        // Available components: enable messages+buttons for PDP
+        $params['merchant-id'] = $moduleSettings->getMerchantId();
+
         if ($this->isPayPalBannerActive()) {
-            $params['components'] .= ',messages';
+            $components[] = 'messages';
         }
 
         if ($moduleSettings->showPayPalPayLaterButton()) {
-            $params['enable-funding'] = 'paylater';
+            $enableFunding[] = 'paylater';
         }
-
-        $params['disable-funding'] = 'sepa,bancontact,blik,eps,giropay,ideal,mercadopago,p24,venmo';
 
         if ($moduleSettings->isAcdcEligibility()) {
-            $params['disable-funding'] .= ',card';
+            $components[] = 'hosted-fields';
         } else {
-            if (isset($params['enable-funding'])) {
-                $params['enable-funding'] .= ',card';
-            } else {
-                $params['enable-funding'] = 'card';
-            }
+            $enableFunding[] = 'card';
         }
+
+        if ($this->getIsVaultingActive()) {
+            $components[] = 'card-fields';
+        }
+
+        if ($components) {
+            $params['components'] = implode(',', $components);
+        }
+        if ($enableFunding) {
+            $params['enable-funding'] = implode(',', $enableFunding);
+        }
+        if ($disableFunding) {
+            $params['disable-funding'] = implode(',', $disableFunding);
+        }
+
         $params['locale'] = $localeCode;
 
-        return Constants::PAYPAL_JS_SDK_URL . '?' . http_build_query($params);
-    }
+        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ?
+            Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
 
-    /**
-     * Gets PayPal JS SDK url for ACDC
-     *
-     * @return string
-     */
-    public function getPayPalJsSdkUrlForACDC(): string
-    {
-        return $this->getBasePayPalJsSdkUrl('hosted-fields');
+        return $baseJsSdkUrl . '?' . http_build_query($params);
     }
 
     /**
@@ -245,7 +279,33 @@ class ViewConfig extends ViewConfig_parent
         }
         $params['locale'] = $localeCode;
 
-        return Constants::PAYPAL_JS_SDK_URL . '?' . http_build_query($params);
+        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ?
+            Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
+
+        return $baseJsSdkUrl . '?' . http_build_query($params);
+    }
+
+    public function showPayPalExpressInMiniBasket(): bool
+    {
+        $className = $this->getTopActiveClassName();
+        $showButton = false;
+        $payPalConfig = $this->getPayPalCheckoutConfig();
+        $ppActive = $payPalConfig->isActive();
+        $configShowMiniBasketButton = $payPalConfig->showPayPalMiniBasketButton();
+        $ppExpressSessionActive = $this->isPayPalExpressSessionActive();
+        $acdcSessionActive = $this->isPayPalACDCSessionActive();
+        if (
+            $className !== 'payment'
+            && $ppActive
+            && $configShowMiniBasketButton
+            && !$ppExpressSessionActive
+            && (            (            $className === 'order'
+            && !$acdcSessionActive            )
+            || $className !== 'order')
+        ) {
+            $showButton = true;
+        }
+        return $showButton;
     }
 
     public function getUserIdForVaulting(): string
@@ -298,13 +358,25 @@ class ViewConfig extends ViewConfig_parent
 
     public function getDataClientToken(): string
     {
+        $result = '';
 
-        /** @var \OxidSolutionCatalysts\PayPal\Core\Api\IdentityService $identityService */
-        $identityService = Registry::get(ServiceFactory::class)->getIdentityService();
+        try {
+            /**
+ * @var \OxidSolutionCatalysts\PayPal\Core\Api\IdentityService $identityService
+*/
+            $identityService = Registry::get(ServiceFactory::class)->getIdentityService();
 
-        $response = $identityService->requestClientToken();
+            $response = $identityService->requestClientToken();
+            $result = $response['client_token'] ?? '';
+        } catch (Exception $exception) {
+            /**
+ * @var Logger $logger
+*/
+            $logger = $this->getServiceFromContainer(Logger::class);
+            $logger->log('error', $exception->getMessage(), [$exception]);
+        }
 
-        return $response['client_token'] ?? '';
+        return $result;
     }
 
     /**
@@ -333,7 +405,10 @@ class ViewConfig extends ViewConfig_parent
 
         $params['components'] = 'messages';
 
-        return Constants::PAYPAL_JS_SDK_URL . '?' . http_build_query($params);
+        $baseJsSdkUrl = $this->getPayPalCheckoutConfig()->isSandbox() ?
+            Constants::PAYPAL_SANDBOX_JS_SDK_URL : Constants::PAYPAL_JS_SDK_URL;
+
+        return $baseJsSdkUrl . '?' . http_build_query($params);
     }
 
     /**
@@ -530,7 +605,7 @@ class ViewConfig extends ViewConfig_parent
     /**
      * Template variable getter. Check if is a ??? Theme Compatible Theme
      *
-     * @return boolean
+     * @return         boolean
      * @psalm-suppress InternalMethod
      */
     public function isCompatibleTheme($themeId = null)
@@ -541,8 +616,8 @@ class ViewConfig extends ViewConfig_parent
             $theme->load($theme->getActiveThemeId());
             // check active theme or parent theme
             if (
-                $theme->getActiveThemeId() == $themeId ||
-                $theme->getInfo('parentTheme') == $themeId
+                $theme->getActiveThemeId() == $themeId
+                || $theme->getInfo('parentTheme') == $themeId
             ) {
                 $result = true;
             }
@@ -554,5 +629,55 @@ class ViewConfig extends ViewConfig_parent
     public function getPayPalSCAContingency(): string
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->getPayPalSCAContingency();
+    }
+
+    public function getGenerateSetupTokenLink($card = false)
+    {
+        $config = oxNew(Config::class);
+        $params = 'cl=osctokencontroller&fnc=generatesetuptoken';
+        if ($config->isSandbox()) {
+            $params .= '&XDEBUG_SESSION_START=1';
+        }
+
+        if ($card) {
+            $params .= '&card=true';
+        }
+
+        $url = html_entity_decode($this->getConfig()->getShopHomeUrl());
+
+        return $url . $params;
+    }
+
+    public function getGeneratePaymentTokenLink()
+    {
+        $config = oxNew(Config::class);
+        $params = 'cl=osctokencontroller&fnc=generatepaymenttoken';
+        if ($config->isSandbox()) {
+            $params .= '&XDEBUG_SESSION_START=1';
+        }
+
+        $url = html_entity_decode($this->getConfig()->getShopHomeUrl());
+
+        return $url . $params . '&token=';
+    }
+
+    public function isAcdcEligibility(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isAcdcEligibility();
+    }
+
+    public function getMerchantId(): string
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->getMerchantId();
+    }
+
+    public function getClientId(): string
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->getClientId();
+    }
+
+    public function getConfig(): Config
+    {
+        return Registry::getConfig();
     }
 }

@@ -11,3 +11,4 @@ php-cs-fixer.phar
 /tests/.env
 /tests/report
 /resources/node_modules/
+/resources/build/js/typescript-transpiled

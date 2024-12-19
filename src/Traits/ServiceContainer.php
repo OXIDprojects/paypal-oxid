@@ -20,8 +20,8 @@ trait ServiceContainer
      * Used in Unit-Tests to mock services
      * There might be a cleaner way, but haven't found it yet
      *
-     * @param string     $serviceName
-     * @param MockObject $serviceMock
+     * @param  string     $serviceName
+     * @param  MockObject $serviceMock
      * @return void
      */
     public function addServiceMock(string $serviceName, MockObject $serviceMock)
@@ -30,9 +30,9 @@ trait ServiceContainer
     }
 
     /**
-     * @template T
+     * @template    T
      * @psalm-param class-string<T> $serviceName
-     * @return T
+     * @return      T
      */
     protected function getServiceFromContainer(string $serviceName)
     {

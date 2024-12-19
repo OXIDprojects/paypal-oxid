@@ -7,15 +7,21 @@
 
 namespace OxidSolutionCatalysts\PayPal\Core\Onboarding;
 
+use JsonException;
 use OxidEsales\Eshop\Core\Registry;
+use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\Config as PayPalConfig;
 use OxidSolutionCatalysts\PayPal\Core\PartnerConfig;
 use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
 use OxidSolutionCatalysts\PayPal\Exception\OnboardingException;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
+use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
 use OxidSolutionCatalysts\PayPalApi\Onboarding as ApiOnboardingClient;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Filesystem\Filesystem;
 
 class Onboarding
 {
@@ -42,34 +48,49 @@ class Onboarding
         return $credentials;
     }
 
+    /**
+     * @throws ApiException
+     * @throws OnboardingException
+     * @throws JsonException
+     */
     public function fetchCredentials(): array
     {
-        $credentials = [];
-
         $onboardingResponse = $this->getOnboardingPayload();
         $this->saveSandboxMode($onboardingResponse['isSandBox']);
 
         $nonce = Registry::getSession()->getVariable('PAYPAL_MODULE_NONCE');
         Registry::getSession()->deleteVariable('PAYPAL_MODULE_NONCE');
 
-        /** @var ApiOnboardingClient $apiClient */
-        $apiClient = $this->getOnboardingClient($onboardingResponse['isSandBox']);
-        $apiClient->authAfterWebLogin($onboardingResponse['authCode'], $onboardingResponse['sharedId'], $nonce);
+        try {
+            /**
+ * @var ApiOnboardingClient $apiClient
+*/
+            $apiClient = $this->getOnboardingClient($onboardingResponse['isSandBox']);
+            $apiClient->authAfterWebLogin($onboardingResponse['authCode'], $onboardingResponse['sharedId'], $nonce);
 
-        $credentials = $apiClient->getCredentials();
+            $credentials = $apiClient->getCredentials();
+            $credentials = $apiClient->getCredentials();
+        } catch (ApiException $exception) {
+            /**
+             * @var Logger $logger
+            */
+            $logger = $this->getServiceFromContainer(Logger::class);
+            $logger->log('error', $exception->getMessage(), [$exception]);
+        }
 
         return $credentials;
     }
 
+    /**
+     * @throws OnboardingException
+     * @throws JsonException
+     */
     public function getOnboardingPayload(): array
     {
-        $response = json_decode(PayPalSession::getOnboardingPayload(), true);
+        $response = json_decode(PayPalSession::getOnboardingPayload(), true, 512, JSON_THROW_ON_ERROR);
 
         if (
-            !is_array($response) ||
-            !isset($response['authCode']) ||
-            !isset($response['sharedId']) ||
-            !isset($response['isSandBox'])
+            !isset($response['authCode'], $response['sharedId'], $response['isSandBox'])
         ) {
             throw OnboardingException::mandatoryDataNotFound();
         }
@@ -83,11 +104,13 @@ class Onboarding
         $moduleSettings->saveSandboxMode($isSandbox);
     }
 
+    /**
+     * @throws OnboardingException
+     */
     public function saveCredentials(array $credentials): array
     {
         if (
-            !isset($credentials['client_id']) ||
-            !isset($credentials['client_secret'])
+            !isset($credentials['client_id'], $credentials['client_secret'])
         ) {
             throw OnboardingException::mandatoryDataNotFound();
         }
@@ -102,6 +125,58 @@ class Onboarding
         ];
     }
 
+    /**
+     * @return void
+     */
+    private function downloadAndSaveApplePayCertificate()
+    {
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
+        $isSandbox = $moduleSettings->isSandbox();
+        $filesystem = oxNew(Filesystem::class);
+        $this->ensureDirectoryExists($filesystem);
+        $this->updateCertificateIfChanged($filesystem, $isSandbox);
+    }
+
+    /**
+     * @param  Filesystem $filesystem
+     * @return void
+     */
+    private function ensureDirectoryExists(Filesystem $filesystem): void
+    {
+        $directory = getShopBasePath() . '.well-known/';
+        try {
+            $filesystem->mkdir($directory);
+        } catch (IOException $e) {
+            throw new IOException($e->getMessage());
+        }
+    }
+
+    /**
+     * @param  Filesystem $filesystem
+     * @param  string     $environment
+     * @param  array      $config
+     * @return void
+     */
+    private function updateCertificateIfChanged(Filesystem $filesystem, bool $isSandbox): void
+    {
+        $certificateUrl = $isSandbox ?
+            Constants::PAYPAL_APPLEPAYCERT_SANDBOX_URL :
+            Constants::PAYPAL_APPLEPAYCERT_LIVE_URL;
+        $filename = basename(parse_url($certificateUrl, PHP_URL_PATH));
+        $savePath = getShopBasePath() . '.well-known/' . $filename;
+
+        $currentContent = $filesystem->exists($savePath) ? file_get_contents($savePath) : null;
+
+        $newContent = file_get_contents($certificateUrl);
+
+        if ($newContent !== false && $newContent !== $currentContent) {
+            try {
+                $filesystem->dumpFile($savePath, $newContent);
+            } catch (IOException $e) {
+                throw new IOException($e->getMessage());
+            }
+        }
+    }
     public function getOnboardingClient(bool $isSandbox, bool $withCredentials = false): ApiOnboardingClient
     {
         $paypalConfig = oxNew(PayPalConfig::class);
@@ -119,7 +194,9 @@ class Onboarding
             $merchantId = $paypalConfig->getMerchantId();
         }
 
-        /** @var LoggerInterface $logger */
+        /**
+ * @var LoggerInterface $logger
+*/
         $logger = $this->getServiceFromContainer('OxidSolutionCatalysts\PayPal\Logger');
 
         return new ApiOnboardingClient(
@@ -135,7 +212,6 @@ class Onboarding
     }
 
     /**
-     * @return array
      * @throws ApiException
      * @throws JsonException
      * @throws OnboardingException
@@ -143,9 +219,7 @@ class Onboarding
     public function fetchMerchantInformations(): array
     {
         $onboardingResponse = $this->getOnboardingPayload();
-        /** @var ApiOnboardingClient $apiClient */
-        $apiClient = $this->getOnboardingClient($onboardingResponse['isSandBox'], true);
-        return $apiClient->getMerchantInformations();
+        return $this->getOnboardingClient($onboardingResponse['isSandBox'], true)->getMerchantInformations();
     }
 
     public function saveEligibility(array $merchantInformations): array
@@ -156,28 +230,69 @@ class Onboarding
 
         $isPuiEligibility = false;
         $isAcdcEligibility = false;
+        $isVaultingEligibility = false;
+        $isVaultingCapability = false;
+        $isApplePayEligibility = false;
+        $isGooglePayCapability = false;
 
-        foreach ($merchantInformations['products'] as $product) {
+        foreach ($merchantInformations['capabilities'] as $capability) {
             if (
-                $product['name'] === 'PAYMENT_METHODS' &&
-                in_array('PAY_UPON_INVOICE', $product['capabilities'])
+                $capability['name'] === 'PAYPAL_WALLET_VAULTING_ADVANCED'
+                && $capability['status'] === 'ACTIVE'
             ) {
-                $isPuiEligibility = true;
-            } elseif (
-                $product['name'] === 'PPCP_CUSTOM' &&
-                in_array('CUSTOM_CARD_PROCESSING', $product['capabilities'])
+                $isVaultingCapability = true;
+            }
+            if (
+                $capability['name'] === 'APPLE_PAY'
+                && $capability['status'] === 'ACTIVE'
             ) {
-                $isAcdcEligibility = true;
+                $isApplePayEligibility = true;
+            }
+            if (
+                $capability['name'] === 'GOOGLE_PAY'
+                && $capability['status'] === 'ACTIVE'
+            ) {
+                $isGooglePayCapability = true;
             }
         }
 
+        foreach ($merchantInformations['products'] as $product) {
+            if (
+                $product['name'] === 'PAYMENT_METHODS'
+                && in_array('PAY_UPON_INVOICE', $product['capabilities'], true)
+            ) {
+                $isPuiEligibility = true;
+            } elseif (
+                $product['name'] === 'PPCP_CUSTOM'
+                && in_array('CUSTOM_CARD_PROCESSING', $product['capabilities'], true)
+            ) {
+                $isAcdcEligibility = true;
+            }
+
+            if (
+                $isVaultingCapability
+                && $product['name'] === 'PPCP_CUSTOM'
+                && in_array('PAYPAL_WALLET_VAULTING_ADVANCED', $product['capabilities'], true)
+            ) {
+                $isVaultingEligibility = true;
+            }
+        }
+        if ($isApplePayEligibility) {
+            $this->downloadAndSaveApplePayCertificate();
+        }
         $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
         $moduleSettings->savePuiEligibility($isPuiEligibility);
         $moduleSettings->saveAcdcEligibility($isAcdcEligibility);
+        $moduleSettings->saveVaultingEligibility($isVaultingEligibility);
+        $moduleSettings->saveApplePayEligibility($isApplePayEligibility);
+        $moduleSettings->saveGooglePayEligibility($isGooglePayCapability);
 
         return [
             'acdc' => $isAcdcEligibility,
-            'pui' => $isPuiEligibility
+            'pui' => $isPuiEligibility,
+            'vaulting' => $isVaultingEligibility,
+            'applepay' => $isVaultingEligibility,
+            'googlepay' => $isGooglePayCapability,
         ];
     }
 }

@@ -19,10 +19,9 @@ use OxidEsales\Eshop\Application\Model\BasketItem;
 use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\State;
 use OxidEsales\Eshop\Core\Registry;
-use OxidSolutionCatalysts\PayPal\Core\PayPalRequestAmountFactory;
+use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\AddressPortable;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\AddressPortable3;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\AmountBreakdown;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\AmountWithBreakdown;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Item;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderApplicationContext;
@@ -36,13 +35,18 @@ use OxidSolutionCatalysts\PayPal\Core\Utils\PriceToMoney;
 use OxidSolutionCatalysts\PayPalApi\Pui\ExperienceContext;
 use OxidSolutionCatalysts\PayPalApi\Pui\PuiPaymentSource;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\PaymentSource;
+use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
+use stdClass;
 
 /**
  * Class OrderRequestBuilder
+ *
  * @package OxidSolutionCatalysts\PayPal\Core
  */
 class OrderRequestFactory
 {
+    use ServiceContainer;
+
     /**
      * After you redirect the customer to the PayPal payment page, a Continue button appears.
      * Use this option when the final amount is not known when the checkout flow is initiated and you want to
@@ -63,17 +67,16 @@ class OrderRequestFactory
     private $basket;
 
     /**
-     * @param Basket $basket
-     * @param string $intent Order::INTENT_CAPTURE or Order::INTENT_AUTHORIZE constant values
-     * @param null|string $userAction USER_ACTION_CONTINUE constant values
-     * @param null|string $transactionId transaction id
+     * @param Basket      $basket
+     * @param string      $intent                Order::INTENT_CAPTURE or Order::INTENT_AUTHORIZE constant values
+     * @param null|string $userAction            USER_ACTION_CONTINUE constant values
+     * @param null|string $transactionId         custom id reference
      * @param null|string $processingInstruction processing instruction
-     * @param null|string $paymentSource Payment-Source Name
-     * @param null|string $invoiceId custom invoice number
-     * @param null|string $returnUrl Return Url
-     * @param null|string $cancelUrl Cancel Url
-     * @param bool $withArticles Request with article information?
-     * @param bool $setProvidedAddress Address changeable in PayPal?
+     * @param null|string $paymentSource         Payment-Source Name
+     * @param null|string $invoiceId             custom invoice number
+     * @param null|string $returnUrl             Return Url
+     * @param null|string $cancelUrl             Cancel Url
+     * @param bool        $setProvidedAddress    Address changeable in PayPal?
      *
      * @return OrderRequest
      */
@@ -92,8 +95,62 @@ class OrderRequestFactory
     ): OrderRequest {
         $request = $this->request = new OrderRequest();
         $this->basket = $basket;
+        $withItems = !$this->basket->isCalculationModeNetto();
 
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
+        $setVaulting = $moduleSettings->getIsVaultingActive();
+        $selectedVaultPaymentSourceIndex = Registry::getSession()->getVariable("selectedVaultPaymentSourceIndex");
+        $paymentId = Registry::getSession()->getVariable('paymentid');
+        if ($paymentId === PayPalDefinitions::APPLEPAY_PAYPAL_PAYMENT_ID) {
+            $request->payment_source = $this->getApplePayPaymentSource($basket, 'apple_pay');
+        }
+        $paymentId = Registry::getSession()->getVariable('paymentid');
+        if ($paymentId === PayPalDefinitions::GOOGLEPAY_PAYPAL_PAYMENT_ID) {
+            $request->payment_source = $this->getGooglePayPaymentSource($basket, 'google_pay');
+        }
         $request->intent = $intent;
+        $request->purchase_units = $this->getPurchaseUnits($transactionId, $invoiceId, $withItems);
+
+        $useVaultedPayment = $setVaulting && !is_null($selectedVaultPaymentSourceIndex);
+        if ($useVaultedPayment) {
+            $config = Registry::getConfig();
+            $vaultingService = $this->getVaultingService();
+            $payPalCustomerId = $this->getUsersPayPalCustomerId();
+
+            $selectedPaymentToken = $vaultingService->getVaultPaymentTokenByIndex(
+                $payPalCustomerId,
+                $selectedVaultPaymentSourceIndex
+            );
+            //find out which payment token was selected by getting the index via request param
+            $paymentType = key($selectedPaymentToken["payment_source"]);
+            $useCard = $paymentType === "card";
+
+            $this->modifyPaymentSourceForVaulting($request, $useCard);
+
+            //we use the PayPal payment type as a "dummy payment" when we use vaulted payments.
+            //therefore, we need to use a returnURL depending on the payment type.
+            if ($useCard) {
+                $returnUrl = $config->getSslShopUrl() . 'index.php?cl=order&fnc=finalizeacdc';
+            }
+
+            $request->application_context = $this->getApplicationContext(
+                "",
+                $returnUrl,
+                $cancelUrl,
+                false
+            );
+            return $request;
+        } elseif (Registry::getRequest()->getRequestParameter("vaultPayment") === "true") {
+            $paymentType = Registry::getRequest()->getRequestParameter("oscPayPalPaymentTypeForVaulting");
+            $card = ($paymentType == PayPalDefinitions::ACDC_PAYPAL_PAYMENT_ID);
+
+            Registry::getSession()->setVariable("vaultSuccess", true);
+
+            $this->modifyPaymentSourceForVaulting($request, $card);
+
+            return $request;
+        }
+
         if (!$paymentSource && $basket->getUser()) {
             $request->payer = $this->getPayer();
         }
@@ -114,19 +171,73 @@ class OrderRequestFactory
         }
 
         if ($paymentSource == PayPalDefinitions::PUI_REQUEST_PAYMENT_SOURCE_NAME) {
-            /** @var PaymentSource $puiPaymentSource */
+            /**
+ * @var PaymentSource $puiPaymentSource
+*/
             $puiPaymentSource = $this->getPuiPaymentSource();
             $request->payment_source = $puiPaymentSource;
         }
 
         return $request;
     }
+    protected function getApplePayPaymentSource($basket, $requestName)
+    {
+        $user = $basket->getBasketUser();
+
+        $userName = $user->getFieldData('oxfname') . ' ' . $user->getFieldData('oxlname');
+
+        // get Billing CountryCode
+        $country = oxNew(Country::class);
+        $country->load($user->getFieldData('oxcountryid'));
+
+        // check possible deliveryCountry
+        $deliveryId = Registry::getSession()->getVariable("deladrid");
+        $deliveryAddress = oxNew(Address::class);
+        if ($deliveryId && $deliveryAddress->load($deliveryId)) {
+            $country->load($deliveryAddress->getFieldData('oxcountryid'));
+        }
+        $paymentSource = new PaymentSource(
+            [
+            $requestName => [
+                'name' => $userName,
+                'country_code' => $country->getFieldData('oxisoalpha2')
+            ]
+            ]
+        );
+        return $paymentSource;
+    }
+
+    protected function getGooglePayPaymentSource($basket, $requestName)
+    {
+        $user = $basket->getBasketUser();
+
+        // get Billing CountryCode
+        $country = oxNew(Country::class);
+        $country->load($user->getFieldData('oxcountryid'));
+
+        // check possible deliveryCountry
+        $deliveryId = Registry::getSession()->getVariable("deladrid");
+        $deliveryAddress = oxNew(Address::class);
+        if ($deliveryId && $deliveryAddress->load($deliveryId)) {
+            $country->load($deliveryAddress->getFieldData('oxcountryid'));
+        }
+        $paymentSource = new stdClass();
+
+        // Dynamically adding properties to the stdClass object
+        $paymentSource->$requestName = new stdClass();
+        $paymentSource->$requestName->attributes = new stdClass();
+        $paymentSource->$requestName->attributes->verification = new stdClass();
+        $paymentSource->$requestName->attributes->verification->method = 'SCA_ALWAYS';
+        return $paymentSource;
+    }
 
     /**
      * Sets application context
      *
-     * @param string $userAction
-     *
+     * @param  string|null $userAction
+     * @param  string|null $returnUrl
+     * @param  string|null $cancelUrl
+     * @param  bool|null   $setProvidedAddress
      * @return OrderApplicationContext
      */
     protected function getApplicationContext(
@@ -135,8 +246,9 @@ class OrderRequestFactory
         ?string $cancelUrl,
         ?bool $setProvidedAddress
     ): OrderApplicationContext {
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
         $context = new OrderApplicationContext();
-        $context->brand_name = Registry::getConfig()->getActiveShop()->getFieldData('oxname');
+        $context->brand_name = $moduleSettings->getShopName();
         $context->shipping_preference = 'GET_FROM_FILE';
         $context->landing_page = 'LOGIN';
         if ($userAction) {
@@ -161,10 +273,11 @@ class OrderRequestFactory
     protected function getPurchaseUnits(
         ?string $transactionId,
         ?string $invoiceId,
-        bool $withArticles = true
+        bool $withItems = false
     ): array {
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
         $purchaseUnit = new PurchaseUnitRequest();
-        $shopName = Registry::getConfig()->getActiveShop()->getFieldData('oxname');
+        $shopName = $moduleSettings->getShopName();
         $lang = Registry::getLang();
 
         $purchaseUnit->custom_id = $transactionId;
@@ -175,12 +288,7 @@ class OrderRequestFactory
         $purchaseUnit->amount = $this->getAmount();
         $purchaseUnit->reference_id = Constants::PAYPAL_ORDER_REFERENCE_ID;
 
-        // If it is planned to patch this PayPal order in the further course,
-        // then no items may be given, since PayPal cannot patch any items at the moment
-        // At the moment only the amount and the title of the article
-        // are relevant. However, no inventory.
-        // in this case get the purchase units without articles
-        if ($withArticles) {
+        if ($withItems) {
             $purchaseUnit->items = $this->getItems();
         }
 
@@ -200,7 +308,7 @@ class OrderRequestFactory
     }
 
     /**
-     * @return array
+     * @return         array
      * @psalm-suppress UndefinedDocblockClass
      */
     public function getItems(): array
@@ -211,7 +319,9 @@ class OrderRequestFactory
         $language = Registry::getLang();
         $items = [];
 
-        /** @var BasketItem $basketItem */
+        /**
+ * @var BasketItem $basketItem
+*/
         foreach ($basket->getContents() as $basketItem) {
             $item = new Item();
             $item->name = substr($basketItem->getTitle(), 0, 120);
@@ -223,13 +333,14 @@ class OrderRequestFactory
                 : Item::CATEGORY_PHYSICAL_GOODS;
 
             // no zero price articles in the list
-            if ((float)$itemUnitPrice->getBruttoPrice() > 0) {
-                $item->unit_amount = PriceToMoney::convert((float)$itemUnitPrice->getBruttoPrice(), $currency);
+            if ($itemUnitPrice && $itemUnitPrice->getBruttoPrice() > 0) {
+                $item->unit_amount = PriceToMoney::convert(
+                    $itemUnitPrice->getBruttoPrice(),
+                    $currency
+                );
                 // tax - we use 0% and calculate with brutto to avoid rounding errors
-                $item->tax = PriceToMoney::convert((float)0, $currency);
+                $item->tax = PriceToMoney::convert(0.0, $currency);
                 $item->tax_rate = '0';
-                // TODO: There are usually still categories for digital products.
-                // But only with PHYSICAL_GOODS, Payments like PUI will work fine.
                 $item->category = $articleCategory;
 
                 $item->quantity = (string)$basketItem->getAmount();
@@ -237,73 +348,63 @@ class OrderRequestFactory
             }
         }
 
-        if ($wrapping = $basket->getPayPalCheckoutWrapping()) {
+        $wrapping = $basket->getPayPalCheckoutWrapping();
+        if ($wrapping) {
             $item = new Item();
             $item->name = $language->translateString('GIFT_WRAPPING');
 
-            $item->unit_amount = PriceToMoney::convert((float)$wrapping, $currency);
+            $item->unit_amount = PriceToMoney::convert(
+                $wrapping,
+                $currency
+            );
             // tax - we use 0% and calculate with brutto to avoid rounding errors
-            $item->tax = PriceToMoney::convert(0, $currency);
+            $item->tax = PriceToMoney::convert(0.0, $currency);
             $item->tax_rate = '0';
-            // TODO: There are usually still categories for digital products.
-            // But only with PHYSICAL_GOODS, Payments like PUI will work fine.
             $item->category = $itemCategory;
 
             $item->quantity = '1';
             $items[] = $item;
         }
 
-        if ($giftCard = $basket->getPayPalCheckoutGiftCard()) {
+        $giftCard = $basket->getPayPalCheckoutGiftCard();
+        if ($giftCard) {
             $item = new Item();
             $item->name = $language->translateString('GREETING_CARD');
 
-            $item->unit_amount = PriceToMoney::convert((float)$giftCard, $currency);
+            $item->unit_amount = PriceToMoney::convert(
+                $giftCard,
+                $currency
+            );
             // tax - we use 0% and calculate with brutto to avoid rounding errors
-            $item->tax = PriceToMoney::convert(0, $currency);
+            $item->tax = PriceToMoney::convert(0.0, $currency);
             $item->tax_rate = '0';
-            // TODO: There are usually still categories for digital products.
-            // But only with PHYSICAL_GOODS, Payments like PUI will work fine.
             $item->category = $itemCategory;
 
             $item->quantity = '1';
             $items[] = $item;
         }
 
-        if ($payment = $basket->getPayPalCheckoutPayment()) {
+        $payment = $basket->getPayPalCheckoutPayment();
+        if ($payment) {
             $item = new Item();
             $item->name = $language->translateString('PAYMENT_METHOD');
 
-            $item->unit_amount = PriceToMoney::convert((float)$payment, $currency);
+            $item->unit_amount = PriceToMoney::convert(
+                $payment,
+                $currency
+            );
             // tax - we use 0% and calculate with brutto to avoid rounding errors
-            $item->tax = PriceToMoney::convert(0, $currency);
+            $item->tax = PriceToMoney::convert(0.0, $currency);
             $item->tax_rate = '0';
-            // TODO: There are usually still categories for digital products.
-            // But only with PHYSICAL_GOODS, Payments like PUI will work fine.
             $item->category = $itemCategory;
 
             $item->quantity = '1';
             $items[] = $item;
         }
 
-        //Shipping cost
-        if ($delivery = $basket->getPayPalCheckoutDeliveryCosts()) {
-            $item = new Item();
-            $item->name = $language->translateString('SHIPPING_COST');
-
-            $item->unit_amount = PriceToMoney::convert((float)$delivery, $currency);
-            // tax - we use 0% and calculate with brutto to avoid rounding errors
-            $item->tax = PriceToMoney::convert(0, $currency);
-            $item->tax_rate = '0';
-            // TODO: There are usually still categories for digital products.
-            // But only with PHYSICAL_GOODS, Payments like PUI will work fine.
-            $item->category = $itemCategory;
-
-            $item->quantity = '1';
-            $items[] = $item;
-        }
-
-        $discount = $basket->getPayPalCheckoutDiscount();
         // possible price surcharge
+        $discount = $basket->getPayPalCheckoutDiscount();
+
         if ($discount < 0) {
             $discount *= -1;
             $item = new Item();
@@ -311,10 +412,8 @@ class OrderRequestFactory
 
             $item->unit_amount = PriceToMoney::convert($discount, $currency);
             // tax - we use 0% and calculate with brutto to avoid rounding errors
-            $item->tax = PriceToMoney::convert(0, $currency);
+            $item->tax = PriceToMoney::convert(0.0, $currency);
             $item->tax_rate = '0';
-            // TODO: There are usually still categories for digital products.
-            // But only with PHYSICAL_GOODS, Payments like PUI will work fine.
             $item->category = $itemCategory;
 
             $item->quantity = '1';
@@ -328,11 +427,8 @@ class OrderRequestFactory
 
             $item->unit_amount = PriceToMoney::convert((float)$roundDiff, $currency);
             // tax - we use 0% and calculate with brutto to avoid rounding errors
-            $item->tax = PriceToMoney::convert(0, $currency);
+            $item->tax = PriceToMoney::convert(0.0, $currency);
             $item->tax_rate = '0';
-
-            // TODO: There are usually still categories for digital products.
-            // But only with PHYSICAL_GOODS, Payments like PUI will work fine.
             $item->category = $itemCategory;
 
             $item->quantity = '1';
@@ -345,14 +441,15 @@ class OrderRequestFactory
     /**
      * Determine the item category based on the entire basket contents. If all items in the basket are virtual
      * the category "DIGITAL_GOODS" is used, in any other case it'll be "PHYSICAL_GOODS".
+     *
      * @return string
      */
     public function getItemCategoryByBasketContent(): string
     {
         return (
-            $this->basket->isEntirelyVirtualPayPalBasket()
-                ? Item::CATEGORY_DIGITAL_GOODS
-                : Item::CATEGORY_PHYSICAL_GOODS
+        $this->basket->isEntirelyVirtualPayPalBasket()
+            ? Item::CATEGORY_DIGITAL_GOODS
+            : Item::CATEGORY_PHYSICAL_GOODS
         );
     }
 
@@ -373,7 +470,9 @@ class OrderRequestFactory
 
         $birthDate = $user->getFieldData('oxbirthdate');
         if ($birthDate && $birthDate !== '0000-00-00') {
-            /** @var DateTime $birthDate */
+            /**
+ * @var DateTime $birthDate
+*/
             $birthDate = oxNew(DateTime::class, $user->getFieldData('oxbirthdate'));
             $payer->birth_date = $birthDate->format('Y-m-d');
         }
@@ -518,6 +617,7 @@ class OrderRequestFactory
     protected function getPuiPaymentSource(): array
     {
         $user = $this->basket->getBasketUser();
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
 
         // get Billing CountryCode
         $country = oxNew(Country::class);
@@ -544,7 +644,9 @@ class OrderRequestFactory
         $paymentSource->email = $payer->email_address;
         $paymentSource->billing_address = $billingAddress;
 
-        /** @var ApiModelPhone $phoneNumberForPuiRequest */
+        /**
+ * @var ApiModelPhone $phoneNumberForPuiRequest
+*/
         $phoneNumberForPuiRequest = $user->getPhoneNumberForPuiRequest();
         $paymentSource->phone = $phoneNumberForPuiRequest;
         if ($birthdate = $user->getBirthDateForPuiRequest()) {
@@ -553,13 +655,99 @@ class OrderRequestFactory
 
         $activeShop = Registry::getConfig()->getActiveShop();
         $experienceContext = new ExperienceContext();
-        $experienceContext->brand_name = $activeShop->getFieldData('oxname');
+        $experienceContext->brand_name = $moduleSettings->getShopName();
         $experienceContext->locale = strtolower($payer->address->country_code)
             . '-'
             .  strtoupper($payer->address->country_code);
-        $experienceContext->customer_service_instructions[] = $activeShop->getFieldData('oxinfoemail');
+        $experienceContext->customer_service_instructions[] = $moduleSettings->getInfoEMail();
         $paymentSource->experience_context = $experienceContext;
 
         return [PayPalDefinitions::PUI_REQUEST_PAYMENT_SOURCE_NAME => $paymentSource];
+    }
+
+    /**
+     * @param  OrderRequest $request
+     * @return void
+     */
+    protected function modifyPaymentSourceForVaulting(OrderRequest $request, $useCard = false): void
+    {
+        $config = Registry::getConfig();
+        $vaultingService = $this->getVaultingService();
+
+        $selectedVaultPaymentSourceIndex = Registry::getSession()->getVariable("selectedVaultPaymentSourceIndex");
+
+        //use selected vault
+        if (!is_null($selectedVaultPaymentSourceIndex) && $payPalCustomerId = $this->getUsersPayPalCustomerId()) {
+            $paymentTokens = $vaultingService->getVaultPaymentTokens($payPalCustomerId);
+            //find out which payment token was selected by getting the index via request param
+            $selectedPaymentToken = $paymentTokens["payment_tokens"][$selectedVaultPaymentSourceIndex];
+
+            $request->payment_source =
+                [
+                    "paypal" =>
+                        [
+                            "vault_id" => $selectedPaymentToken["id"],
+                        ]
+                ];
+        } elseif ($user = $config->getUser()) {
+            //save during purchase
+            $paypalCustomerId = $user->getFieldData("oscpaypalcustomerid");
+
+            if ($useCard) {
+                $newPaymentSource = $vaultingService->getPaymentSourceForVaulting(true);
+                $newPaymentSource["attributes"] = [
+                    "verification" => [
+                        "method" => "SCA_WHEN_REQUIRED"
+                    ],
+                    "vault" => [
+                        "store_in_vault" => "ON_SUCCESS"
+                    ],
+                ];
+
+                if ($paypalCustomerId) {
+                    $newPaymentSource["card"]["attributes"]["customer"] = [
+                        "id" => $paypalCustomerId
+                    ];
+                }
+            } else {
+                $newPaymentSource = [
+                    "paypal" =>
+                        [
+                            "attributes" =>
+                                [
+                                    "vault" =>
+                                        PayPalDefinitions::PAYMENT_VAULTING
+                                ],
+                            "experience_context" =>
+                                [
+                                    "return_url" => $config->getSslShopUrl() .
+                                        'index.php?cl=order&fnc=finalizepaypalsession',
+                                    "cancel_url" => $config->getSslShopUrl() .
+                                        'index.php?cl=order&fnc=cancelpaypalsession',
+                                    "shipping_preference" => "SET_PROVIDED_ADDRESS",
+                                ]
+                        ],
+                ];
+
+                if ($paypalCustomerId) {
+                    $newPaymentSource["paypal"]["attributes"]["customer"] = [
+                        "id" => $paypalCustomerId
+                    ];
+                }
+            }
+
+            $request->payment_source = $newPaymentSource;
+        }
+    }
+
+    private function getVaultingService()
+    {
+        return Registry::get(ServiceFactory::class)->getVaultingService();
+    }
+
+    private function getUsersPayPalCustomerId()
+    {
+        $user = Registry::getConfig()->getUser();
+        return $user ? $user->getFieldData("oscpaypalcustomerid") : '';
     }
 }

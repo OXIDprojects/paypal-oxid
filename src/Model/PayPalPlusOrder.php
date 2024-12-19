@@ -179,7 +179,9 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         if (is_null($this->order)) {
 
-            /** @var Order $oOrder */
+            /**
+ * @var Order $oOrder
+*/
             $oOrder = oxNew(Order::class);
 
             if ($oOrder->load($this->getOrderId())) {
@@ -201,7 +203,9 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         if (is_null($this->refundList)) {
 
-            /** @var PayPalPlusRefundList $oRefundList */
+            /**
+ * @var PayPalPlusRefundList $oRefundList
+*/
             $oRefundList = oxNew(PayPalPlusRefundList::class);
             $oRefundList->loadRefundsBySaleId($this->getSaleId());
 
@@ -222,7 +226,9 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         if (is_null($this->totalAmountRefunded)) {
 
-            /** @var PayPalPlusRefundList $oRefundList */
+            /**
+ * @var PayPalPlusRefundList $oRefundList
+*/
             $oRefundList = oxNew(PayPalPlusRefundList::class);
             $this->totalAmountRefunded = $oRefundList->getRefundedSumBySaleId($this->getSaleId());
         }

@@ -109,6 +109,11 @@ class Config
         return $this->getServiceFromContainer(ModuleSettings::class)->isPuiEligibility();
     }
 
+    public function isVaultingEligibility(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isVaultingEligibility();
+    }
+
     public function isLiveAcdcEligibility(): bool
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->isLiveAcdcEligibility();
@@ -122,6 +127,18 @@ class Config
     public function isLiveVaultingEligibility(): bool
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->isLiveVaultingEligibility();
+    }
+    public function isLiveApplePayEligibility(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isLiveApplePayEligibility();
+    }
+    public function isLiveGooglePayEligibility(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isLiveGooglePayEligibility();
+    }
+    public function isSandboxGooglePayEligibility(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isSandboxGooglePayEligibility();
     }
 
     public function isSandboxAcdcEligibility(): bool
@@ -138,7 +155,10 @@ class Config
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->isSandboxVaultingEligibility();
     }
-
+    public function isSandboxApplePayEligibility(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isSandboxApplePayEligibility();
+    }
     public function getLiveClientId(): string
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->getLiveClientId();
@@ -243,6 +263,10 @@ class Config
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->getStartPageBannerSelector();
     }
+    public function getDefaultShippingPriceForExpress(): string
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->getDefaultShippingPriceForExpress();
+    }
 
     public function showBannersOnCategoryPage(): bool
     {
@@ -282,10 +306,6 @@ class Config
     public function getPayPalCheckoutBannerCartPageSelector(): string
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->getPayPalCheckoutBannerCartPageSelector();
-    }
-    public function getDefaultShippingPriceForExpress(): string
-    {
-        return $this->getServiceFromContainer(ModuleSettings::class)->getDefaultShippingPriceForExpress();
     }
     public function getPayPalCheckoutBannerPaymentPageSelector(): string
     {
@@ -434,5 +454,23 @@ class Config
     public function getIsVaultingActive(): bool
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->getIsVaultingActive();
+    }
+
+    public function getIsGooglePayDeliveryAdressActive(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->getIsGooglePayDeliveryAddressActive();
+    }
+
+    public function isLogLevel(string $level): bool
+    {
+        $possiblePayPalLevels = [
+            'error' => 400,
+            'info'  => 200,
+            'debug' => 100
+        ];
+        $logLevel = Registry::getConfig()->getConfigParam('sLogLevel') ?? 'error';
+        $logLevel = isset($possiblePayPalLevels[$logLevel]) ? $logLevel : 'error';
+        $level = isset($possiblePayPalLevels[$level]) ? $level : 'error';
+        return $possiblePayPalLevels[$logLevel] <= $possiblePayPalLevels[$level];
     }
 }
