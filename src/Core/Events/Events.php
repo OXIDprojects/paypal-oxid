@@ -19,6 +19,7 @@ use OxidEsales\EshopCommunity\Internal\Transition\Utility\ContextInterface;
 use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
 use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
+use OxidSolutionCatalysts\PayPal\Service\UserRepository;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPal\Service\StaticContent;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
@@ -155,11 +156,14 @@ class Events
             /** @var Logger $logger */
             $logger = $container->get(Logger::class);
 
+            $userRepository = $container->get(UserRepository::class);
+
             return new ModuleSettings(
                 $moduleSettingsBridge,
                 $context,
                 $moduleConfigurationDaoBridgeInterface,
-                $logger
+                $logger,
+                $userRepository
             );
         } catch (NotFoundExceptionInterface | ContainerExceptionInterface $exception) {
             Registry::getUtilsView()->addErrorToDisplay('OSC_PAYPAL_INSTALLPROCESS_FAILED');
