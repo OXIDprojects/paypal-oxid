@@ -296,14 +296,16 @@ class ViewConfig extends ViewConfig_parent
     /**
      * get Vault Token
      *
-     * @return string|null
+     * @return array|null
      */
     public function getVaultPaymentTokens()
     {
         if ($this->getIsVaultingActive() && $customerId = $this->getUser()->getFieldData("oscpaypalcustomerid")) {
             $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();
 
-            return $vaultingService->getVaultPaymentTokens($customerId)["payment_tokens"] ?? null;
+            $vaultPaymentTokens = $vaultingService->getVaultPaymentTokens($customerId)["payment_tokens"] ?? null;
+
+            return $this->filterVaultPaymentTokensByController($vaultPaymentTokens);
         }
 
         return null;
@@ -598,5 +600,44 @@ class ViewConfig extends ViewConfig_parent
     public function isAcdcEligibility(): bool
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->isAcdcEligibility();
+    }
+
+    private function filterVaultPaymentTokensByController($vaultPaymentTokens)
+    {
+        if (is_null($vaultPaymentTokens)) {
+            return null;
+        }
+
+        if ($this->isAccountVaultController()) {
+            return array_filter(
+                $vaultPaymentTokens,
+                function ($token) {
+                    return array_key_exists('payment_source', $token)
+                        && !array_key_exists('card', $token['payment_source']);
+                }
+            );
+        }
+
+        if ($this->isAccountVaultCartController()) {
+            return array_filter(
+                $vaultPaymentTokens,
+                function ($token) {
+                    return array_key_exists('payment_source', $token)
+                        && array_key_exists('card', $token['payment_source']);
+                }
+            );
+        }
+
+        return $vaultPaymentTokens;
+    }
+
+    private function isAccountVaultController(): bool
+    {
+        return Registry::getRequest()->getRequestEscapedParameter("cl") === 'oscaccountvault';
+    }
+
+    private function isAccountVaultCartController(): bool
+    {
+        return Registry::getRequest()->getRequestEscapedParameter("cl") === 'oscaccountvaultcard';
     }
 }

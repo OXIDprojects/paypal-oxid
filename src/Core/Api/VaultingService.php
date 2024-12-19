@@ -13,6 +13,7 @@ use OxidEsales\Eshop\Application\Model\State;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\ViewConfig;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
@@ -242,6 +243,8 @@ class VaultingService extends BaseService
             }
             $result = json_decode((string)$body, true, 512, JSON_THROW_ON_ERROR);
         } catch (ApiException|JsonException $e) {
+            $this->getServiceFromContainer(Logger::class)
+                ->log('error', __CLASS__ . ' ' . __FUNCTION__ . ' : ' . $e->getMessage());
             $result = [];
         }
 
