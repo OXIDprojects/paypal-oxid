@@ -401,17 +401,20 @@ class ProxyController extends FrontendController
         $requestedPayPalPaymentId = $this->getRequestedPayPalPaymentId($defaultPayPalPaymentId);
         if ($session->getVariable('paymentid') !== $requestedPayPalPaymentId) {
             $basket->setPayment($requestedPayPalPaymentId);
-
-            // get the active shippingSetId
-            /** @psalm-suppress InvalidArgument */
-            [, $shippingSetId,] =
-                Registry::get(DeliverySetList::class)->getDeliverySetData('', $user, $basket);
-
-            if ($shippingSetId) {
-                $basket->setShipping($shippingSetId);
-                $session->setVariable('sShipSet', $shippingSetId);
-            }
             $session->setVariable('paymentid', $requestedPayPalPaymentId);
+        }
+        $this->getActiveShippingSetId($session, $user, $basket);
+    }
+
+    private function getActiveShippingSetId($session, $user, $basket): void
+    {
+        /** @psalm-suppress InvalidArgument */
+        [, $shippingSetId,] =
+            Registry::get(DeliverySetList::class)->getDeliverySetData('', $user, $basket);
+
+        if ($shippingSetId) {
+            $basket->setShipping($shippingSetId);
+            $session->setVariable('sShipSet', $shippingSetId);
         }
     }
 
