@@ -166,7 +166,7 @@
         let intent = 'captures';
         let intent_object = intent === "authorize" ? "authorizations" : "captures";
 
-        const createOrderUrl = "[{$sSelfLink|cat:'cl=oscpaypalproxy&fnc=createApplepayOrder&paymentid=oscpaypal_apple_pay&context=continue&aid='|cat:$aid|cat:'&stoken='|cat:$sToken}]";
+        const createOrderUrl = "[{$sSelfLink|cat:'cl=oscpaypalproxy&fnc=createApplepayOrder&paymentid='|cat:$paymentId|cat:'&context=continue&aid='|cat:$aid|cat:'&stoken='|cat:$sToken}]";
         [{if $config->isSandbox()}]
         console.log('Creating order with URL:', createOrderUrl);
         [{/if}]
@@ -197,7 +197,7 @@
                 session.completePayment(session.STATUS_FAILURE);
                 return;
             }
-            const approve_order = "[{$sSelfLink|cat:'cl=oscpaypalproxy&fnc=approveOrder&paymentid=oscpaypal_apple_pay&context=continue&aid='|cat:$aid|cat:'&stoken='|cat:$sToken}]";
+            const approve_order = "[{$sSelfLink|cat:'cl=oscpaypalproxy&fnc=approveOrder&paymentid='|cat:$paymentId|cat:'&context=continue&aid='|cat:$aid|cat:'&stoken='|cat:$sToken}]";
             const approve_response = await fetch(approve_order, {
                 method: "post",
                 headers: { "Content-Type": "application/json; charset=utf-8" },

@@ -43,6 +43,8 @@ $aLang = [
 
     'OSC_PAYPAL_3DSECURITY_ERROR'                  => 'Security check failed, please retry.',
     'OSC_PAYPAL_ORDEREXECUTION_ERROR'              => 'Payment process could not be completed.',
+    'OSCPAYPAL_KILL_EXPRESS_SESSION_REASON'        => 'The shopping cart has been changed. For this reason, the active PayPal payment process was automatically canceled. Please restart the payment with PayPal. No money has been collected from PayPal yet.',
+    'OSC_PAYPAL_ORDEREXECUTION_ERROR'              => 'Payment process could not be completed.',
 
     'OSC_PAYPAL_VAULTING_MENU'                      => 'Save PayPal payment method',
     'OSC_PAYPAL_VAULTING_MENU_CARD'                 => 'Save PayPal card',

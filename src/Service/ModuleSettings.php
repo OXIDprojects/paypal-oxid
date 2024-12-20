@@ -13,7 +13,6 @@ use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\DeliverySetList;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\Shop;
-use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ModuleConfigurationDaoBridgeInterface;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ModuleSettingBridgeInterface;
@@ -23,7 +22,6 @@ use OxidEsales\EshopCommunity\Internal\Transition\Utility\ContextInterface;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
 use OxidSolutionCatalysts\PayPal\Module;
-use OxidSolutionCatalysts\PayPal\Service\Payment as PaymentService;
 
 class ModuleSettings
 {
@@ -452,9 +450,10 @@ class ModuleSettings
         $moduleSetting = $this->moduleConfiguration->getModuleSetting($name);
 
         if ($moduleSetting->getType() === 'str') {
+        } else if ($moduleSetting->getType() === 'bool') {
             $value = trim($value);
-        }
-        if ($moduleSetting->getType() === 'bool') {
+        } else if ($moduleSetting->getType() === 'float') {
+            $value = (float)trim($value);
             $value = (bool)$value;
         }
 

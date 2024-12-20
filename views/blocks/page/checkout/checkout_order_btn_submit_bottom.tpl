@@ -30,9 +30,9 @@
 
 [{elseif "oscpaypal_apple_pay" == $payment->getId()}]
     [{if $oViewConf->isFlowCompatibleTheme()}]
-    [{include file="modules/osc/paypal/applepay.tpl" buttonId=$payment->getId() buttonClass="paypal-button-wrapper large"}]
+    [{include file="modules/osc/paypal/applepay.tpl" paymentId=$payment->getId() buttonClass="paypal-button-wrapper large"}]
     [{else}]
-    [{include file="modules/osc/paypal/applepay.tpl" buttonId=$payment->getId() buttonClass="paypal-button-wrapper large"}]
+    [{include file="modules/osc/paypal/applepay.tpl" paymentId=$payment->getId() buttonClass="paypal-button-wrapper large"}]
     [{/if}]
     <div id="applepay-container" class="paypal-button-container paypal-button-wrapper large"></div>
 [{else}]

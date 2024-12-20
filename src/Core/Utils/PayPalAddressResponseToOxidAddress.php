@@ -98,6 +98,10 @@ class PayPalAddressResponseToOxidAddress
             $DBTablePrefix . 'country' => $countryName,
             $DBTablePrefix . 'zip' => $shippingAddress->postal_code,
             $DBTablePrefix . 'fon' => $fon,
+            // Needed to not produce an error in InputValidator->hasRequiredParametersForVatInCheck()
+            $DBTablePrefix . 'ustid' => "",
+            // Needed to not produce an error in InputValidator->hasRequiredParametersForVatInCheck()
+            $DBTablePrefix . 'company' => "",
         ];
     }
 

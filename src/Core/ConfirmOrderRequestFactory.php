@@ -12,6 +12,7 @@ namespace OxidSolutionCatalysts\PayPal\Core;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Core\Exception\LanguageNotFoundException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Core\Language;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderConfirmApplicationContext;
@@ -34,6 +35,7 @@ class ConfirmOrderRequestFactory
      * @param string $requestName Name of the RequestClass defined in PayPalClient
      *
      * @return ConfirmOrderRequest
+     * @throws LanguageNotFoundException
      */
     public function getRequest(
         Basket $basket,
@@ -68,7 +70,7 @@ class ConfirmOrderRequestFactory
             $requestName = 'google_pay';
             $paymentSource = new \stdClass();
 
-// Dynamically adding properties to the stdClass object
+            // Dynamically adding properties to the stdClass object
             $paymentSource->$requestName = new \stdClass();
             $paymentSource->$requestName->name = $userName;
             $paymentSource->$requestName->country_code = $country->getFieldData('oxisoalpha2');
@@ -84,13 +86,13 @@ class ConfirmOrderRequestFactory
             ]);
         }
 
-
         return $paymentSource;
     }
 
     /**
      * Sets application context
      *
+     * @throws LanguageNotFoundException
      * @return OrderConfirmApplicationContext
      */
     protected function getApplicationContext(): OrderConfirmApplicationContext
