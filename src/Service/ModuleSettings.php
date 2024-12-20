@@ -415,8 +415,7 @@ class ModuleSettings
         $shop = Registry::getConfig()->getActiveShop();
         if (isset($shop->oxshops__oxname->rawValue)) {
             $value = $shop->oxshops__oxname->rawValue;
-        }
-        elseif(isset($shop->oxshops__oxname->value)) {
+        } elseif (isset($shop->oxshops__oxname->value)) {
             $value = $shop->oxshops__oxname->value;
         }
         return $value;
@@ -432,8 +431,7 @@ class ModuleSettings
         $shop = Registry::getConfig()->getActiveShop();
         if (isset($shop->oxshops__oxinfoemail->rawValue)) {
             $value = $shop->oxshops__oxinfoemail->rawValue;
-        }
-        elseif(isset($shop->oxshops__oxinfoemail->value)) {
+        } elseif (isset($shop->oxshops__oxinfoemail->value)) {
             $value = $shop->oxshops__oxinfoemail->value;
         }
         return $value;
@@ -630,9 +628,9 @@ class ModuleSettings
         $payment = oxNew(Payment::class);
         $payment->load($paymentId);
         $paymentEnabled = (bool)$payment->oxpayments__oxactive->value;
-        $paymentType = PayPalDefinitions::getPayPalDefinitions()[$paymentId]["vaultingtype"];
+        $vaultingType = PayPalDefinitions::getPayPalDefinitions()[$paymentId]["vaultingtype"];
 
-        $session =  Registry::getSession();
+        $session = Registry::getSession();
         $actShipSet = $session->getVariable('sShipSet');
         $basket = $session->getBasket();
         $user = $session->getUser();
@@ -649,7 +647,8 @@ class ModuleSettings
 
         return $paymentEnabled &&
             $this->getIsVaultingActive() &&
-            PayPalDefinitions::isPayPalVaultingPossible($paymentId, $paymentType) &&
+            $vaultingType &&
+            PayPalDefinitions::isPayPalVaultingPossible($paymentId, $vaultingType) &&
             array_key_exists($paymentId, $paymentList) &&
             (
                 empty($payPalDefinitions[$paymentId]['currencies']) ||
