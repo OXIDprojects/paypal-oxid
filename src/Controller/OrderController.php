@@ -94,7 +94,8 @@ class OrderController extends OrderController_parent
         $user = $this->getUser();
 
         if ($user) {
-            $paymentId = $this->getPayment()->getId();
+            $paymentId = (string) $paymentService->getSessionPaymentId();
+
             $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
             $isVaultingPossible = $moduleSettings->isVaultingAllowedForPayment($paymentId)
                 && $user->getFieldData('oxpassword');
@@ -240,8 +241,8 @@ class OrderController extends OrderController_parent
             $logger = $this->getServiceFromContainer(Logger::class);
 
             $_POST['sDeliveryAddressMD5'] = $this->getDeliveryAddressMD5();
-            $paypalOrderId = Registry::getRequest()->getRequestParameter('token');
-            $_POST['orderID'] = $paypalOrderId;
+            $orderId = Registry::getRequest()->getRequestParameter('orderID');
+            $_POST['orderID'] = $orderId;
             $this->execute();
         } catch (Exception $exception) {
             $logger->log('error', $exception->getMessage(), [$exception]);
@@ -251,20 +252,20 @@ class OrderController extends OrderController_parent
 
         $paymentService->doPatchPayPalOrder(
             Registry::getSession()->getBasket(),
-            $paypalOrderId
+            $orderId
         );
     }
 
     public function captureGooglePayOrder(): void
     {
         $orderService = Registry::get(ServiceFactory::class)->getOrderService();
-        $checkoutOrderId = (string) Registry::getRequest()->getRequestParameter('token');
+        $orderId = (string) Registry::getRequest()->getRequestParameter('orderID');
 
         $request = new OrderCaptureRequest();
         try {
             $orderService->capturePaymentForOrder(
                 '',
-                $checkoutOrderId,
+                $orderId,
                 $request,
                 '',
                 Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
@@ -284,6 +285,13 @@ class OrderController extends OrderController_parent
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
         }
+        $result = [
+            'location' => [
+                'cl=order&fnc=finalizeGooglePay'
+            ]
+        ];
+
+        $this->outputJson($result);
     }
 
     public function captureAcdcOrder(): void
@@ -404,7 +412,6 @@ class OrderController extends OrderController_parent
         $orderId = (string) Registry::getRequest()->getRequestEscapedParameter('orderID');
         $orderService = Registry::get(ServiceFactory::class)->getOrderService();
         $sessionOrderId = (string) Registry::getSession()->getVariable('sess_challenge');
-        $checkoutOrderId = (string) PayPalSession::getCheckoutOrderId();
         $request = new OrderCaptureRequest();
         $logger = $this->getServiceFromContainer(Logger::class);
         try {

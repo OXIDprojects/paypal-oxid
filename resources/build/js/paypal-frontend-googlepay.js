@@ -154,18 +154,14 @@ window.OxidPayPalGooglePay = {
                 body: JSON.stringify(paymentData),
             }).then((res) => res.json());
 
-            const hateoasLinks = new OxidPayPalHateoasLinks();
-            const approveLink = hateoasLinks.getApproveLink(links);
-
-            if (approveLink) {
-                window.location.href = approveLink;
+            if (status === "CREATED") {
+                /* Capture the Order */
+                this.confirmOrder(orderId, paymentData);
+                return {transactionState: "SUCCESS"};
             } else if (status === "APPROVED") {
                 /* Capture the Order */
                 this.captureOrder(orderId);
                 return {transactionState: "SUCCESS"};
-            } else if (status === "PAYER_ACTION_REQUIRED") {
-                console.log("==== Confirm Payment Completed Payer Action Required =====");
-                this.googlePayUserActionRequired(orderId);
             } else {
                 console.error("Payment was not approved");
                 return {transactionState: "ERROR"};
@@ -179,12 +175,32 @@ window.OxidPayPalGooglePay = {
             };
         }
     },
+    confirmOrder: async function (orderId, paymentData) {
+        const confirmOrderResponse = await paypal.Googlepay().confirmOrder({
+            orderId: orderId,
+            paymentMethodData: paymentData.paymentMethodData
+        });
+
+        const hateoasLinks = new OxidPayPalHateoasLinks();
+        const payerActionLink = hateoasLinks.getPayerActionLink(confirmOrderResponse.links);
+
+        if (confirmOrderResponse.status === "PAYER_ACTION_REQUIRED") {
+            console.log("==== Confirm Payment Completed Payer Action Required =====");
+            this.googlePayUserActionRequired(orderId);
+        } else {
+            if (this.isSandbox) {
+                console.log("==== confirmOrder: Not Approved =====");
+            }
+        }
+    },
+
     googlePayUserActionRequired: function (orderId) {
         paypal
             .Googlepay()
             .initiatePayerAction({ orderId: orderId })
             .then(async () => {
                 console.log("===== Payer Action Completed =====");
+                await this.captureOrder(orderId);
                 await this.createOxidOrder(orderId);
             });
     },

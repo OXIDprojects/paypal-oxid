@@ -7,3 +7,6 @@
     max-width: 250px; }
   .paypal-button-wrapper.small {
     max-width: 200px; }
+
+.paypal-button-container {
+  margin-left: auto; }
