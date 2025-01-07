@@ -23,37 +23,40 @@
     <script>
         window.onload = function () {
             const cardFields = paypal.CardFields({
-            createVaultSetupToken: async () => {
-                // Call your server API to generate a vaultSetupToken
-                // and return it here as a string
-                const result = await fetch(
-                    "[{oxgetseourl ident=$oViewConf->getGenerateSetupTokenLink(true)}]",
-                    { method: "POST"
-                })
-                const { id } = await result.json();
-                return id;
-            },
-            onApprove: async (data) => {
-                // Only for 3D Secure
-                if(data.liabilityShift){
-                 // Handle liability shift
-                }
-
-                const result = await fetch(
-                    "[{oxgetseourl ident=$oViewConf->getGeneratePaymentTokenLink()}]"+data.vaultSetupToken,
-                    {
-                        method: "POST",
-                        body: JSON.stringify(data)
+                createVaultSetupToken: async () => {
+                    // Call your server API to generate a vaultSetupToken
+                    // and return it here as a string
+                    const result = await fetch(
+                        "[{oxgetseourl ident=$oViewConf->getGenerateSetupTokenLink(true)}]",
+                        {method: "POST"}
+                    )
+                    const { id } = await result.json();
+                    return id;
+                },
+                onApprove: async (data) => {
+                    // Only for 3D Secure
+                    if(data.liabilityShift){
+                     // Handle liability shift
                     }
-                );
-                const status = await result.json();
 
-                if(status.state !== "SUCCESS") {
-                    //log error?
+                    const result = await fetch(
+                        "[{oxgetseourl ident=$oViewConf->getGeneratePaymentTokenLink()}]"+data.vaultSetupToken,
+                        {
+                            method: "POST",
+                            body: JSON.stringify(data)
+                        }
+                    );
+                    const status = await result.json();
+
+                    if(status.state !== "SUCCESS") {
+                        //log error?
+                    }
+                },
+                onError: (error) => {
+                    console.error('Something went wrong:', error);
+                    $('#PayPalVaultingSuccess').hide();
+                    $('#PayPalVaultingFailure').show();
                 }
-            },
-            onError: (error) =>
-                console.error('Something went wrong:', error)
             })
 
 
@@ -82,9 +85,11 @@
             function showSuccessMessage() {
                 $('#payPalVaultingCardContainer').hide();
                 $('#PayPalVaultingSuccess').show();
+                $('#PayPalVaultingFailure').hide();
             }
 
             function showFailureMessage() {
+                $('#PayPalVaultingSuccess').hide();
                 $('#PayPalVaultingFailure').show();
             }
         }
