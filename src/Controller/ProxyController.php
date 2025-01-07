@@ -93,67 +93,6 @@ class ProxyController extends FrontendController
         $this->outputJson($response);
     }
 
-    public function getGooglepayBasket()
-    {
-        $basket = Registry::getSession()->getBasket();
-        $lang = Registry::getLang();
-        $actShopCurrency = Registry::getConfig()->getActShopCurrencyObject();
-        $blIsAdd = false;
-
-        if ($basket->getItemsCount() === 0) {
-            $this->addToBasket();
-
-            $basket = Registry::getSession()->getBasket();
-            $blIsAdd = true;
-        }
-        $deliveryCost = $basket->getDeliveryCost();
-        $deliveryBruttoPrice = $deliveryCost->getBruttoPrice();
-        $this->setPayPalPaymentMethod();
-
-        $sVat = 0;
-        foreach ($basket->getProductVats(false) as $key => $VATitem) {
-            $sVat += $VATitem;
-        }
-
-        $aItems = [
-           "displayItems" => [
-             [
-                "label" => $lang->translateString("TOTAL_NET"),
-                "type" => "SUBTOTAL",
-                "price" => number_format((double) $basket->getNettoSum(), 2, '.', ''),
-             ],
-             [
-                "label" => $lang->translateString("VAT"),
-                "type" => "TAX",
-                "price" => number_format((double) $sVat, 2, '.', ''),
-             ],
-             [
-                "label" => $lang->translateString("SHIPPING"),
-                "type" => "LINE_ITEM",
-                "price" => number_format((double) $deliveryBruttoPrice, 2, '.', ''),
-                "status" => "FINAL"
-             ]
-           ],
-           "countryCode" => strtoupper($lang->getLanguageAbbr()),
-           "currencyCode" => strtoupper($actShopCurrency->name),
-           "totalPriceStatus" => "ESTIMATED",
-           "totalPrice" => number_format((double) $basket->getPrice()->getBruttoPrice(), 2, '.', ''),
-           "totalPriceLabel" => $lang->translateString("TOTAL"),
-        ];
-        if ($blIsAdd) {
-            if ($aid = (string)Registry::getRequest()->getRequestEscapedParameter('aid')) {
-                try {
-                    $basket->addToBasket($aid, 0);
-                    $basket->calculateBasket(false);
-                } catch (NoArticleException $exception) {
-                }
-            }
-        }
-
-        $utils = Registry::getUtils();
-        $utils->showMessageAndExit(json_encode($aItems));
-    }
-
     /**
      * @throws JsonException
      */
