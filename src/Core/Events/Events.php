@@ -10,13 +10,11 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\PayPal\Core\Events;
 
 use OxidEsales\DoctrineMigrationWrapper\MigrationsBuilder;
-use OxidEsales\Eshop\Application\Model\Payment as EshopModelPayment;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ModuleConfigurationDaoBridgeInterface;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ModuleSettingBridgeInterface;
 use OxidEsales\EshopCommunity\Internal\Transition\Utility\ContextInterface;
-use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
 use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Service\UserRepository;
