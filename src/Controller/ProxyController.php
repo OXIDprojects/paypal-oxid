@@ -157,7 +157,7 @@ class ProxyController extends FrontendController
     /**
      * @throws JsonException
      */
-    public function createGooglepayOrder()
+    public function createGooglePayOrder()
     {
         $data = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
 

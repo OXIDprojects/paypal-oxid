@@ -230,12 +230,10 @@ class OrderController extends OrderController_parent
     /**
      * @throws Exception
      */
-    public function createGooglePayOrder(): void
+    public function executeGooglePayOrder(): void
     {
         try {
             $paymentService = $this->getServiceFromContainer(PaymentService::class);
-            $paymentService->removeTemporaryOrder();
-            Registry::getSession()->setVariable('sess_challenge', $this->getUtilsObjectInstance()->generateUID());
 
             /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
@@ -287,7 +285,7 @@ class OrderController extends OrderController_parent
         }
         $result = [
             'location' => [
-                'cl=order&fnc=finalizeGooglePay'
+                'cl=order&fnc=finalizeGooglePay&token=' . $orderId
             ]
         ];
 
@@ -563,10 +561,8 @@ class OrderController extends OrderController_parent
         $paypalOrderId = (string) Registry::getRequest()->getRequestParameter('token');
         $forceFetchDetails = (bool) Registry::getRequest()->getRequestParameter('fallbackfinalize');
 
-        $this->createGooglePayOrder();
-        $this->captureGooglePayOrder();
-
         $oxidOrderId = Registry::getSession()->getBasket()->getOrderId();
+        $oxidOrderId = $oxidOrderId ?: Registry::getSession()->getVariable('sess_challenge');
 
         /** @var GooglePayPayPalService $googlePayPayPalService */
         $googlePayPayPalService = $this->getServiceFromContainer(GooglePayPayPalService::class);

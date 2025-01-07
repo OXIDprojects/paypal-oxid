@@ -146,7 +146,7 @@ window.OxidPayPalGooglePay = {
 
     processPayment: async function (paymentData) {
         try {
-            const createOrderUrl = this.selfLink + '&cl=oscpaypalproxy&fnc=createGooglepayOrder&paymentid=oscpaypal_googlepay&context=continue&stoken=' + this.token;
+            const createOrderUrl = this.selfLink + '&cl=oscpaypalproxy&fnc=createGooglePayOrder&paymentid=oscpaypal_googlepay&context=continue&stoken=' + this.token;
 
             const {id: orderId, status, links} = await fetch(createOrderUrl, {
                 method: "POST",
@@ -200,12 +200,12 @@ window.OxidPayPalGooglePay = {
             .initiatePayerAction({ orderId: orderId })
             .then(async () => {
                 console.log("===== Payer Action Completed =====");
+                await this.executeOxidOrder(orderId);
                 await this.captureOrder(orderId);
-                await this.createOxidOrder(orderId);
             });
     },
-    createOxidOrder: async function (orderId) {
-        const url = this.selfLink + '&cl=order&fnc=createGooglePayOrder&context=continue&stoken=' + this.token + '&sDeliveryAddressMD5=' + this.deliveryAddressMD5;
+    executeOxidOrder: async function (orderId) {
+        const url = this.selfLink + '&cl=order&fnc=executeGooglePayOrder&context=continue&stoken=' + this.token + '&sDeliveryAddressMD5=' + this.deliveryAddressMD5;
         createData = new FormData();
         createData.append('orderID', orderId);
         fetch(url, {
@@ -214,6 +214,8 @@ window.OxidPayPalGooglePay = {
         }).then(function (res) {
             return res.json();
         }).then(function (data) {
+            console.log("==== Create OXID Order Completed ====");
+
             if (data.status === "ERROR") {
                 location.reload();
             }
@@ -230,8 +232,8 @@ window.OxidPayPalGooglePay = {
         }).then(function (data) {
             console.log("==== Capture Order Completed ====");
             var goNext = Array.isArray(data.location) && data.location[0];
+            window.location.href = this.selfLink + goNext + '&stoken=' + this.token;
 
-            window.location.href = this.selfLink + goNext;
             if (data.status === "ERROR") {
                 location.reload();
             }
