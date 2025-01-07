@@ -21,13 +21,7 @@
     [{/if}]
 [{/if}]
 [{if "oscpaypal_googlepay" == $payment->getId()}]
-    [{if $oViewConf->isFlowCompatibleTheme()}]
-    [{include file="modules/osc/paypal/googlepay.tpl" buttonId=$payment->getId() buttonClass="paypal-button-wrapper large"}]
-    [{else}]
-    [{include file="modules/osc/paypal/googlepay.tpl" buttonId=$payment->getId() buttonClass="paypal-button-wrapper large"}]
-    [{/if}]
-    <div id="[{$payment->getId()}]" class="paypal-button-container paypal-button-wrapper large"></div>
-
+    [{include file="modules/osc/paypal/googlepay.tpl" buttonClass="paypal-button-wrapper large"}]
 [{elseif "oscpaypal_apple_pay" == $payment->getId()}]
     [{if $oViewConf->isFlowCompatibleTheme()}]
     [{include file="modules/osc/paypal/applepay.tpl" paymentId=$payment->getId() buttonClass="paypal-button-wrapper large"}]

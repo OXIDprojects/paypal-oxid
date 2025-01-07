@@ -8,9 +8,8 @@
         <div class="google-pay-loading-container paypal-button-right">
             <img src="[{$oViewConf->getModuleUrl('osc_paypal', 'out/img/loading.svg')}]" width="24" height="24" alt="loading animation"/>
         </div>
-        <div id="[{$paymentId}]"
+        <div id="google_pay_button_data_container"
              class="paypal-button-container paypal-button-wrapper paypal-button-right large"
-             data-button-id="[{$buttonId}]"
              data-token="[{$sToken}]"
              data-self-link="[{$sSelfLink}]"
              data-use-google-pay-address="[{$bGooglePayDelivery}]"
@@ -29,6 +28,7 @@
             });
         </script>
         <script async src="https://pay.google.com/gp/p/js/pay.js" onload="window.onGooglePayLoaded()"></script>
+        <div id="[{$payment->getId()}]" class="paypal-button-container paypal-button-wrapper large"></div>
     [{/oxhasrights}]
 [{/block}]
 
