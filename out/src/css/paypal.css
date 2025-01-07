@@ -8,5 +8,9 @@
   .paypal-button-wrapper.small {
     max-width: 200px; }
 
-.paypal-button-container {
-  margin-left: auto; }
+.paypal-button-right {
+  margin-left: auto;
+  text-align: right; }
+
+#paypal-installment-banner-container {
+  margin-bottom: 1rem; }
