@@ -35,15 +35,19 @@ class User extends User_parent
         // to add the customers to the correct usergroup
 
         if (
-            in_array($success, [
+            in_array(
+                $success,
+                [
                 Order::ORDER_STATE_ACDCINPROGRESS,
                 Order::ORDER_STATE_ACDCCOMPLETED,
                 Order::ORDER_STATE_NEED_CALL_ACDC_FINALIZE,
                 Order::ORDER_STATE_SESSIONPAYMENT_INPROGRESS,
                 Order::ORDER_STATE_TIMEOUT_FOR_WEBHOOK_EVENTS,
                 Order::ORDER_STATE_WAIT_FOR_WEBHOOK_EVENTS
-            ], true) &&
-            PayPalDefinitions::isPayPalPayment($basket->getPaymentId())
+                ],
+                true
+            )
+            && PayPalDefinitions::isPayPalPayment($basket->getPaymentId())
         ) {
             $success = 1;
         }
@@ -98,6 +102,12 @@ class User extends User_parent
     {
         $result = [];
         $requiredAddressFields = oxNew(RequiredAddressFields::class);
+        // Needed to not produce an error in InputValidator->hasRequiredParametersForVatInCheck()
+        $requiredFields = $requiredAddressFields->getRequiredFields();
+        $requiredFields[] = 'oxuser__oxustid';
+        $requiredFields[] = 'oxuser__oxcountryid';
+        $requiredFields[] = 'oxuser__oxcompany';
+        $requiredAddressFields->setRequiredFields($requiredFields);
         foreach ($requiredAddressFields->getBillingFields() as $requiredAddressField) {
             $result[$requiredAddressField] = $this->{$requiredAddressField}->value;
         }

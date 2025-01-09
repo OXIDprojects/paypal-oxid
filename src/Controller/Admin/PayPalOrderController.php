@@ -11,7 +11,6 @@ use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Registry;
-use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Model\PayPalOrder as PayPalModelPayPalOrder;
@@ -127,7 +126,7 @@ class PayPalOrderController extends AdminDetailsController
                 $this->addTplParam('capture', $capture);
                 $transactionId = $capture ? $capture->id : '';
 
-                /** @var \OxidSolutionCatalysts\PayPal\Model\PayPalOrder $paypalOrderModel */
+                /** @var PayPalModelPayPalOrder $paypalOrderModel */
                 $paypalOrderModel = $this->getServiceFromContainer(OrderRepository::class)
                     ->paypalOrderByOrderIdAndPayPalId($orderId, $paypalOrder->id, $transactionId);
                 $this->addTplParam('payPalOrderDetails', $paypalOrderModel);
@@ -156,7 +155,7 @@ class PayPalOrderController extends AdminDetailsController
                 $this->addTplParam('error', $lang->translateString('OSC_PAYPAL_ERROR_' . $exception->getErrorIssue()));
             }
         } elseif (
-            $order->getFieldData('oxpaymenttype') == $this->payPalPlusPaymentType &&
+            $order->getFieldData('oxpaymenttype') === $this->payPalPlusPaymentType &&
             !$order->tableExitsForPayPalPlus()
         ) {
             $this->addTplParam('error', $lang->translateString('OSC_PAYPAL_PAYPALPLUS_TABLE_DOES_NOT_EXISTS'));
@@ -165,7 +164,7 @@ class PayPalOrderController extends AdminDetailsController
             $this->addTplParam('payPalOrder', $this->getPayPalPlusOrder());
             $result = "oscpaypalorder_ppplus.tpl";
         } elseif (
-            $order->getFieldData('oxpaymenttype') == $this->payPalSoapPaymentType &&
+            $order->getFieldData('oxpaymenttype') === $this->payPalSoapPaymentType &&
             !$order->tableExitsForPayPalSoap()
         ) {
             $this->addTplParam('error', $lang->translateString('OSC_PAYPAL_PAYPALSOAP_TABLE_DOES_NOT_EXISTS'));
@@ -195,7 +194,6 @@ class PayPalOrderController extends AdminDetailsController
         $refundAll = $request->getRequestEscapedParameter('refundAll');
         $noteToPayer = $request->getRequestEscapedParameter('noteToPayer');
 
-        /** @var Order $order */
         $order = $this->getOrder();
 
         $capture = $order->getOrderPaymentCapture();
@@ -214,7 +212,6 @@ class PayPalOrderController extends AdminDetailsController
 
             /** @var OrderRepository $orderRepository */
             $orderRepository = $this->getServiceFromContainer(OrderRepository::class);
-            /** @var PayPalModelPayPalOrder $payPalOrder */
             $payPalOrder = $orderRepository->paypalOrderByOrderIdAndPayPalId(
                 $order->getId(),
                 '',

@@ -14,6 +14,7 @@ use OxidSolutionCatalysts\PayPal\Core\Config as PayPalConfig;
 use OxidSolutionCatalysts\PayPal\Core\PartnerConfig;
 use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
 use OxidSolutionCatalysts\PayPal\Exception\OnboardingException;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
@@ -48,7 +49,6 @@ class Onboarding
     }
 
     /**
-     * @throws ApiException
      * @throws OnboardingException
      * @throws JsonException
      */
@@ -60,11 +60,20 @@ class Onboarding
         $nonce = Registry::getSession()->getVariable('PAYPAL_MODULE_NONCE');
         Registry::getSession()->deleteVariable('PAYPAL_MODULE_NONCE');
 
-        /** @var ApiOnboardingClient $apiClient */
+        $credentials = [];
+        try {
         $apiClient = $this->getOnboardingClient($onboardingResponse['isSandBox']);
         $apiClient->authAfterWebLogin($onboardingResponse['authCode'], $onboardingResponse['sharedId'], $nonce);
 
-        return $apiClient->getCredentials();
+            $credentials = $apiClient->getCredentials();
+        } catch (ApiException $exception) {
+            /**
+             * @var Logger $logger
+            */
+            $logger = $this->getServiceFromContainer(Logger::class);
+            $logger->log('error', $exception->getMessage(), [$exception]);
+        }
+        return $credentials;
     }
 
     /**
@@ -219,6 +228,7 @@ class Onboarding
         $isVaultingCapability = false;
         $isGooglePayCapability = false;
         $isApplePayEligibility = false;
+        $isGooglePayCapability = false;
 
         foreach ($merchantInformations['capabilities'] as $capability) {
             if (

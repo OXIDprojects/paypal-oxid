@@ -20,8 +20,8 @@ final class PayPalDefinitions
     public const GIROPAY_PAYPAL_PAYMENT_ID = 'oscpaypal_giropay';
     public const SEPA_PAYPAL_PAYMENT_ID = 'oscpaypal_sepa';
     public const CCALTERNATIVE_PAYPAL_PAYMENT_ID = 'oscpaypal_cc_alternative';
+    public const APPLEPAY_PAYPAL_PAYMENT_ID = 'oscpaypal_applepay';
     public const GOOGLEPAY_PAYPAL_PAYMENT_ID = 'oscpaypal_googlepay';
-    public const APPLEPAY_PAYPAL_PAYMENT_ID = 'oscpaypal_apple_pay';
 
     //vaulting
     public const PAYMENT_VAULTING = [
@@ -503,10 +503,11 @@ final class PayPalDefinitions
         return (isset(self::PAYPAL_DEFINTIONS[$paymentId]));
     }
 
-    public static function isPayPalVaultingPossible(string $paymentId, string $paypalPaymentType): bool
+    public static function isPayPalVaultingPossible(string $paymentId, ?string $paypalPaymentType = null): bool
     {
         return (
-            isset(self::PAYPAL_DEFINTIONS[$paymentId]['vaultingtype'])
+            $paypalPaymentType
+            && isset(self::PAYPAL_DEFINTIONS[$paymentId]['vaultingtype'])
             && self::PAYPAL_DEFINTIONS[$paymentId]['vaultingtype'] === $paypalPaymentType
         );
     }
