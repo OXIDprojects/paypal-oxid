@@ -23,32 +23,13 @@
                 <button type="submit" name="userform"
                         class="btn btn-primary pull-right submitButton nextStep largeButton"
                         id="paypalVaultCheckoutButton"
+                        disabled
                 >
                     [{oxmultilang ident="OSC_PAYPAL_CONTINUE_TO_NEXT_STEP"}] <i class="fa fa-caret-right"></i>
                 </button>
             </div>
         </div>
     </div>
-
-    <script>
-        window.onload = function () {
-            document.getElementById("paypalVaultCheckoutButton").onclick = function () {
-                document.querySelectorAll(".vaulting_paymentsource").forEach(function (paymentsource) {
-                    if (paymentsource.checked) {
-                        document.getElementById("payment_oscpaypal").click();
-
-                        let input = document.createElement("input");
-                        input.type = "hidden";
-                        input.name = "vaultingpaymentsource";
-                        input.value = paymentsource.dataset.index;
-                        document.getElementById("payment").appendChild(input);
-
-                        document.getElementById("paymentNextStepBottom").click();
-                    }
-                });
-            }
-        }
-    </script>
 [{/if}]
 [{if 'oscpaypal_express'|array_key_exists:$oView->getPaymentList() && $oViewConf->isPayPalExpressSessionActive()}]
     [{assign var="config" value=$oViewConf->getPayPalCheckoutConfig()}]
