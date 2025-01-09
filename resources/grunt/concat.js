@@ -16,6 +16,7 @@ module.exports = {
                 "build/js/paypal-frontend-googlepay.js",
                 "build/js/paypal-frontend-googlepay-3ds.js",
                 "build/js/paypal-frontend-hateoaslinks.js",
+                "build/js/paypal-frontend-paypal-vault-checkout.js",
             ]
         }
     }
