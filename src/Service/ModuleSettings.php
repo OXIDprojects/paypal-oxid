@@ -448,11 +448,11 @@ class ModuleSettings
         $moduleSetting = $this->moduleConfiguration->getModuleSetting($name);
 
         if ($moduleSetting->getType() === 'str') {
-        } else if ($moduleSetting->getType() === 'bool') {
             $value = trim($value);
-        } else if ($moduleSetting->getType() === 'float') {
-            $value = (float)trim($value);
+        } else if ($moduleSetting->getType() === 'bool') {
             $value = (bool)$value;
+        } else if ($moduleSetting->getType() === 'num') {
+            $value = (float)$value;
         }
 
         $this->moduleSettingBridge->save($name, $value, Module::MODULE_ID);
