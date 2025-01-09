@@ -10,16 +10,36 @@
      */
 
     /**
-     * Process an array of links.
+     * Process an array of links and return the aprove-link
      * @param {Link[]} links - An array of link objects.
      *
      * @returns {string|null}
      */
     OxidPayPalHateoasLinks.prototype.getApproveLink = function (links) {
-        const approveHateoasLink = links.find(link => link.rel === 'approve');
+        return this.getLinkByKeyword(links, 'approve');
+    };
 
-        if (approveHateoasLink) {
-            return approveHateoasLink.href;
+    /**
+     * Process an array of links and return the payer-action-link
+     * @param {Link[]} links - An array of link objects.
+     *
+     * @returns {string|null}
+     */
+    OxidPayPalHateoasLinks.prototype.getPayerActionLink = function (links) {
+        return this.getLinkByKeyword(links, 'payer-action');
+    };
+
+    /**
+     * Process an array of links.
+     * @param {Link[]} links - An array of link objects.
+     *
+     * @returns {string|null}
+     */
+    OxidPayPalHateoasLinks.prototype.getLinkByKeyword = function (links, keyword) {
+        const hateoasLink = links.find(link => link.rel === keyword);
+
+        if (hateoasLink) {
+            return hateoasLink.href;
         }
 
         return null;
