@@ -12,7 +12,6 @@ use OxidEsales\Eshop\Application\Model\Order as EshopModelOrder;
 use OxidEsales\Eshop\Core\DisplayError;
 use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Registry;
-use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
 use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
@@ -22,6 +21,7 @@ use OxidSolutionCatalysts\PayPal\Exception\PayPalException;
 use OxidSolutionCatalysts\PayPal\Exception\Redirect;
 use OxidSolutionCatalysts\PayPal\Exception\RedirectWithMessage;
 use OxidSolutionCatalysts\PayPal\Model\Order as PayPalOrderModel;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Service\Payment as PaymentService;
 use OxidSolutionCatalysts\PayPal\Service\UserRepository;
@@ -36,6 +36,7 @@ use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderCaptureRequest;
 
 /**
  * Class OrderController
+ *
  * @package OxidSolutionCatalysts\PayPal\Controller
  *
  * @mixin \OxidEsales\Eshop\Application\Controller\OrderController
@@ -82,11 +83,11 @@ class OrderController extends OrderController_parent
         }
 
         if (
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::SEPA_PAYPAL_PAYMENT_ID ||
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::CCALTERNATIVE_PAYPAL_PAYMENT_ID ||
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID ||
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::PAYLATER_PAYPAL_PAYMENT_ID ||
-            $paymentService->getSessionPaymentId() === PayPalDefinitions::GOOGLEPAY_PAYPAL_PAYMENT_ID
+            $paymentService->getSessionPaymentId() === PayPalDefinitions::SEPA_PAYPAL_PAYMENT_ID
+            || $paymentService->getSessionPaymentId() === PayPalDefinitions::CCALTERNATIVE_PAYPAL_PAYMENT_ID
+            || $paymentService->getSessionPaymentId() === PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID
+            || $paymentService->getSessionPaymentId() === PayPalDefinitions::PAYLATER_PAYPAL_PAYMENT_ID
+            || $paymentService->getSessionPaymentId() === PayPalDefinitions::GOOGLEPAY_PAYPAL_PAYMENT_ID
         ) {
             $paymentService->removeTemporaryOrder();
         }
@@ -105,9 +106,9 @@ class OrderController extends OrderController_parent
             $selectedVaultPaymentSourceIndex = $session->getVariable("selectedVaultPaymentSourceIndex");
 
             if (
-                $isVaultingPossible &&
-                !is_null($selectedVaultPaymentSourceIndex) &&
-                $payPalCustomerId = $user->getFieldData("oscpaypalcustomerid")
+                $isVaultingPossible
+                && !is_null($selectedVaultPaymentSourceIndex)
+                && $payPalCustomerId = $user->getFieldData("oscpaypalcustomerid")
             ) {
                 $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();
 
@@ -143,9 +144,9 @@ class OrderController extends OrderController_parent
         $order->load(Registry::getSession()->getVariable('sess_challenge'));
 
         if (
-            !$order->getFieldData('oxtransid') &&
-            $retryRequest &&
-             isset($this->retryPaymentMessages[$retryRequest])
+            !$order->getFieldData('oxtransid')
+            && $retryRequest
+            && isset($this->retryPaymentMessages[$retryRequest])
         ) {
             $displayError = oxNew(DisplayError::class);
             $displayError->setMessage($this->retryPaymentMessages[$retryRequest]);
@@ -183,9 +184,9 @@ class OrderController extends OrderController_parent
         $acdcStatus = Registry::getSession()->getVariable(Constants::SESSION_ACDC_PAYPALORDER_STATUS);
 
         if (
-            $sessionOrderId &&
-            $sessionAcdcOrderId &&
-            $acdcStatus === Constants::PAYPAL_STATUS_COMPLETED
+            $sessionOrderId
+            && $sessionAcdcOrderId
+            && $acdcStatus === Constants::PAYPAL_STATUS_COMPLETED
         ) {
             //we already have a completed acdc order
             $this->outputJson(['acdcerror' => 'shop order already completed']);
@@ -303,9 +304,9 @@ class OrderController extends OrderController_parent
         $logger = $this->getServiceFromContainer(Logger::class);
 
         if (
-            'COMPLETED' === $acdcStatus &&
-            $sessionOrderId &&
-            $sessionAcdcOrderId
+            'COMPLETED' === $acdcStatus
+            && $sessionOrderId
+            && $sessionAcdcOrderId
         ) {
             $logger->log(
                 'debug',
