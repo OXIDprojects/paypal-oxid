@@ -6,4 +6,4 @@
  */
 $sLangName = 'Deutsch';
 
-$aLang = include __DIR__."/../../de/transaction_type_codes_translations.php";
+$aLang = include __DIR__."/../../admin_de/transaction_type_codes_translations.php";

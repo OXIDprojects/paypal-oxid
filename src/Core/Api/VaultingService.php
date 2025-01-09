@@ -13,6 +13,7 @@ use OxidEsales\Eshop\Application\Model\State;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\ViewConfig;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
+use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
@@ -44,7 +45,7 @@ class VaultingService extends BaseService
                 $body = $response->getBody();
             }
             $result = json_decode((string)$body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (ApiException | JsonException $e) {
+        } catch (ApiException|JsonException $e) {
             $result = [];
         }
 
@@ -53,8 +54,7 @@ class VaultingService extends BaseService
 
     /**
      * Request a setup token either for card or for PayPal vaulting
-     *
-     * @param  bool $card
+     * @param bool $card
      * @return array
      * @throws JsonException
      */
@@ -98,7 +98,7 @@ class VaultingService extends BaseService
                 $body = $response->getBody();
             }
             $result = json_decode((string)$body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (ApiException | JsonException $e) {
+        } catch (ApiException|JsonException $e) {
             $result = [];
         }
 
@@ -106,7 +106,7 @@ class VaultingService extends BaseService
     }
 
     /**
-     * @param  bool $card
+     * @param bool $card
      * @return array
      */
     public function getPaymentSourceForVaulting(bool $card): array
@@ -149,7 +149,7 @@ class VaultingService extends BaseService
             "locale"              => $locale,
             "return_url"          => $config->getSslShopUrl() . 'index.php?cl=order&fnc=finalizepaypalsession',
             "cancel_url"          => $config->getSslShopUrl() . 'index.php?cl=order&fnc=cancelpaypalsession',
-        //            "shipping_preference" => "SET_PROVIDED_ADDRESS",
+//            "shipping_preference" => "SET_PROVIDED_ADDRESS",
         ];
 
         if ($card) {
@@ -215,7 +215,7 @@ class VaultingService extends BaseService
                 $body = $response->getBody();
             }
             $result = json_decode((string)$body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (ApiException | JsonException $e) {
+        } catch (ApiException|JsonException $e) {
             $result = [];
         }
 
@@ -242,7 +242,9 @@ class VaultingService extends BaseService
                 $body = $response->getBody();
             }
             $result = json_decode((string)$body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (ApiException | JsonException $e) {
+        } catch (ApiException|JsonException $e) {
+            $this->getServiceFromContainer(Logger::class)
+                ->log('error', __CLASS__ . ' ' . __FUNCTION__ . ' : ' . $e->getMessage());
             $result = [];
         }
 
@@ -257,7 +259,7 @@ class VaultingService extends BaseService
     }
 
     /**
-     * @param  string $paymentTokenId
+     * @param string $paymentTokenId
      * @return bool
      */
     public function deleteVaultedPayment(string $paymentTokenId): bool

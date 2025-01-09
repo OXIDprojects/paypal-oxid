@@ -1,7 +1,6 @@
 [{include file="headitem.tpl" title="paypal" box="boxpaypal"}]
 [{assign var="isSandBox" value=$config->isSandbox()}]
 [{assign var="sSelfLink" value=$oViewConf->getSslSelfLink()|replace:"&amp;":"&"}]
-
 [{capture assign="sPayPalJS"}]
     [{strip}]
     window.isSandBox = '[{$isSandBox}]';
@@ -16,9 +15,9 @@
     <h1>[{oxmultilang ident="paypal"}] [{oxmultilang ident="OSC_PAYPAL_CONFIG"}]</h1>
     <div class="alert alert-[{if $Errors.paypal_error}]danger[{else}]success[{/if}]" role="alert">
         [{if $Errors.paypal_error}]
-            [{oxmultilang ident="OSC_PAYPAL_ERR_CONF_INVALID"}]
+        [{oxmultilang ident="OSC_PAYPAL_ERR_CONF_INVALID"}]
         [{else}]
-            [{oxmultilang ident="OSC_PAYPAL_CONF_VALID"}]
+        [{oxmultilang ident="OSC_PAYPAL_CONF_VALID"}]
         [{/if}]
     </div>
     <div id="overlay"><div class="loader"></div></div>
@@ -55,7 +54,6 @@
                         <p class="help-block text-danger">[{oxmultilang ident="HELP_OSC_PAYPAL_CREDENTIALS_PART1"}]</p>
                         <p class="help-block text-danger">[{oxmultilang ident="HELP_OSC_PAYPAL_CREDENTIALS_PART2"}]</p>
 
-                        <p class="help-block text-danger">[{oxmultilang ident="HELP_OSC_PAYPAL_CREDENTIALS_PART2"}]</p>
                         <p class="live"><a target="_blank"
                                            class="popuplink2"
                                            href="[{$oView->getLiveSignUpMerchantIntegrationLink()}]"
@@ -66,7 +64,7 @@
                             </a>
                         </p>
 
-                      <h3 class="live">[{oxmultilang ident="OSC_PAYPAL_LIVE_CREDENTIALS"}]</h3>
+                        <h3 class="live">[{oxmultilang ident="OSC_PAYPAL_LIVE_CREDENTIALS"}]</h3>
 
                         <div class="form-group live">
                             <label for="client-id">[{oxmultilang ident="OSC_PAYPAL_CLIENT_ID"}]</label>
@@ -109,9 +107,9 @@
                                 <br>
                                 [{oxmultilang ident="OSC_PAYPAL_SPECIAL_PAYMENTS_VAULTING" suffix="COLON"}] [{if $config->isLiveVaultingEligibility()}][{oxmultilang ident="GENERAL_YES"}][{else}][{oxmultilang ident="GENERAL_NO"}][{/if}]
                                 <br>
-                                [{oxmultilang ident="OSC_PAYPAL_SPECIAL_PAYMENTS_APPLEPAY" suffix="COLON"}] [{if $config->isLiveApplePayEligibility()}][{oxmultilang ident="GENERAL_YES"}][{else}][{oxmultilang ident="GENERAL_NO"}][{/if}]
-                                <br>
                                 [{oxmultilang ident="OSC_PAYPAL_SPECIAL_PAYMENTS_GOOGLEPAY" suffix="COLON"}] [{if $config->isLiveGooglePayEligibility()}][{oxmultilang ident="GENERAL_YES"}][{else}][{oxmultilang ident="GENERAL_NO"}][{/if}]
+                                <br>
+                                [{oxmultilang ident="OSC_PAYPAL_SPECIAL_PAYMENTS_APPLEPAY" suffix="COLON"}] [{if $config->isLiveApplePayEligibility()}][{oxmultilang ident="GENERAL_YES"}][{else}][{oxmultilang ident="GENERAL_NO"}][{/if}]
                             </div>
                         </div>
 
@@ -360,7 +358,7 @@
                 <div id="collapse7" class="collapse" aria-labelledby="heading7" data-parent="#accordion">
                     <div class="card-body">
                         [{if $oView->showTransferLegacySettingsButton()}]
-                            <a class="btn btn-primary bottom-space" href="[{$sSelfLink|cat:"cl=oscpaypalconfig&fnc=transferBannerSettings"}]">[{oxmultilang ident='OSC_PAYPAL_BANNER_TRANSFERLEGACYSETTINGS'}]</a>
+                        <a class="btn btn-primary bottom-space" href="[{$sSelfLink|cat:"cl=oscpaypalconfig&fnc=transferBannerSettings"}]">[{oxmultilang ident='OSC_PAYPAL_BANNER_TRANSFERLEGACYSETTINGS'}]</a>
                         [{/if}]
                         <p>[{oxmultilang ident="OSC_PAYPAL_BANNER_INFOTEXT"}]</p>
                         <div class="form-group">
@@ -449,7 +447,6 @@
                                 <input type="text" class="form-control" id="banner-cart" name="conf[oscPayPalBannersCartPageSelector]" value="[{$config->getPayPalCheckoutBannerCartPageSelector()}]">
                             </div>
                             <span class="help-block">[{oxmultilang ident="HELP_OSC_PAYPAL_BANNER_CARTPAGESELECTOR"}]</span>
-
                             <label for="banner-paymentpage">[{oxmultilang ident="OSC_PAYPAL_BANNER_PAYMENTPAGESELECTOR"}]</label>
                             <div class="controls">
                                 <input type="text" class="form-control" id="banner-paymentpage" name="conf[oscPayPalBannersPaymentPageSelector]" value="[{$config->getPayPalCheckoutBannerPaymentPageSelector()}]">
@@ -509,6 +506,7 @@
                         [{oxmultilang ident="OSC_PAYPAL_VAULTING_TITLE"}]
                     </h4>
                 </div>
+
                 <div id="collapse9" class="collapse" aria-labelledby="heading9" data-parent="#accordion">
                     <div class="card-body">
                             <div class="form-group">
@@ -524,28 +522,6 @@
                             </div>
                     </div>
                 </div>
-            </div>
-            <div class="card">
-                <div class="card-header" id="heading10">
-                    <h4 class="collapsed" data-toggle="collapse" data-target="#collapse10" aria-expanded="false" aria-controls="collapse10">
-                        [{oxmultilang ident="OSC_PAYPAL_EXPRESS_SHIPPING_TITLE"}]
-                    </h4>
-                </div>
-            <div id="collapse10" class="collapse" aria-labelledby="heading10" data-parent="#accordion">
-                <div class="card-body">
-                    <div class="form-group">
-                        <div class="controls">
-                            <div class="form-group">
-                                <label for="shippingExpress">[{oxmultilang ident="OSC_PAYPAL_EXPRESS_SHIPPING_TITLE"}]</label>
-                                <div class="controls">
-                                        <input type="text" id="shippingExpress" class="form-control" name="conf[oscPayPalDefaultShippingPriceExpress]" value="[{$config->getDefaultShippingPriceForExpress()|string_format:"%.2f"}]" />
-                                    <span class="help-block">[{oxmultilang ident="OSC_PAYPAL_EXPRESS_SHIPPING_DESC"}]</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
             </div>
 
             <div class="card">
@@ -563,6 +539,28 @@
                                     <div class="controls">
                                         <input type="text" id="shippingExpress" class="form-control" name="conf[oscPayPalDefaultShippingPriceExpress]" value="[{$config->getDefaultShippingPriceForExpress()|string_format:"%.2f"}]" />
                                         <span class="help-block">[{oxmultilang ident="OSC_PAYPAL_EXPRESS_SHIPPING_DESC"}]</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="heading11">
+                    <h4 class="collapsed" data-toggle="collapse" data-target="#collapse11" aria-expanded="false" aria-controls="collapse11">
+                        [{oxmultilang ident="OSC_PAYPAL_CUSTOM_ID_CONTENTS_TITLE"}]
+                    </h4>
+                </div>
+                <div id="collapse11" class="collapse" aria-labelledby="heading11" data-parent="#accordion">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="controls">
+                                <div class="form-group">
+                                    <div class="controls">
+                                        <input type="checkbox" name="conf[oscPayPalUseStructuralCustomIdSchema]" value="1" [{if $config->isCustomIdSchemaStructural()}] checked[{/if}]>
+                                        <span class="help-block">[{oxmultilang ident="OSC_PAYPAL_CUSTOM_ID_CONTENTS_DESC"}]</span>
                                     </div>
                                 </div>
                             </div>

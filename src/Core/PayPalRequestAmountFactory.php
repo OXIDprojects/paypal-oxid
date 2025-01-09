@@ -16,7 +16,6 @@ use OxidSolutionCatalysts\PayPal\Core\Utils\PriceToMoney;
 
 /**
  * Class PayPalRequestFactory
- *
  * @package OxidSolutionCatalysts\PayPal\Core
  */
 class PayPalRequestAmountFactory
@@ -48,18 +47,16 @@ class PayPalRequestAmountFactory
         }
 
         if ($netMode) {
-            $total = $brutBasketTotal - $shipping;
+            $total = $itemTotal - $shipping;
         } else {
             $total = $itemTotal - $discount + $itemTotalAdditionalCosts;
         }
-        $total_with_shipping = $total + $shipping;
 
         $total = PriceToMoney::convert($total, $currency);
-        $total_with_shipping = PriceToMoney::convert($total_with_shipping, $currency);
 
         //Total amount
         $amount = new AmountWithBreakdown();
-        $amount->value = $total_with_shipping->value;
+        $amount->value = $brutBasketTotal;
         $amount->currency_code = $total->currency_code;
 
         //Cost breakdown
@@ -69,7 +66,8 @@ class PayPalRequestAmountFactory
             $breakdown->discount = PriceToMoney::convert($netMode ? $brutDiscountValue : $discount, $currency);
         }
 
-        $breakdown->item_total = PriceToMoney::convert($total->value, $currency);
+        $breakDownItemTotal = $netMode ? $total->value : $itemTotal;
+        $breakdown->item_total = PriceToMoney::convert($breakDownItemTotal, $currency);
         //Item tax sum - we use 0% and calculate with brutto to avoid rounding errors
         $breakdown->tax_total = PriceToMoney::convert(0, $currency);
 

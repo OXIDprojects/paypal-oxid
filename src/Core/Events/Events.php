@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\PayPal\Core\Events;
 
 use OxidEsales\DoctrineMigrationWrapper\MigrationsBuilder;
-use OxidEsales\Eshop\Application\Model\Payment as EshopModelPayment;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ModuleConfigurationDaoBridgeInterface;
@@ -18,6 +17,7 @@ use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\Mod
 use OxidEsales\EshopCommunity\Internal\Transition\Utility\ContextInterface;
 use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\ModuleSettings;
+use OxidSolutionCatalysts\PayPal\Service\UserRepository;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPal\Service\StaticContent;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
@@ -111,14 +111,10 @@ class Events
         */
 
         try {
-            /**
- * @var ContainerInterface $container
-*/
+            /** @var ContainerInterface $container */
             $container = ContainerFactory::getInstance()
                 ->getContainer();
-            /**
- * @var QueryBuilderFactoryInterface $queryBuilderFactory
-*/
+            /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
             $queryBuilderFactory = $container->get(QueryBuilderFactoryInterface::class);
             $moduleSettings = self::getModuleSettingsService();
 
@@ -146,33 +142,25 @@ class Events
         */
 
         try {
-            /**
- * @var ContainerInterface $container
-*/
+            /** @var ContainerInterface $container */
             $container = ContainerFactory::getInstance()
                 ->getContainer();
-            /**
- * @var ModuleSettingBridgeInterface $moduleSettingsBridge
-*/
+            /** @var ModuleSettingBridgeInterface $moduleSettingsBridge */
             $moduleSettingsBridge = $container->get(ModuleSettingBridgeInterface::class);
-            /**
- * @var ContextInterface $context
-*/
+            /** @var ContextInterface $context */
             $context = $container->get(ContextInterface::class);
-            /**
- * @var ModuleConfigurationDaoBridgeInterface $moduleConfigurationDaoBridgeInterface
-*/
+            /** @var ModuleConfigurationDaoBridgeInterface $moduleConfigurationDaoBridgeInterface */
             $moduleConfigurationDaoBridgeInterface = $container->get(ModuleConfigurationDaoBridgeInterface::class);
-            /**
- * @var Logger $logger
-*/
+            /** @var Logger $logger */
             $logger = $container->get(Logger::class);
 
+            $userRepository = $container->get(UserRepository::class);
             return new ModuleSettings(
                 $moduleSettingsBridge,
                 $context,
                 $moduleConfigurationDaoBridgeInterface,
-                $logger
+                $logger,
+                $userRepository
             );
         } catch (NotFoundExceptionInterface | ContainerExceptionInterface $exception) {
             Registry::getUtilsView()->addErrorToDisplay('OSC_PAYPAL_INSTALLPROCESS_FAILED');

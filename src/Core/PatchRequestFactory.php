@@ -22,7 +22,6 @@ use OxidSolutionCatalysts\PayPal\Core\Utils\PriceToMoney;
 
 /**
  * Class PatchRequestFactory
- *
  * @package OxidSolutionCatalysts\PayPal\Core
  */
 class PatchRequestFactory
@@ -154,9 +153,7 @@ class PatchRequestFactory
         $patch->path = "/purchase_units/@reference_id=='" . Constants::PAYPAL_ORDER_REFERENCE_ID . "'/items";
         $patchValues = [];
 
-        /**
- * @var BasketItem $basketItem
-*/
+        /** @var BasketItem $basketItem */
         foreach ($basketItems as $basketItem) {
             $item = new Item();
             $item->name = $basketItem->getTitle();

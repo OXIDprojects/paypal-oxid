@@ -22,12 +22,12 @@ class ShopControl extends ShopControl_parent
     /**
      * @param StandardException $exception
      */
-    protected function handleBaseException($exception) // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+    protected function _handleBaseException($exception) // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
     {
         if ($exception instanceof PayPalException) {
             $this->handleCustomPayPalException($exception);
         } else {
-            parent::handleBaseException($exception);
+            parent::_handleBaseException($exception);
         }
     } // @codeCoverageIgnore
 
@@ -41,13 +41,13 @@ class ShopControl extends ShopControl_parent
         } elseif ($exception instanceof Redirect) {
             $this->handlePayPalRedirectException($exception, false);
         } else {
-            parent::handleBaseException($exception);
+            parent::_handleBaseException($exception);
         }
     } // @codeCoverageIgnore
 
     /**
      * @param Redirect $redirectException
-     * @param bool     $blAddRedirectParam
+     * @param bool $blAddRedirectParam
      */
     protected function handlePayPalRedirectException(Redirect $redirectException, bool $blAddRedirectParam = true): void
     {

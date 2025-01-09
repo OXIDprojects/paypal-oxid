@@ -29,7 +29,7 @@ abstract class WebhookHandlerBase
 
     /**
      * @inheritDoc
-     * @throws     WebhookEventException
+     * @throws WebhookEventException
      */
     public function handle(Event $event): void
     {
@@ -42,14 +42,10 @@ abstract class WebhookHandlerBase
         $payPalOrderId = $this->getPayPalOrderIdFromResource($eventPayload);
 
         if ($payPalOrderId) {
-            /**
- * @var EshopModelOrder $order
-*/
+            /** @var EshopModelOrder $order */
             $order = $this->getOrderByPayPalOrderId($payPalOrderId);
 
-            /**
- * @var PayPalModelOrder $paypalOrderModel
-*/
+            /** @var PayPalModelOrder $paypalOrderModel */
             $paypalOrderModel = $this->getPayPalModelOrder(
                 (string) $order->getId(),
                 $payPalOrderId,
@@ -64,9 +60,7 @@ abstract class WebhookHandlerBase
                 $order
             );
         } else {
-            /**
- * @var Logger $logger
-*/
+            /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log(
                 'debug',
@@ -92,9 +86,7 @@ abstract class WebhookHandlerBase
     ): void {
         $paypalOrderModel->setTransactionId($payPalTransactionId);
 
-        /**
- * @var ?PayPalApiModelOrder $orderDetail
-*/
+        /** @var ?PayPalApiModelOrder $orderDetail */
         $orderDetail = $this->getPayPalOrderDetails($payPalOrderId);
 
         $this->updateStatus(
@@ -109,9 +101,7 @@ abstract class WebhookHandlerBase
     public function cleanUpNotFinishedOrders(): void
     {
         // check for not finished orders and reset
-        /**
- * @var \OxidSolutionCatalysts\PayPal\Model\PayPalOrder $paypalOrderModel
-*/
+        /** @var \OxidSolutionCatalysts\PayPal\Model\PayPalOrder $paypalOrderModel */
         $this->getOrderRepository()->cleanUpNotFinishedOrders();
     }
 
@@ -143,9 +133,7 @@ abstract class WebhookHandlerBase
     protected function getOrderByPayPalOrderId(string $payPalOrderId): EshopModelOrder
     {
         try {
-            /**
- * @var EshopModelOrder $order
-*/
+            /** @var EshopModelOrder $order */
             $order = $this->getOrderRepository()
                 ->getShopOrderByPayPalOrderId($payPalOrderId);
         } catch (NotFound $exception) {
@@ -160,9 +148,7 @@ abstract class WebhookHandlerBase
         string $payPalOrderId,
         string $payPalTransactionId
     ): PayPalModelOrder {
-        /**
- * @var PayPalModelOrder $paypalOrderModel
-*/
+        /** @var PayPalModelOrder $paypalOrderModel */
         $paypalOrderModel = $this->getOrderRepository()
             ->paypalOrderByOrderIdAndPayPalId(
                 $shopOrderId,
@@ -184,8 +170,8 @@ abstract class WebhookHandlerBase
         ?PayPalApiModelOrder $orderDetails
     ): void {
         if (
-            $orderDetails
-            && ($puiPaymentDetails = $orderDetails->payment_source->pay_upon_invoice ?? null)
+            $orderDetails &&
+            ($puiPaymentDetails = $orderDetails->payment_source->pay_upon_invoice ?? null)
         ) {
             $paypalOrderModel->setPuiPaymentReference($puiPaymentDetails->payment_reference);
             $paypalOrderModel->setPuiBic($puiPaymentDetails->bic);

@@ -20,24 +20,16 @@ use OxidEsales\Eshop\Application\Model\State;
 
 class UserRepository
 {
-    /**
-     * @var QueryBuilderFactoryInterface
-     */
+    /** @var QueryBuilderFactoryInterface */
     private $queryBuilderFactory;
 
-    /**
-     * @var ContextInterface
-     */
+    /** @var ContextInterface */
     private $context;
 
-    /**
-     * @var EshopCoreConfig
-     */
+    /** @var EshopCoreConfig */
     private $config;
 
-    /**
-     * @var EshopCoreSession
-     */
+    /** @var EshopCoreSession */
     private $session;
 
     public function __construct(
@@ -74,9 +66,7 @@ class UserRepository
 
     private function getUserId(string $userEmail, bool $hasPassword = true): string
     {
-        /**
- * @var QueryBuilder $queryBuilder
-*/
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->queryBuilderFactory->create();
 
         $parameters = [

@@ -307,6 +307,7 @@ class Config
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->getPayPalCheckoutBannerCartPageSelector();
     }
+
     public function getPayPalCheckoutBannerPaymentPageSelector(): string
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->getPayPalCheckoutBannerPaymentPageSelector();
@@ -340,6 +341,11 @@ class Config
     public function getStartTimeCleanUpOrders(): int
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->getStartTimeCleanUpOrders();
+    }
+
+    public function isCustomIdSchemaStructural(): bool
+    {
+        return $this->getServiceFromContainer(ModuleSettings::class)->isCustomIdSchemaStructural();
     }
 
     public function tableExists(string $tableName = ''): bool
@@ -456,21 +462,23 @@ class Config
         return $this->getServiceFromContainer(ModuleSettings::class)->getIsVaultingActive();
     }
 
+    public function getUserIdForVaulting(): string
+    {
+        $user = Registry::getConfig()->getUser();
+        $payPalCustomerId = $user ? $user->getFieldData("oscpaypalcustomerid") : '';
+
+        if (!$payPalCustomerId) {
+            return "";
+        }
+
+        $vaultingService = Registry::get(ServiceFactory::class)->getVaultingService();
+        $response = $vaultingService->generateUserIdToken($payPalCustomerId);
+
+        return $response["id_token"] ?? "";
+    }
+
     public function getIsGooglePayDeliveryAdressActive(): bool
     {
         return $this->getServiceFromContainer(ModuleSettings::class)->getIsGooglePayDeliveryAddressActive();
-    }
-
-    public function isLogLevel(string $level): bool
-    {
-        $possiblePayPalLevels = [
-            'error' => 400,
-            'info'  => 200,
-            'debug' => 100
-        ];
-        $logLevel = Registry::getConfig()->getConfigParam('sLogLevel') ?? 'error';
-        $logLevel = isset($possiblePayPalLevels[$logLevel]) ? $logLevel : 'error';
-        $level = isset($possiblePayPalLevels[$level]) ? $level : 'error';
-        return $possiblePayPalLevels[$logLevel] <= $possiblePayPalLevels[$level];
     }
 }

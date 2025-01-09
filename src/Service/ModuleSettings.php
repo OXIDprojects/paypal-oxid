@@ -10,9 +10,9 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\PayPal\Service;
 
 use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Application\Model\DeliverySetList;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\Shop;
-use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ModuleConfigurationDaoBridgeInterface;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ModuleSettingBridgeInterface;
@@ -44,36 +44,43 @@ class ModuleSettings
     protected $payPalCheckoutExpressPaymentEnabled = null;
 
     /**
+     * is Vaulting allowed for PayPal
+     *
+     * @var bool
+     */
+    protected $isVaultingAllowedForPayPal = null;
+
+    /**
+     * is Vaulting allowed for ACDC
+     *
+     * @var bool
+     */
+    protected $isVaultingAllowedForACDC = null;
+
+    /**
      * Country Restriction for PayPal as comma seperated string
      *
      * @var string
      */
     protected $countryRestrictionForPayPalExpress = null;
 
-    /**
-     * @var ModuleSettingBridgeInterface
-     */
+    /** @var ModuleSettingBridgeInterface */
     private $moduleSettingBridge;
 
-    /**
-     * @var ModuleConfigurationDaoBridgeInterface
-     */
+    /** @var ModuleConfigurationDaoBridgeInterface */
     private $moduleConfigurationDaoBridgeInterface;
 
-    /**
-     * @var ModuleConfiguration
-     */
+    /** @var ModuleConfiguration */
     private $moduleConfiguration = null;
 
-    /**
-     * @var ContextInterface
-     */
+    /** @var ContextInterface */
     private $context;
 
-    /**
-     * @var Logger
-     */
+    /** @var Logger */
     private $logger;
+
+    /** @var UserRepository */
+    private $userRepository;
 
     //TODO: we need service for fetching module settings from db (this one)
     //another class for moduleconfiguration (database values/edefaults)
@@ -84,12 +91,14 @@ class ModuleSettings
         ModuleSettingBridgeInterface $moduleSettingBridge,
         ContextInterface $context,
         ModuleConfigurationDaoBridgeInterface $moduleConfigurationDaoBridgeInterface,
-        Logger $logger
+        Logger $logger,
+        UserRepository $userRepository
     ) {
         $this->moduleSettingBridge = $moduleSettingBridge;
         $this->context = $context;
         $this->moduleConfigurationDaoBridgeInterface = $moduleConfigurationDaoBridgeInterface;
         $this->logger = $logger;
+        $this->userRepository = $userRepository;
     }
 
     public function showAllPayPalBanners(): bool
@@ -276,6 +285,7 @@ class ModuleSettings
     {
         return (bool)$this->getSettingValue('oscPayPalBannersCategoryPage');
     }
+
     public function getCategoryPageBannerSelector(): string
     {
         return (string)$this->getSettingValue('oscPayPalBannersCategoryPageSelector');
@@ -346,6 +356,7 @@ class ModuleSettings
         return (int)$this->getSettingValue('oscPayPalStartTimeCleanUpOrders');
     }
 
+
     public function isLiveAcdcEligibility(): bool
     {
         return (bool)$this->getSettingValue('oscPayPalAcdcEligibility');
@@ -397,25 +408,15 @@ class ModuleSettings
         return (bool)$this->getSettingValue('oscPayPalSandboxGooglePayEligibility');
     }
 
-    public function getActivePayments(): array
-    {
-        /**
- * @var array|null $activePayments
-*/
-        $activePayments = $this->getSettingValue('oscPayPalActivePayments');
-        return $activePayments ?: [];
-    }
-
     public function getShopName(): string
     {
         $value = '';
-        /**
- * @var Shop $shop
-*/
+        /** @var Shop $shop */
         $shop = Registry::getConfig()->getActiveShop();
         if (isset($shop->oxshops__oxname->rawValue)) {
             $value = $shop->oxshops__oxname->rawValue;
-        } elseif (isset($shop->oxshops__oxname->value)) {
+        }
+        elseif(isset($shop->oxshops__oxname->value)) {
             $value = $shop->oxshops__oxname->value;
         }
         return $value;
@@ -427,13 +428,12 @@ class ModuleSettings
     public function getInfoEMail(): string
     {
         $value = '';
-        /**
- * @var Shop $shop
-*/
+        /** @var Shop $shop */
         $shop = Registry::getConfig()->getActiveShop();
         if (isset($shop->oxshops__oxinfoemail->rawValue)) {
             $value = $shop->oxshops__oxinfoemail->rawValue;
-        } elseif (isset($shop->oxshops__oxinfoemail->value)) {
+        }
+        elseif(isset($shop->oxshops__oxinfoemail->value)) {
             $value = $shop->oxshops__oxinfoemail->value;
         }
         return $value;
@@ -453,8 +453,8 @@ class ModuleSettings
             $value = trim($value);
         } else if ($moduleSetting->getType() === 'bool') {
             $value = (bool)$value;
-        } else if ($moduleSetting->getType() === 'float') {
-            $value = (float)trim($value);
+        } else if ($moduleSetting->getType() === 'num') {
+            $value = (float)$value;
         }
 
         $this->moduleSettingBridge->save($name, $value, Module::MODULE_ID);
@@ -572,7 +572,6 @@ class ModuleSettings
 
     /**
      * This setting indicates whether settings from the legacy modules have been transferred.
-     *
      * @return bool
      */
     public function getLegacySettingsTransferStatus(): bool
@@ -585,7 +584,7 @@ class ModuleSettings
      */
     public function isPayPalCheckoutExpressPaymentEnabled(): bool
     {
-        if ($this->payPalCheckoutExpressPaymentEnabled === null) {
+        if (is_null($this->payPalCheckoutExpressPaymentEnabled)) {
             $expressEnabled = false;
             $payment = oxNew(Payment::class);
             $payment->load(PayPalDefinitions::EXPRESS_PAYPAL_PAYMENT_ID);
@@ -601,6 +600,65 @@ class ModuleSettings
             $this->payPalCheckoutExpressPaymentEnabled = $expressEnabled;
         }
         return $this->payPalCheckoutExpressPaymentEnabled;
+    }
+
+    /** check if Vaulting is allowed for PayPal */
+    public function isVaultingAllowedForPayPal(): bool
+    {
+        if (is_null($this->isVaultingAllowedForPayPal)) {
+            $this->isVaultingAllowedForPayPal = $this->isVaultingAllowedForPayment(
+                PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID
+            );
+        }
+        return $this->isVaultingAllowedForPayPal;
+    }
+
+    /** check if Vaulting is allowed for ACDC */
+    public function isVaultingAllowedForACDC(): bool
+    {
+        if (is_null($this->isVaultingAllowedForACDC)) {
+            $this->isVaultingAllowedForACDC = $this->isVaultingAllowedForPayment(
+                PayPalDefinitions::ACDC_PAYPAL_PAYMENT_ID
+            );
+        }
+        return $this->isVaultingAllowedForACDC;
+    }
+
+    /** check if Vaulting is allowed for Payment-Method */
+    public function isVaultingAllowedForPayment(string $paymentId): bool
+    {
+        $payment = oxNew(Payment::class);
+        $payment->load($paymentId);
+        $paymentEnabled = (bool)$payment->oxpayments__oxactive->value;
+        $paymentType = PayPalDefinitions::getPayPalDefinitions()[$paymentId]["vaultingtype"];
+
+        $session =  Registry::getSession();
+        $actShipSet = $session->getVariable('sShipSet');
+        $basket = $session->getBasket();
+        $user = $session->getUser();
+        $payPalDefinitions = PayPalDefinitions::getPayPalDefinitions();
+        $actShopCurrency = Registry::getConfig()->getActShopCurrencyObject();
+        $userCountryIso = $this->userRepository->getUserCountryIso();
+
+        [, , $paymentList] =
+            Registry::get(DeliverySetList::class)->getDeliverySetData(
+                $actShipSet,
+                $user,
+                $basket
+            );
+
+        return $paymentEnabled &&
+            $this->getIsVaultingActive() &&
+            PayPalDefinitions::isPayPalVaultingPossible($paymentId, $paymentType) &&
+            array_key_exists($paymentId, $paymentList) &&
+            (
+                empty($payPalDefinitions[$paymentId]['currencies']) ||
+                in_array($actShopCurrency->name, $payPalDefinitions[$paymentId]['currencies'], true)
+            ) &&
+            (
+                empty($payPalDefinitions[$paymentId]['countries']) ||
+                in_array($userCountryIso, $payPalDefinitions[$paymentId]['countries'], true)
+            );
     }
 
     /**
@@ -645,9 +703,15 @@ class ModuleSettings
     {
         return (bool)$this->getSettingValue('oscPayPalSetVaulting');
     }
+
     public function getIsGooglePayDeliveryAddressActive(): bool
     {
         return (bool)$this->getSettingValue('oscPayPalUseGooglePayAddress');
+    }
+
+    public function isCustomIdSchemaStructural(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalUseStructuralCustomIdSchema');
     }
 
     /**

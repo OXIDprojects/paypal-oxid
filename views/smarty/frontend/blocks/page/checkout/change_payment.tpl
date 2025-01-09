@@ -1,0 +1,6 @@
+[{if $oViewConf->isFlowCompatibleTheme()}]
+    [{include file='@osc_paypal/frontend/flow/change_payment.tpl'}]
+[{else}]
+    [{include file='@osc_paypal/frontend/wave/change_payment.tpl'}]
+[{/if}]
+[{$smarty.block.parent}]

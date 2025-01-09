@@ -73,28 +73,6 @@ final class PayPalDefinitions
             'vaultingtype' => 'paypal'
         ],
         //GooglePay
-        self::APPLEPAY_PAYPAL_PAYMENT_ID => [
-            'descriptions' => [
-                'de' => [
-                    'desc' => 'ApplePay',
-                    'longdesc' => '',
-                    'longdesc_beta' => 'Bezahlen Sie bequem mit ApplePay. Starten Sie direkt von der Detailsseite oder im Warenkorb.'
-                ],
-                'en' => [
-                    'desc' => 'ApplePay',
-                    'longdesc' => '',
-                    'longdesc_beta' => 'Pay conveniently with ApplePay. Start directly from the details page or in the shopping cart.'
-                ]
-            ],
-            'countries' => [],
-            'currencies' => ['AUD', 'BRL', 'CAD', 'CNY', 'CZK', 'DKK', 'EUR', 'HKD', 'HUF', 'ILS', 'JPY', 'MYR', 'MXN', 'TWD', 'NZD', 'NOK', 'PHP', 'PLN', 'GBP', 'RUB', 'SGD', 'SEK', 'CHF', 'THB', 'USD'],
-            'uapmpaymentsource' => 'apple_pay',
-            'constraints' => self::PAYMENT_CONSTRAINTS_PAYPAL,
-            'onlybrutto' => false,
-            'buttonpayment' => false,
-            'defaulton' => true
-        ],
-        //GooglePay
         self::GOOGLEPAY_PAYPAL_PAYMENT_ID => [
             'descriptions' => [
                 'de' => [
@@ -110,7 +88,27 @@ final class PayPalDefinitions
             ],
             'countries' => [],
             'currencies' => ['AUD', 'BRL', 'CAD', 'CNY', 'CZK', 'DKK', 'EUR', 'HKD', 'HUF', 'ILS', 'JPY', 'MYR', 'MXN', 'TWD', 'NZD', 'NOK', 'PHP', 'PLN', 'GBP', 'RUB', 'SGD', 'SEK', 'CHF', 'THB', 'USD'],
-            'uapmpaymentsource' => 'googlepay',
+            'constraints' => self::PAYMENT_CONSTRAINTS_PAYPAL,
+            'onlybrutto' => false,
+            'buttonpayment' => false,
+            'defaulton' => true
+        ],
+        //ApplePay
+        self::APPLEPAY_PAYPAL_PAYMENT_ID => [
+            'descriptions' => [
+                'de' => [
+                    'desc' => 'ApplePay',
+                    'longdesc' => '',
+                    'longdesc_beta' => 'Bezahlen Sie bequem mit ApplePay. Starten Sie direkt von der Detailsseite oder im Warenkorb.'
+                ],
+                'en' => [
+                    'desc' => 'ApplePay',
+                    'longdesc' => '',
+                    'longdesc_beta' => 'Pay conveniently with ApplePay. Start directly from the details page or in the shopping cart.'
+                ]
+            ],
+            'countries' => [],
+            'currencies' => ['AUD', 'BRL', 'CAD', 'CNY', 'CZK', 'DKK', 'EUR', 'HKD', 'HUF', 'ILS', 'JPY', 'MYR', 'MXN', 'TWD', 'NZD', 'NOK', 'PHP', 'PLN', 'GBP', 'RUB', 'SGD', 'SEK', 'CHF', 'THB', 'USD'],
             'constraints' => self::PAYMENT_CONSTRAINTS_PAYPAL,
             'onlybrutto' => false,
             'buttonpayment' => false,
@@ -136,7 +134,6 @@ final class PayPalDefinitions
             'onlybrutto' => false,
             'buttonpayment' => false,
             'defaulton' => true,
-            'vaultingtype' => 'paypal'
         ],
         //Express PayPal
         self::EXPRESS_PAYPAL_PAYMENT_ID => [
@@ -158,7 +155,6 @@ final class PayPalDefinitions
             'onlybrutto' => false,
             'buttonpayment' => true,
             'defaulton' => true,
-            'vaultingtype' => 'paypal'
         ],
         self::PUI_PAYPAL_PAYMENT_ID => [
             'descriptions' => [
@@ -518,12 +514,12 @@ final class PayPalDefinitions
     /**
      * Check if payment is deprecated
      *
-     * @param  string $paymentId
+     * @param string $paymentId
      * @return bool
      */
     public static function isDeprecatedPayment(string $paymentId): bool
     {
-        if (isset(self::PAYPAL_DEFINTIONS[$paymentId]['deprecated']) && self::PAYPAL_DEFINTIONS[$paymentId]['deprecated'] === true) {
+        if ( isset(self::PAYPAL_DEFINTIONS[$paymentId]['deprecated']) && self::PAYPAL_DEFINTIONS[$paymentId]['deprecated'] === true ) {
             return true;
         }
         return false;

@@ -16,11 +16,11 @@ use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
 class BasketComponent extends BasketComponent_parent
 {
     /**
-     * @param  $sProductId
-     * @param  $dAmount
-     * @param  $aSel
-     * @param  $aPersParam
-     * @param  $blOverride
+     * @param $sProductId
+     * @param $dAmount
+     * @param $aSel
+     * @param $aPersParam
+     * @param $blOverride
      * @return mixed
      */
     public function changeBasket(
@@ -35,11 +35,11 @@ class BasketComponent extends BasketComponent_parent
     }
 
     /**
-     * @param  $sProductId
-     * @param  $dAmount
-     * @param  $aSel
-     * @param  $aPersParam
-     * @param  $blOverride
+     * @param $sProductId
+     * @param $dAmount
+     * @param $aSel
+     * @param $aPersParam
+     * @param $blOverride
      * @return mixed
      */
     public function toBasket($sProductId = null, $dAmount = null, $aSel = null, $aPersParam = null, $blOverride = false)
@@ -51,7 +51,6 @@ class BasketComponent extends BasketComponent_parent
     /**
      *  Resets the session if the user has previously authorized a payment
      *  with PayPal Express and is now adding or changing an item to the basket.
-     *
      * @return void
      */
     protected function resetExpressOrderAndShowError()

@@ -18,7 +18,6 @@ use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 
 /**
  * Class PaymentGateway
- *
  * @package OxidSolutionCatalysts\PayPal\Model
  *
  * @mixin \OxidEsales\Eshop\Application\Model\PaymentGateway
@@ -28,11 +27,12 @@ class PaymentGateway extends PaymentGateway_parent
      use ServiceContainer;
 
      /**
-      * Executes payment, returns true on success.
-      *
-      * @param double          $amount Goods amount
-      * @param EshopModelOrder $order  User ordering object
-      */
+     * Executes payment, returns true on success.
+     *
+     * @param double          $amount Goods amount
+     * @param EshopModelOrder $order  User ordering object
+     *
+     */
     public function executePayment($amount, &$order)
     {
         $paymentService = $this->getServiceFromContainer(PaymentService::class);
@@ -47,14 +47,14 @@ class PaymentGateway extends PaymentGateway_parent
         }
         $paypalOrderId = '';
         if (
-            $sessionPaymentId === PayPalDefinitions::APPLEPAY_PAYPAL_PAYMENT_ID
-            || $sessionPaymentId === PayPalDefinitions::GOOGLEPAY_PAYPAL_PAYMENT_ID
+            $sessionPaymentId === PayPalDefinitions::APPLEPAY_PAYPAL_PAYMENT_ID ||
+            $sessionPaymentId === PayPalDefinitions::GOOGLEPAY_PAYPAL_PAYMENT_ID
         ) {
             $paypalOrderId = Registry::getRequest()->getRequestParameter('orderID');
         }
         if (
-            $success
-            && $paymentService->isPayPalPayment()
+            $success &&
+            $paymentService->isPayPalPayment()
         ) {
             $capture = $order->getOrderPaymentCapture($paypalOrderId);
             if ($capture && (string) $capture->status === 'COMPLETED') {
@@ -68,24 +68,18 @@ class PaymentGateway extends PaymentGateway_parent
 
     protected function doExecutePayPalExpressPayment(EshopModelOrder $order): bool
     {
-        /**
- * @var PaymentService $paymentService
-*/
+        /** @var PaymentService $paymentService */
         $paymentService = $this->getServiceFromContainer(PaymentService::class);
         $sessionPaymentId = (string) $paymentService->getSessionPaymentId();
         $success = false;
 
-        /**
- * @var Logger $logger
-*/
+        /** @var Logger $logger */
         $logger = $this->getServiceFromContainer(Logger::class);
 
         if ($checkoutOrderId = PayPalSession::getCheckoutOrderId()) {
             // Update Order
             try {
-                $basket = Registry::getSession()->getBasket();
-                $shopOrderId = (string)$order->getFieldData('oxordernr');
-                $paymentService->doPatchPayPalOrder($basket, $checkoutOrderId, $shopOrderId);
+                $paymentService->doPatchPayPalOrder(Registry::getSession()->getBasket(), $checkoutOrderId);
             } catch (Exception $exception) {
                 $logger->log('error', 'Error on order patch call.', [$exception]);
             }
@@ -110,9 +104,7 @@ class PaymentGateway extends PaymentGateway_parent
 
     protected function doExecutePuiPayment(EshopModelOrder $order): bool
     {
-        /**
-         * @var PaymentService $paymentService
-        */
+        /** @var PaymentService $paymentService */
         $paymentService = $this->getServiceFromContainer(PaymentService::class);
 
         $success = false;
@@ -126,9 +118,7 @@ class PaymentGateway extends PaymentGateway_parent
             );
             PayPalSession::unsetPayPalPuiCmId();
         } catch (Exception $exception) {
-            /**
-             * @var Logger $logger
-            */
+            /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', 'Error on execute pui payment call.', [$exception]);
         }

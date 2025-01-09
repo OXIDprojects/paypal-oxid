@@ -15,9 +15,7 @@ class GooglePayPayPalService
     public function finalizeGooglePay(string $oxidOrderId, string $payPalOrderId, bool $forceFetchDetails): bool
     {
         try {
-            /**
- * @var Order $order
-*/
+            /** @var Order $order */
             $order = oxNew(Order::class);
             $order->load($oxidOrderId);
             $order->finalizeOrderAfterExternalPayment($payPalOrderId, $forceFetchDetails);

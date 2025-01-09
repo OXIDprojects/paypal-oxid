@@ -22,7 +22,6 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Class ServiceFactory
- *
  * @package OxidSolutionCatalysts\PayPal\Core
  *
  * Responsible for creation of PayPal service objects
@@ -129,13 +128,9 @@ class ServiceFactory
     private function getClient(bool $useToken = true): Client
     {
         if ($this->client === null) {
-            /**
- * @var Config $config
-*/
+            /** @var Config $config */
             $config = oxNew(Config::class);
-            /**
- * @var LoggerInterface $logger
-*/
+            /** @var LoggerInterface $logger */
             $logger = $this->getServiceFromContainer('OxidSolutionCatalysts\PayPal\Logger');
 
             $debug = Registry::getConfig()->getConfigParam('sLogLevel') === 'debug';
@@ -148,6 +143,7 @@ class ServiceFactory
             $actionHash = md5($sessionId . $basketId . $paymentId);
 
             $sTokenCacheFileName = $useToken ? $config->getTokenCacheFileName() : '';
+
             $client = new Client(
                 $logger,
                 $config->isSandbox() ? Client::SANDBOX_URL : Client::PRODUCTION_URL,

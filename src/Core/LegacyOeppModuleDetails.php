@@ -17,7 +17,6 @@ class LegacyOeppModuleDetails
 
     /**
      * Determines whether the legacy PayPal module "oepaypal" is enabled
-     *
      * @return bool
      */
     public function isLegacyModulePresent(): bool
