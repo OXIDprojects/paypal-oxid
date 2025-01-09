@@ -152,16 +152,6 @@ $aModule = [
     ],
     'blocks' => [
         [
-            'template' => 'page/checkout/order.tpl',
-            'block' => 'shippingAndPayment',
-            'file' => 'views/blocks/page/checkout/shipping_and_payment.tpl'
-        ],
-        [
-            'template' => 'page/checkout/order.tpl',
-            'block' => 'checkout_order_btn_submit_bottom',
-            'file' => '/views/blocks/page/checkout/checkout_order_btn_submit_bottom.tpl'
-        ],
-        [
             'template' => 'headitem.tpl',
             'block' => 'admin_headitem_inccss',
             'file' => 'views/blocks/admin/admin_headitem_inccss.tpl'
@@ -192,38 +182,15 @@ $aModule = [
             'file' => 'views/blocks/layout/base_style.tpl'
         ],
         [
+            'template' => 'page/account/inc/account_menu.tpl',
+            'block' => 'account_menu',
+            'file' => '/views/blocks/page/account/inc/account_menu.tpl',
+        ],
+        [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'basket_btn_next_bottom',
             'file' => '/views/blocks/page/checkout/basket_btn_next_bottom.tpl',
         ],
-        [
-            'template' => 'widget/minibasket/minibasket.tpl',
-            'block' => 'dd_layout_page_header_icon_menu_minibasket_functions',
-            'file' => '/views/blocks/widget/minibasket/dd_layout_page_header_icon_menu_minibasket_functions.tpl',
-        ],
-        [
-            'template' => 'payment_main.tpl',
-            'block' => 'admin_payment_main_form',
-            'file' => '/views/blocks/admin/admin_payment_main_form.tpl',
-        ],
-        // @Todo PAYPAL-486: Using the same file, with 2 themes. Should be more generic, if possible.
-        [
-            'template' => 'page/checkout/payment.tpl',
-            'block' => 'select_payment',
-            'file' => '/views/blocks/page/checkout/select_payment.tpl',
-        ],
-        [
-            'template' => 'page/checkout/payment.tpl',
-            'block' => 'change_payment',
-            'file' => '/views/blocks/page/checkout/change_payment.tpl',
-        ],
-        [
-            'template' => 'page/details/inc/productmain.tpl',
-            'block' => 'details_productmain_tobasket',
-            'file' => '/views/blocks/page/details/inc/details_productmain_tobasket.tpl',
-        ],
-
-        // PSPAYPAL-491 Installment banners -->
         [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'checkout_basket_next_step_top',
@@ -235,14 +202,44 @@ $aModule = [
             'file' => '/views/blocks/page/checkout/basket_installment_banner_before.tpl'
         ],
         [
+            'template' => 'page/checkout/order.tpl',
+            'block' => 'checkout_order_btn_submit_bottom',
+            'file' => 'views/blocks/page/checkout/checkout_order_btn_submit_bottom.tpl'
+        ],
+        [
+            'template' => 'page/checkout/order.tpl',
+            'block' => 'shippingAndPayment',
+            'file' => 'views/blocks/page/checkout/shipping_and_payment.tpl'
+        ],
+        [
+            'template' => 'page/checkout/payment.tpl',
+            'block' => 'change_payment',
+            'file' => '/views/blocks/page/checkout/change_payment.tpl',
+        ],
+        [
             'template' => 'page/checkout/payment.tpl',
             'block' => 'checkout_payment_main',
             'file' => '/views/blocks/page/checkout/basket_installment_banner_before.tpl'
         ],
         [
+            'template' => 'page/checkout/payment.tpl',
+            'block' => 'select_payment',
+            'file' => '/views/blocks/page/checkout/select_payment.tpl',
+        ],
+        [
+            'template' => 'page/checkout/thankyou.tpl',
+            'block' => 'checkout_thankyou_info',
+            'file' => '/views/blocks/page/checkout/thankyou.tpl',
+        ],
+        [
             'template' => 'page/details/inc/productmain.tpl',
             'block' => 'details_productmain_price_value',
             'file' => '/views/blocks/page/details/inc/productmain.tpl'
+        ],
+        [
+            'template' => 'page/details/inc/productmain.tpl',
+            'block' => 'details_productmain_tobasket',
+            'file' => '/views/blocks/page/details/inc/details_productmain_tobasket.tpl',
         ],
         [
             'template' => 'page/list/list.tpl',
@@ -260,16 +257,10 @@ $aModule = [
             'file' => '/views/blocks/page/shop/start.tpl',
         ],
         [
-            'template' => 'page/account/inc/account_menu.tpl',
-            'block' => 'account_menu',
-            'file' => '/views/blocks/page/account/inc/account_menu.tpl',
+            'template' => 'widget/minibasket/minibasket.tpl',
+            'block' => 'dd_layout_page_header_icon_menu_minibasket_functions',
+            'file' => '/views/blocks/widget/minibasket/dd_layout_page_header_icon_menu_minibasket_functions.tpl',
         ],
-        [
-            'template' => 'page/checkout/thankyou.tpl',
-            'block' => 'checkout_thankyou_info',
-            'file' => '/views/blocks/page/checkout/thankyou.tpl',
-        ],
-        // <-- PSPAYPAL-491
     ],
     'settings' => [
         [
@@ -567,7 +558,7 @@ $aModule = [
         [
             'name' => 'oscPayPalDefaultShippingPriceExpress',
             'type' => 'str',
-            'value' => 3.5,
+            'value' => '3.5',
             'group' => null
         ],
         [
