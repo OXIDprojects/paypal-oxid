@@ -1,5 +1,5 @@
 [{$smarty.block.parent}]
-[{if $oViewConf->isModuleActive('osc_paypal') && $oViewConf->showPayPalCheckoutBannerOnCategoryPage()}]
+[{if $oViewConf->showPayPalCheckoutBannerOnCategoryPage()}]
     [{assign var="paypalInstallmentPrice" value=$oxcmp_basket->getBruttoSum()}]
     [{if $oxcmp_basket->isPriceViewModeNetto()}]
         [{assign var="paypalInstallmentPrice" value=$oxcmp_basket->getNettoSum()}]

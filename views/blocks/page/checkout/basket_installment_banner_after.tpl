@@ -1,6 +1,6 @@
 [{$smarty.block.parent}]
 
-[{if $oViewConf->isModuleActive('osc_paypal') && $oViewConf->showPayPalCheckoutBannerOnCheckoutPage()}]
+[{if $oViewConf->showPayPalCheckoutBannerOnCheckoutPage()}]
     <div id="basket-paypal-installment-banner"></div>
     [{oxstyle include=$oViewConf->getModuleUrl('osc_paypal','out/src/css/paypal.min.css')}]
     [{assign var="basketAmount" value=$oxcmp_basket->getPrice()}]

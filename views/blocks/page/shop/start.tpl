@@ -1,4 +1,4 @@
-[{if $oViewConf->isModuleActive('osc_paypal') && $oViewConf->showPayPalCheckoutBannerOnStartPage()}]
+[{if $oViewConf->showPayPalCheckoutBannerOnStartPage()}]
     [{assign var="paypalInstallmentPrice" value=$oxcmp_basket->getBruttoSum()}]
     [{if $oxcmp_basket->isPriceViewModeNetto()}]
         [{assign var="paypalInstallmentPrice" value=$oxcmp_basket->getNettoSum()}]
