@@ -606,7 +606,7 @@ class OrderController extends OrderController_parent
         return $cmId;
     }
 
-    protected function getNextStep($success) // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+    protected function getNextStep($success)
     {
         if (
             (PayPalOrderModel::ORDER_STATE_SESSIONPAYMENT_INPROGRESS === $success) &&

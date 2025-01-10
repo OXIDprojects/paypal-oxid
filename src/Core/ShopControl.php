@@ -22,7 +22,7 @@ class ShopControl extends ShopControl_parent
     /**
      * @param StandardException $exception
      */
-    protected function handleBaseException($exception) // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+    protected function handleBaseException($exception)
     {
         if ($exception instanceof PayPalException) {
             $this->handleCustomPayPalException($exception);

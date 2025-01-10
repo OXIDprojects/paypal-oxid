@@ -267,7 +267,6 @@ class Order extends Order_parent
      * @return     integer 2 or an error code
      * @deprecated underscore prefix violates PSR12, will be renamed to "executePayment" in next major
      */
-    // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
     protected function executePayment(Basket $basket, $userpayment)
     {
         $paymentService = $this->getServiceFromContainer(PaymentService::class);
