@@ -68,7 +68,7 @@ class ProxyController extends FrontendController
         $basket = $session->getBasket();
 
         $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
-        $defaultShippingPriceExpress = $moduleSettings->getDefaultShippingPriceForExpress();
+        $defaultShippingPriceExpress = (double) $moduleSettings->getDefaultShippingPriceForExpress();
 
         $calculateDelCostIfNotLoggedIn = (bool) $config->getConfigParam('blCalculateDelCostIfNotLoggedIn');
         $isDeliverySet = (bool) $session->getVariable('sShipSet');
