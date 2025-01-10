@@ -9,7 +9,7 @@
             <ul>
                 [{foreach from=$vaultedPaymentSources item=paymentToken}]
                     <li class="mt-3">
-                        <form action="[{$oViewConf->getSslSelfLink()}]" method="post">
+                        <form action="[{$oViewConf->getSslSelfLink()|replace:"&amp;":"&"}]" method="post">
                             <div class="hidden">
                                 [{$oViewConf->getHiddenSid()}]
                                 <input type="hidden" name="cl" value="[{$oViewConf->getActiveClassName()}]">
