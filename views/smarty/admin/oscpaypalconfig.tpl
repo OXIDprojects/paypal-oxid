@@ -21,7 +21,7 @@
         [{/if}]
     </div>
     <div id="overlay"><div class="loader"></div></div>
-    <form id="configForm" name="configForm" action="[{$oViewConf->getSslSelfLink()}]" method="post" autocomplete="off">
+    <form id="configForm" name="configForm" action="[{$oViewConf->getSslSelfLink()|replace:"&amp;":"&"}]" method="post" autocomplete="off">
         [{$oViewConf->getHiddenSid()}]
         <input type="hidden" name="cl" value="[{$oViewConf->getActiveClassName()}]">
         <input type="hidden" name="fnc" value="save">
