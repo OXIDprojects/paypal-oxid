@@ -81,6 +81,7 @@ class ConfirmOrderRequestFactory
             $paymentSource = new PaymentSource([
                 $requestName => [
                     'name' => $userName,
+                    'email' => $user->getFieldData('oxusername'),
                     'country_code' => $country->getFieldData('oxisoalpha2')
                 ]
             ]);
