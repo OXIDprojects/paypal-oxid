@@ -594,7 +594,7 @@ class ViewConfig extends ViewConfig_parent
             $params .= '&XDEBUG_SESSION_START=1';
         }
 
-        $url = html_entity_decode($this->getConfig()->getShopHomeUrl());
+        $url = html_entity_decode(Registry::getConfig()->getShopHomeUrl());
 
         return $url . $params . '&token=';
     }
