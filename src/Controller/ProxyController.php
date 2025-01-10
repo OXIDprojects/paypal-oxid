@@ -66,13 +66,10 @@ class ProxyController extends FrontendController
         }
         $session = Registry::getSession();
         $basket = $session->getBasket();
-        $moduleSettingService = ContainerFactory::getInstance()
-            ->getContainer()
-            ->get(ModuleSettingServiceInterface::class);
-        $defaultShippingPriceExpress = $moduleSettingService->getFloat(
-            'oscPayPalDefaultShippingPriceExpress',
-            Module::MODULE_ID
-        );
+
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
+        $defaultShippingPriceExpress = $moduleSettings->getDefaultShippingPriceForExpress();
+
         $calculateDelCostIfNotLoggedIn = (bool) $config->getConfigParam('blCalculateDelCostIfNotLoggedIn');
         $isDeliverySet = (bool) $session->getVariable('sShipSet');
         if ($basket && $defaultShippingPriceExpress && !$calculateDelCostIfNotLoggedIn && !$isDeliverySet) {
@@ -132,7 +129,7 @@ class ProxyController extends FrontendController
         $this->setPayPalPaymentMethod($paymentId);
         $basket = Registry::getSession()->getBasket();
 
-        if ($basket->getItemsCount() === 0) {
+        if ($basket && $basket->getItemsCount() === 0) {
             $this->outputJson(['ERROR' => 'No Article in the Basket']);
         }
 
