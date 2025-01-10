@@ -9,6 +9,8 @@ namespace OxidSolutionCatalysts\PayPal\Core;
 
 use Exception;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Eshop\Core\Theme;
+use OxidSolutionCatalysts\PayPal\Core\Api\IdentityService;
 use OxidSolutionCatalysts\PayPal\Service\LanguageLocaleMapper;
 use OxidSolutionCatalysts\PayPal\Service\Logger;
 use OxidSolutionCatalysts\PayPal\Service\Payment as PaymentService;
@@ -316,7 +318,7 @@ class ViewConfig extends ViewConfig_parent
         $result = '';
 
         try {
-            /** @var \OxidSolutionCatalysts\PayPal\Core\Api\IdentityService $identityService */
+            /** @var IdentityService $identityService */
             $identityService = Registry::get(ServiceFactory::class)->getIdentityService();
 
             $response = $identityService->requestClientToken();
@@ -548,12 +550,12 @@ class ViewConfig extends ViewConfig_parent
     {
         $result = false;
         if ($themeId) {
-            $theme = oxNew(\OxidEsales\Eshop\Core\Theme::class);
+            $theme = oxNew(Theme::class);
             $theme->load($theme->getActiveThemeId());
             // check active theme or parent theme
             if (
-                $theme->getActiveThemeId() == $themeId ||
-                $theme->getInfo('parentTheme') == $themeId
+                $theme->getActiveThemeId() === $themeId ||
+                $theme->getInfo('parentTheme') === $themeId
             ) {
                 $result = true;
             }
@@ -579,7 +581,7 @@ class ViewConfig extends ViewConfig_parent
             $params .= '&card=true';
         }
 
-        $url = html_entity_decode($this->getConfig()->getShopHomeUrl());
+        $url = html_entity_decode(Registry::getConfig()->getShopHomeUrl());
 
         return $url . $params;
     }
