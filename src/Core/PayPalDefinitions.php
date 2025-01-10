@@ -503,10 +503,11 @@ final class PayPalDefinitions
         return (isset(self::PAYPAL_DEFINTIONS[$paymentId]));
     }
 
-    public static function isPayPalVaultingPossible(string $paymentId, string $paypalPaymentType): bool
+    public static function isPayPalVaultingPossible(string $paymentId, ?string $paypalPaymentType = null): bool
     {
         return (
-            isset(self::PAYPAL_DEFINTIONS[$paymentId]['vaultingtype'])
+            $paypalPaymentType
+            && isset(self::PAYPAL_DEFINTIONS[$paymentId]['vaultingtype'])
             && self::PAYPAL_DEFINTIONS[$paymentId]['vaultingtype'] === $paypalPaymentType
         );
     }
