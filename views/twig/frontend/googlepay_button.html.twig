@@ -1,6 +1,6 @@
 {% hasrights { ident: "PAYWITHGOOGLEPAY" } %}
     {% set sToken = oViewConf.getSessionChallengeToken() %}
-    {% set sSelfLink = oViewConf.getSslSelfLink()|replace({"&amp;": "&"}) %}
+    {% set sSelfLink = oViewConf.getSslSelfLink()|replace({'&amp;': '&'})|raw %}
     {% set oPPconfig = oViewConf.getPayPalCheckoutConfig() %}
     {% set oConfig = oViewConf.getConfig() %}
     {% set buttonId = oView.getPayment().getId() %}

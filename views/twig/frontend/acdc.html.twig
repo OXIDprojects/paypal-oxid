@@ -33,7 +33,7 @@
 </div>
 
 <!-- Implementation -->
-{% set sSelfLink = oViewConf.getSslSelfLink()|replace({"&amp;": "&"}) %}
+{% set sSelfLink = oViewConf.getSslSelfLink()|replace({'&amp;': '&'})|raw %}
 
 <script>
     var PayPalHostedFields = function () {

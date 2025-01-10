@@ -19,7 +19,7 @@
         {% endif %}
     </div>
     <div id="overlay"><div class="loader"></div></div>
-    <form id="configForm" name="configForm" action="{{ oViewConf.getSslSelfLink()|raw }}" method="post" autocomplete="off">
+    <form id="configForm" name="configForm" action="{{ oViewConf.getSslSelfLink()|replace({'&amp;': '&'})|raw }}" method="post" autocomplete="off">
         {{ oViewConf.getHiddenSid()|raw }}
         <input type="hidden" name="cl" value="{{ oViewConf.getActiveClassName() }}">
         <input type="hidden" name="fnc" value="save">

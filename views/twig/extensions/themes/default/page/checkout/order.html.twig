@@ -4,8 +4,7 @@
     {% set payment = oView.getPayment() %}
     {% if payment.getId() == "oscpaypal_acdc" or payment.getId() == "oscpaypal_pui" %}
         {% set sPaymentID = payment.getId() %}
-        {% set sSelfLink = oViewConf.getSslSelfLink()|replace({"&amp;": "&"}) %}
-        <form action="{{ oViewConf.getSslSelfLink()|raw }}" method="post"
+        <form action="{{ oViewConf.getSslSelfLink()|replace({'&amp;': '&'})|raw }}" method="post"
               id="orderShipping">
             {{ oViewConf.getHiddenSid()|raw }}
             <input type="hidden" name="cl" value="payment">
@@ -24,7 +23,7 @@
                 {{ oShipSet.oxdeliveryset__oxtitle.value }}
             </div>
         </form>
-        <form action="{{ oViewConf.getSslSelfLink()|raw }}" method="post"
+        <form action="{{ oViewConf.getSslSelfLink()|replace({'&amp;': '&'})|raw }}" method="post"
               id="orderPayment">
             {{ oViewConf.getHiddenSid()|raw }}
             <input type="hidden" name="cl" value="payment">

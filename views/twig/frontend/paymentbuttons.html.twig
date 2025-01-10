@@ -6,7 +6,7 @@
             {% set aid = "" %}
         {% endif %}
         {% set sToken = oViewConf.getSessionChallengeToken() %}
-        var selfLink = selfLink || "{{ oViewConf.getSslSelfLink()|raw }}";
+        var selfLink = "{{ oViewConf.getSslSelfLink()|replace({'&amp;': '&'})|raw }}";
         {% if buttonId == "oscpaypal_sepa" or buttonId == "oscpaypal_cc_alternative" %}
             FUNDING_SOURCES = [
                 paypal.FUNDING.{% if buttonId == "oscpaypal_sepa" %}SEPA{% elseif buttonId == "oscpaypal_cc_alternative" %}CARD{% endif %}
