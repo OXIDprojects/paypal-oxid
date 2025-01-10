@@ -4,31 +4,21 @@
     {{ parent() }}
     {% if oViewConf.isPayPalCheckoutActive() %}
         {% set className = oViewConf.getTopActiveClassName() %}
-        {% if oViewConf.isPayPalExpressPaymentEnabled() and
-            ((className == 'order' and not oViewConf.isPayPalACDCSessionActive()) or (className != 'order' and className != 'payment')) and
-            (
-                (oxcmp_basket.getProductsCount() and oViewConf.showPayPalMiniBasketButton()) or
-                (className == 'details' and oViewConf.showPayPalProductDetailsButton()) or
-                (className == 'basket' and oViewConf.showPayPalBasketButton())
-            )
-        %}
-            <script src="{{ oViewConf.getBaseDir() }}/out/modules/osc_paypal/js/paypal-frontend.min.js?v=1"></script>
-            <script src="{{ oViewConf.getPayPalJsSdkUrl()|raw }}"
-                    data-partner-attribution-id="{{ oViewConf.getPayPalPartnerAttributionIdForBanner() }}"
-                    onload="window.OxidPayPal.onSDKLoaded()"
-            ></script>
-            {% set sCountryRestriction = oViewConf.getCountryRestrictionForPayPalExpress() %}
-            {% if sCountryRestriction %}
-                <script>
-                    const countryRestriction = [{{ sCountryRestriction }}];
-                </script>
-            {% endif %}
-        {% elseif className == 'order' and oViewConf.isPayPalACDCSessionActive() %}
-            <script src="{{ oViewConf.getPayPalJsSdkUrlForACDC()|raw }}" data-client-token="{{ oViewConf.getDataClientToken() }}"></script>
-        {% elseif className == 'payment' %}
-            <script src="{{ oViewConf.getPayPalJsSdkUrlForButtonPayments()|raw }}" data-partner-attribution-id="{{ oViewConf.getPayPalPartnerAttributionIdForBanner() }}"></script>
-        {% elseif oViewConf.isPayPalBannerActive() and (className == 'start' or className == 'search' or className == 'details' or className == 'alist' or className == 'basket') %}
-            <script src="{{ oViewConf.getPayPalApiBannerUrl()|raw }}" data-partner-attribution-id="{{ oViewConf.getPayPalPartnerAttributionIdForBanner() }}"></script>
+        {% set sFileMTime = oViewConf.getModulePath('osc_paypal', 'js/paypal-frontend.min.js') %}
+        <script src="{{ oViewConf.getModuleUrl('osc_paypal','js/paypal-frontend.min.js') }}"></script>
+        <script src="{{ oViewConf.getPayPalJsSdkUrl() }}"
+                {% if oViewConf.isVaultingEligibility() %}
+                    data-user-id-token="{{ oViewConf.getUserIdForVaulting() }}"
+                {% endif %}
+                data-partner-attribution-id="{{ oViewConf.getPayPalPartnerAttributionIdForBanner() }}"
+                data-client-token="{{ oViewConf.getDataClientToken() }}"
+                onload="window.OxidPayPal.onSDKLoaded()"
+        ></script>
+        {% set sCountryRestriction = oViewConf.getCountryRestrictionForPayPalExpress() %}
+        {% if sCountryRestriction %}
+            <script>
+                const countryRestriction = [{{ sCountryRestriction }}];
+            </script>
         {% endif %}
         {% if submitCart %}
             <script>
@@ -40,5 +30,8 @@
 
 {% block base_style %}
     {{ parent() }}
-    {{ style({ include: oViewConf.getModuleUrl('osc_paypal', 'css/paypal.css') }) }}
+    {% if oViewConf.isPayPalCheckoutActive() %}
+    {{ style({ include: oViewConf.getModuleUrl('osc_paypal', 'css/paypal.min.css') }) }}
+    {% endif %}
+
 {% endblock %}
