@@ -129,7 +129,7 @@ class ProxyController extends FrontendController
         $this->setPayPalPaymentMethod($paymentId);
         $basket = Registry::getSession()->getBasket();
 
-        if ($basket && $basket->getItemsCount() === 0) {
+        if ($basket->getItemsCount() === 0) {
             $this->outputJson(['ERROR' => 'No Article in the Basket']);
         }
 
@@ -231,7 +231,7 @@ class ProxyController extends FrontendController
      */
     public function approveOrder()
     {
-        $data = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode(file_get_contents('php://input'), true);
         $orderId = (string) Registry::getRequest()->getRequestEscapedParameter('orderID');
         $sessionOrderId = PayPalSession::getCheckoutOrderId();
         if (!empty($data['orderID']) && $orderId === '') {
