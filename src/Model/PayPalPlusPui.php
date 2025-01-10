@@ -106,7 +106,7 @@ class PayPalPlusPui extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function loadByPaymentId($sPaymentId)
     {
-        return $this->_loadBy('OXPAYMENTID', $sPaymentId);
+        return $this->loadBy('OXPAYMENTID', $sPaymentId);
     }
 
     /**
@@ -118,7 +118,7 @@ class PayPalPlusPui extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function loadByReferenceNumber($sReferenceNumber)
     {
-        return $this->_loadBy('OXREFERENCENUMBER', $sReferenceNumber);
+        return $this->loadBy('OXREFERENCENUMBER', $sReferenceNumber);
     }
 
         /**
@@ -130,7 +130,7 @@ class PayPalPlusPui extends \OxidEsales\Eshop\Core\Model\BaseModel
      *
      * @return bool
      */
-    protected function _loadBy($sFieldName, $sFieldValue)
+    protected function loadBy($sFieldName, $sFieldValue)
     {
         if (!in_array($sFieldName, ['OXREFERENCENUMBER', 'OXPAYMENTID'])) {
             return false;

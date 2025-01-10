@@ -39,7 +39,7 @@ class PayPalSoapOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function loadByOrderId($sOrderId)
     {
-        return $this->_loadBy('OEPAYPAL_ORDERID', $sOrderId);
+        return $this->loadBy('OEPAYPAL_ORDERID', $sOrderId);
     }
 
     /**
@@ -192,7 +192,7 @@ class PayPalSoapOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
      *
      * @return bool
      */
-    protected function _loadBy($sFieldName, $sFieldValue)
+    protected function loadBy($sFieldName, $sFieldValue)
     {
         $db = DatabaseProvider::getDb();
         if (!in_array($sFieldName, ['OEPAYPAL_ORDERID'])) {
