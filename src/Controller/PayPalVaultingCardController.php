@@ -21,7 +21,7 @@ class PayPalVaultingCardController extends AccountController
         $this->_aViewData['vaultingUserId'] = oxNew(Config::class)->getUserIdForVaulting();
         $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
         if ($moduleSettings->isVaultingAllowedForACDC()) {
-            $this->_sThisTemplate = '@osc_paypal/frontend/account_vaulting_card';
+            $this->_sThisTemplate = '@osc_paypal/frontend/shared/account_vaulting_card';
         }
 
         return parent::render();
