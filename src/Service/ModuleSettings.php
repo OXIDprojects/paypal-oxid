@@ -250,6 +250,11 @@ class ModuleSettings
             ($this->isPayPalCheckoutExpressPaymentEnabled() || $this->isAdmin());
     }
 
+    public function usePayPalUseGooglePayAddress(): bool
+    {
+        return (bool)$this->getSettingValue('oscPayPalUseGooglePayAddress');
+    }
+
     public function getAutoBillOutstanding(): bool
     {
         return (bool)$this->getSettingValue('oscPayPalAutoBillOutstanding');
