@@ -4,7 +4,7 @@
         [{assign var="sSelfLink" value=$oViewConf->getSslSelfLink()|replace:"&amp;":"&"}]
         [{assign var="oPPconfig" value=$oViewConf->getPayPalCheckoutConfig()}]
         <div class="google-pay-loading-container paypal-button-right">
-            <img src="[{$oViewConf->getModuleUrl('osc_paypal', 'out/img/loading.svg')}]" width="24" height="24" alt="loading animation"/>
+            <img src="[{$oViewConf->getModuleUrl('osc_paypal', 'img/loading.svg')}]" width="24" height="24" alt="loading animation"/>
         </div>
         <div id="google_pay_button_data_container"
              class="paypal-button-container paypal-button-wrapper paypal-button-right large"
@@ -26,7 +26,7 @@
             });
         </script>
         <script async src="https://pay.google.com/gp/p/js/pay.js" onload="window.onGooglePayLoaded()"></script>
-        <div id="[{$payment->getId()}]" class="paypal-button-container paypal-button-wrapper large"></div>
+        <div id="[{$payment->getId()}]" class="paypal-button-container paypal-button-wrapper paypal-button-right large"></div>
     [{/oxhasrights}]
 [{/block}]
 
