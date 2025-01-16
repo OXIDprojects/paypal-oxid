@@ -18,8 +18,8 @@
             <label for="card-holder-name">{{ translate({ ident: "OSC_PAYPAL_ACDC_CARD_NAME_ON_CARD" }) }}</label>
         </div>
         {% if oscpaypal_isVaultingPossible %}
-        <input type="checkbox" id="oscPayPalVaultPaymentCheckbox">
-        <label for="oscPayPalVaultPaymentCheckbox">{{ translate({ ident: "OSC_PAYPAL_VAULTING_SAVE" }) }}</label>
+            <input type="checkbox" id="oscPayPalVaultPaymentCheckbox">
+            <label for="oscPayPalVaultPaymentCheckbox">{{ translate({ ident: "OSC_PAYPAL_VAULTING_SAVE" }) }}</label>
         {% endif %}
         <div class="hidden">
             <input type="hidden" id="card-billing-address-street" name="card-billing-address-street" value="{% if oxcmp_user.oxuser__oxstreet.value %}{{ oxcmp_user.oxuser__oxstreet.value }}{% endif %} {% if oxcmp_user.oxuser__oxstreetnr.value %}{{ oxcmp_user.oxuser__oxstreetnr.value }}{% endif %}" />
@@ -54,14 +54,13 @@
                     let downloadableProductAgreement = (document.getElementById('oxdownloadableproductsagreement') && document.getElementById('oxdownloadableproductsagreement').checked) ? 1 : 0;
                     let serviceProductAgreement = (document.getElementById('oxserviceproductsagreement') && document.getElementById('oxserviceproductsagreement').checked) ? 1 : 0;
                     let vaultPayment = document.getElementById("oscPayPalVaultPaymentCheckbox")?.checked ?? false;
-                    let url = '{{ sSelfLink|raw }}' +
-                                "cl=order&fnc=createAcdcOrder&ord_agb=" + ordAgb +
-                                "&oxdownloadableproductsagreement=" + downloadableProductAgreement +
-                                "&oxserviceproductsagreement=" + serviceProductAgreement +
-                                "&stoken=" + '{{ oViewConf.getSessionChallengeToken() }}' +
-                                "&sDeliveryAddressMD5=" + '{{ oView.getDeliveryAddressMD5() }}' +
-                                '&vaultPayment=' + vaultPayment +
-                                '&oscPayPalPaymentTypeForVaulting=' + 'oscpaypal_acdc'
+                    let url = "{{ sSelfLink }}cl=order&fnc=createAcdcOrder&ord_agb=" + ordAgb
+                        + "&oxdownloadableproductsagreement=" + downloadableProductAgreement
+                        + "&oxserviceproductsagreement="+ serviceProductAgreement
+                        + "&stoken=" + "{{ oViewConf.getSessionChallengeToken() }}"
+                        + "&sDeliveryAddressMD5=" + "{{ oView.getDeliveryAddressMD5() }}"
+                        + "&vaultPayment=" + vaultPayment
+                        + "&oscPayPalPaymentTypeForVaulting=oscpaypal_acdc"
                     ;
                     return fetch(url, {
                         method: 'post',

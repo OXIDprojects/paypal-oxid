@@ -138,8 +138,8 @@ $aModule = [
         '@osc_paypal/frontend/shared/applepay.tpl' => 'views/smarty/frontend/shared/applepay.tpl',
 
         //PSPAYPAL-680 Vaulting
-        '@osc_paypal/frontend/shared/account_vaulting_paypal.tpl'    => 'views/smarty/frontend/shared/page/account/account_vaulting_paypal.tpl',
-        '@osc_paypal/frontend/shared/account_vaulting_card.tpl'      => 'views/smarty/frontend/shared/page/account/account_vaulting_card.tpl',
+        '@osc_paypal/frontend/account_vaulting_paypal.tpl'    => 'views/smarty/frontend/shared/page/account/account_vaulting_paypal.tpl',
+        '@osc_paypal/frontend/account_vaulting_card.tpl'      => 'views/smarty/frontend/shared/page/account/account_vaulting_card.tpl',
         '@osc_paypal/frontend/shared/vaultedpaymentsources.tpl'      => 'views/smarty/frontend/shared/vaultedpaymentsources.tpl',
         '@osc_paypal/frontend/flow/vaultedpaymentsources.tpl' => 'views/smarty/frontend/flow/vaulting/vaultedpaymentsources.tpl',
         '@osc_paypal/frontend/wave/vaultedpaymentsources.tpl' => 'views/smarty/frontend/wave/vaulting/vaultedpaymentsources.tpl',

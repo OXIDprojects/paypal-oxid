@@ -57,13 +57,13 @@
                     let downloadableProductAgreement = (document.getElementById('oxdownloadableproductsagreement') && document.getElementById('oxdownloadableproductsagreement').checked) ? 1 : 0;
                     let serviceProductAgreement = (document.getElementById('oxserviceproductsagreement') && document.getElementById('oxserviceproductsagreement').checked) ? 1 : 0;
                     let vaultPayment = document.getElementById("oscPayPalVaultPaymentCheckbox")?.checked ?? false;
-                    let url = '[{$sSelfLink}]' + "cl=order&fnc=createAcdcOrder&ord_agb="+
-                        ordAgb+"&oxdownloadableproductsagreement=" +downloadableProductAgreement
-                        + "&oxserviceproductsagreement="+serviceProductAgreement
-                        + "&stoken=" + '[{$oViewConf->getSessionChallengeToken()}]'
-                        + '&sDeliveryAddressMD5=' + '[{$oView->getDeliveryAddressMD5()}]'
-                        + '&vaultPayment=' + vaultPayment
-                        + '&oscPayPalPaymentTypeForVaulting=' + 'oscpaypal_acdc'
+                    let url = "[{$sSelfLink}]cl=order&fnc=createAcdcOrder&ord_agb=" + ordAgb
+                        + "&oxdownloadableproductsagreement=" + downloadableProductAgreement
+                        + "&oxserviceproductsagreement="+ serviceProductAgreement
+                        + "&stoken=" + "[{$oViewConf->getSessionChallengeToken()}]"
+                        + "&sDeliveryAddressMD5=" + "[{$oView->getDeliveryAddressMD5()}]"
+                        + "&vaultPayment=" + vaultPayment
+                        + "&oscPayPalPaymentTypeForVaulting=oscpaypal_acdc"
                     ;
                     return fetch(url, {
                         method: 'post',

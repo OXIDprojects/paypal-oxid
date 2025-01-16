@@ -1,0 +1,32 @@
+{% extends "page/account/dashboard.html.twig" %}
+
+{% block account_dashboard_col1 %}
+    {{ parent() }}
+    {% if oViewConf.getIsVaultingActive() %}
+        {% if oViewConf.isVaultingAllowedForPayPal() %}
+            <div class="col mb-3">
+                <div class="card card-lg h-100">
+                    <h4 class="card-header card-title">{{ translate({ ident: "OSC_PAYPAL_VAULTING_MENU" }) }}</h4>
+                    <div class="card-body">
+                        <a class="btn btn-outline-primary stretched-link" href="{{ seo_url({ ident: oViewConf.getSelfLink() ~ "cl=oscaccountvault" }) }}">
+                            {{ translate({ ident: "MORE" }) }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if oViewConf.isAcdcEligibility() and oViewConf.isVaultingAllowedForACDC() %}
+            <div class="col mb-3">
+                <div class="card card-lg h-100">
+                    <h4 class="card-header card-title">{{ translate({ ident: "OSC_PAYPAL_VAULTING_MENU_CARD" }) }}</h4>
+                    <div class="card-body">
+                        <a class="btn btn-outline-primary stretched-link" href="{{ seo_url({ ident: oViewConf.getSelfLink() ~ "cl=oscaccountvaultcard" }) }}">
+                            {{ translate({ ident: "MORE" }) }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
