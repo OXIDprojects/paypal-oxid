@@ -226,7 +226,6 @@ class Onboarding
         $isAcdcEligibility = false;
         $isVaultingEligibility = false;
         $isVaultingCapability = false;
-        $isGooglePayCapability = false;
         $isApplePayEligibility = false;
         $isGooglePayCapability = false;
 
@@ -287,7 +286,7 @@ class Onboarding
             'pui' => $isPuiEligibility,
             'vaulting' => $isVaultingEligibility,
             'googlepay' => $isGooglePayCapability,
-            'applepay' => $isVaultingEligibility,
+            'applepay' => $isApplePayEligibility,
         ];
     }
 }
