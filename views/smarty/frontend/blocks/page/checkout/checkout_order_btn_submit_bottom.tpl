@@ -22,14 +22,8 @@
 [{/if}]
 [{if "oscpaypal_googlepay" == $payment->getId()}]
     [{include file="@osc_paypal/frontend/shared/googlepay.tpl" buttonClass="paypal-button-wrapper large"}]
-
 [{elseif "oscpaypal_apple_pay" == $payment->getId()}]
-    [{if $oViewConf->isFlowCompatibleTheme()}]
     [{include file="@osc_paypal/frontend/shared/applepay.tpl" paymentId=$payment->getId() buttonClass="paypal-button-wrapper large"}]
-    [{else}]
-    [{include file="@osc_paypal/frontend/shared/applepay.tpl" paymentId=$payment->getId() buttonClass="paypal-button-wrapper large"}]
-    [{/if}]
-    <div id="applepay-container" class="paypal-button-container paypal-button-wrapper large"></div>
 [{else}]
     [{$smarty.block.parent}]
 [{/if}]
