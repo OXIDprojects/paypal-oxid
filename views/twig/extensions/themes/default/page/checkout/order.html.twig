@@ -66,7 +66,7 @@
         {% include "@osc_paypal/frontend/googlepay_button.html.twig" %}
     {% elseif paymentId == "oscpaypal_apple_pay"%}
         {# apple pay has a specific button #}
-        <div id="{{paymentId}}" class="paypal-button-container paypal-button-wrapper large"></div>
+        {% include "@osc_paypal/frontend/applepay_button.html.twig" with {paymentId: payment.getId()} %}
     {% else %}
         {# usual order button #}
         <button type="button" class="btn btn-highlight btn-lg w-100"
