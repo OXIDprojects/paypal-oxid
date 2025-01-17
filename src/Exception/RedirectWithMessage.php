@@ -9,20 +9,16 @@ namespace OxidSolutionCatalysts\PayPal\Exception;
 
 class RedirectWithMessage extends Redirect
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $messageKey;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $messageParams;
 
     /**
      * @param string $destination
      * @param string $messageKey
-     * @param array  $messageParams
+     * @param array $messageParams
      */
     public function __construct(string $destination, string $messageKey, array $messageParams = [])
     {

@@ -23,19 +23,13 @@ final class RequestHandler
 {
     use ServiceContainer;
 
-    /**
-     * @var RequestReader
-     */
+    /** @var RequestReader */
     private $requestReader;
 
-    /**
-     * @var VerificationService
-     */
+    /** @var VerificationService */
     private $verificationService;
 
-    /**
-     * @var WebhookDispatcher
-     */
+    /** @var WebhookDispatcher */
     private $webhookDispatcher;
 
     public function __construct(
@@ -55,9 +49,7 @@ final class RequestHandler
     public function process(): bool
     {
         $result = false;
-        /**
- * @var Logger $logger
-*/
+        /** @var Logger $logger */
         $logger = $this->getServiceFromContainer(Logger::class);
 
         try {

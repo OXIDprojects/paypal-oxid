@@ -8,7 +8,7 @@
 
 {% block admin_order_main_form_shipping %}
     {% if oView.paidWithPayPal() %}
-        {% set sSelfLink = oViewConf.getSslSelfLink()|replace({"&amp;": "&"}) %}
+        {% set sSelfLink = oViewConf.getSslSelfLink()|replace({'&amp;': '&'})|raw %}
         {% set populateCarrierScript %}
             {% if phpStorm %}<script>{% endif %}
             function populateCarrier(countryCode) {

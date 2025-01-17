@@ -95,11 +95,11 @@ class OrderController extends OrderController_parent
         $user = $this->getUser();
 
         if ($user) {
-            $isVaultingPossible = false;
+            $paymentId = (string) $paymentService->getSessionPaymentId();
+
             $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
-            if ($moduleSettings->getIsVaultingActive() && $user->getFieldData('oxpassword')) {
-                $isVaultingPossible = true;
-            }
+            $isVaultingPossible = $moduleSettings->isVaultingAllowedForPayment($paymentId)
+                && $user->getFieldData('oxpassword');
 
             $this->addTplParam('oscpaypal_isVaultingPossible', $isVaultingPossible);
 
@@ -153,7 +153,7 @@ class OrderController extends OrderController_parent
             Registry::getUtilsView()->addErrorToDisplay($displayError);
 
             $paymentService = $this->getServiceFromContainer(PaymentService::class);
-            if (in_array((string) $paymentService->getSessionPaymentId(), $this->removeTemporaryOrderOnRetry)) {
+            if (in_array((string)$paymentService->getSessionPaymentId(), $this->removeTemporaryOrderOnRetry, true)) {
                 $paymentService->removeTemporaryOrder();
             }
             return true;
@@ -199,16 +199,16 @@ class OrderController extends OrderController_parent
             Registry::getSession()->setVariable('sess_challenge', $this->getUtilsObjectInstance()->generateUID());
             $status = $this->execute();
         } catch (Exception $exception) {
-            /**
- * @var Logger $logger
-*/
+            /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
             $this->outputJson(['acdcerror' => 'failed to execute shop order']);
             return;
         }
 
-        $response = $this->doCreatePatchedOrder();
+        $response = $paymentService->doCreatePatchedOrder(
+            Registry::getSession()->getBasket()
+        );
         if (!($paypalOrderId = $response['id'])) {
             $this->outputJson(['acdcerror' => 'cannot create paypal order']);
             return;
@@ -227,20 +227,21 @@ class OrderController extends OrderController_parent
 
         $this->outputJson($response);
     }
-    public function createGooglePayOrder(): void
+
+    /**
+     * @throws Exception
+     */
+    public function executeGooglePayOrder(): void
     {
         try {
             $paymentService = $this->getServiceFromContainer(PaymentService::class);
-            $paymentService->removeTemporaryOrder();
-            Registry::getSession()->setVariable('sess_challenge', $this->getUtilsObjectInstance()->generateUID());
-            /**
- * @var Logger $logger
-*/
+
+            /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
 
             $_POST['sDeliveryAddressMD5'] = $this->getDeliveryAddressMD5();
-            $paypalOrderId = Registry::getRequest()->getRequestParameter('token');
-            $_POST['orderID'] = $paypalOrderId;
+            $orderId = Registry::getRequest()->getRequestParameter('orderID');
+            $_POST['orderID'] = $orderId;
             $this->execute();
         } catch (Exception $exception) {
             $logger->log('error', $exception->getMessage(), [$exception]);
@@ -250,20 +251,20 @@ class OrderController extends OrderController_parent
 
         $paymentService->doPatchPayPalOrder(
             Registry::getSession()->getBasket(),
-            $paypalOrderId
+            $orderId
         );
     }
 
     public function captureGooglePayOrder(): void
     {
         $orderService = Registry::get(ServiceFactory::class)->getOrderService();
-        $checkoutOrderId = $_GET['token'];
+        $orderId = (string) Registry::getRequest()->getRequestParameter('orderID');
 
         $request = new OrderCaptureRequest();
         try {
             $orderService->capturePaymentForOrder(
                 '',
-                $checkoutOrderId,
+                $orderId,
                 $request,
                 '',
                 Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
@@ -283,6 +284,13 @@ class OrderController extends OrderController_parent
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
         }
+        $result = [
+            'location' => [
+                'cl=order&fnc=finalizeGooglePay&token=' . $orderId
+            ]
+        ];
+
+        $this->outputJson($result);
     }
 
     public function captureAcdcOrder(): void
@@ -292,9 +300,7 @@ class OrderController extends OrderController_parent
         $sessionAcdcOrderId = (string) PayPalSession::getCheckoutOrderId();
         $acdcStatus = Registry::getSession()->getVariable(Constants::SESSION_ACDC_PAYPALORDER_STATUS);
 
-        /**
- * @var Logger $logger
-*/
+        /** @var Logger $logger */
         $logger = $this->getServiceFromContainer(Logger::class);
 
         if (
@@ -371,16 +377,16 @@ class OrderController extends OrderController_parent
             $_POST['sDeliveryAddressMD5'] = $this->getDeliveryAddressMD5();
             $status = $this->execute();
         } catch (Exception $exception) {
-            /**
- * @var Logger $logger
-*/
+            /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log('error', $exception->getMessage(), [$exception]);
             $this->outputJson(['error' => 'failed to execute shop order' . $exception->getMessage()]);
             return;
         }
 
-        $response = $this->doCreatePatchedOrder();
+        $response = $paymentService->doCreatePatchedOrder(
+            Registry::getSession()->getBasket()
+        );
         if (!($paypalOrderId = $response['id'])) {
             $this->outputJson(['error' => 'cannot create paypal order']);
             return;
@@ -405,13 +411,10 @@ class OrderController extends OrderController_parent
         $orderId = (string) Registry::getRequest()->getRequestEscapedParameter('orderID');
         $orderService = Registry::get(ServiceFactory::class)->getOrderService();
         $sessionOrderId = (string) Registry::getSession()->getVariable('sess_challenge');
-        $checkoutOrderId = (string) PayPalSession::getCheckoutOrderId();
         $request = new OrderCaptureRequest();
         $logger = $this->getServiceFromContainer(Logger::class);
         try {
-            /**
- * @var $result ApiOrderModel
-*/
+            /** @var $result ApiOrderModel */
             $result = $orderService->capturePaymentForOrder(
                 '',
                 $orderId,
@@ -462,9 +465,7 @@ class OrderController extends OrderController_parent
             $order->finalizeOrderAfterExternalPayment($sessionGooglePayOrderId, $forceFetchDetails);
             $goNext = 'thankyou';
         } catch (Exception $exception) {
-            /**
- * @var Logger $logger
-*/
+            /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log(
                 'error',
@@ -495,9 +496,7 @@ class OrderController extends OrderController_parent
         try {
             $paymentService = $this->getServiceFromContainer(PaymentService::class);
 
-            /**
- * @var PayPalApiModelOrder $payPalOrder
-*/
+            /** @var PayPalApiModelOrder $payPalOrder */
             $payPalOrder = $paymentService->fetchOrderFields((string) $sessionCheckoutOrderId, '');
             $vaultingPaymentCompleted = $vaulting && $payPalOrder->status === "COMPLETED";
             if (!$vaultingPaymentCompleted && 'APPROVED' !== $payPalOrder->status) {
@@ -517,9 +516,7 @@ class OrderController extends OrderController_parent
             $order->finalizeOrderAfterExternalPayment($sessionCheckoutOrderId);
             $order->save();
         } catch (PayPalException $exception) {
-            /**
- * @var Logger $logger
-*/
+            /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log(
                 'debug',
@@ -546,9 +543,7 @@ class OrderController extends OrderController_parent
             $order->finalizeOrderAfterExternalPayment($sessionAcdcOrderId, $forceFetchDetails);
             $goNext = 'thankyou';
         } catch (Exception $exception) {
-            /**
- * @var Logger $logger
-*/
+            /** @var Logger $logger */
             $logger = $this->getServiceFromContainer(Logger::class);
             $logger->log(
                 'error',
@@ -561,19 +556,16 @@ class OrderController extends OrderController_parent
 
         return $goNext;
     }
+
     public function finalizeGooglePay(): string
     {
-        $paypalOrderId = $_GET['token'];
+        $paypalOrderId = (string) Registry::getRequest()->getRequestParameter('token');
         $forceFetchDetails = (bool) Registry::getRequest()->getRequestParameter('fallbackfinalize');
 
-        $this->createGooglePayOrder();
-        $this->captureGooglePayOrder();
-
         $oxidOrderId = Registry::getSession()->getBasket()->getOrderId();
+        $oxidOrderId = $oxidOrderId ?: Registry::getSession()->getVariable('sess_challenge');
 
-        /**
- * @var GooglePayPayPalService $googlePayPayPalService
-*/
+        /** @var GooglePayPayPalService $googlePayPayPalService */
         $googlePayPayPalService = $this->getServiceFromContainer(GooglePayPayPalService::class);
         $sucesss = $googlePayPayPalService->finalizeGooglePay($oxidOrderId, $paypalOrderId, $forceFetchDetails);
 
@@ -582,10 +574,27 @@ class OrderController extends OrderController_parent
             $this->getServiceFromContainer(OrderPayPalService::class)->cancelPayPalSession('cannot finalize order');
     }
 
+    public function cancelpaypalsession(string $errorcode = null): string
+    {
+        //TODO: we get the PayPal order id retuned in token parameter, can be used for paranoia checks
+        //(string) Registry::getRequest()->getRequestParameter('token')
+        $requestErrorcode = (string) Registry::getRequest()->getRequestParameter('errorcode');
+
+        $this->getServiceFromContainer(PaymentService::class)
+            ->removeTemporaryOrder();
+
+        $goNext = 'payment';
+        if ($errorcode || $requestErrorcode) {
+            $goNext = 'payment?payerror=2';
+        }
+
+        return $goNext;
+    }
+
     /**
      * Template-Getter get a Fraudnet CmId
      *
-     * @param          $response
+     * @return string
      * @psalm-suppress InternalMethod
      */
     public function getPayPalPuiFraudnetCmId(): string
@@ -597,62 +606,50 @@ class OrderController extends OrderController_parent
         return $cmId;
     }
 
-    protected function getNextStep($success) // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+    protected function getNextStep($success)
     {
         if (
-            (PayPalOrderModel::ORDER_STATE_SESSIONPAYMENT_INPROGRESS == $success)
-            && ($redirectLink = PayPalSession::getSessionRedirectLink())
+            (PayPalOrderModel::ORDER_STATE_SESSIONPAYMENT_INPROGRESS === $success) &&
+            ($redirectLink = PayPalSession::getSessionRedirectLink())
         ) {
             PayPalSession::unsetSessionRedirectLink();
             throw new Redirect($redirectLink);
         }
 
-        if (PayPalOrderModel::ORDER_STATE_ACDCINPROGRESS == $success) {
+        if (PayPalOrderModel::ORDER_STATE_ACDCINPROGRESS === $success) {
             return (string) $success;
         }
 
-        if (PaymentService::PAYMENT_ERROR_PUI_PHONE == $success) {
+        if (PaymentService::PAYMENT_ERROR_PUI_PHONE === $success) {
             //user needs to retry, entered pui phone number was not accepted by PayPal
             return 'order?retryoscpp=puiretry';
         }
 
-        if (PayPalOrderModel::ORDER_STATE_WAIT_FOR_WEBHOOK_EVENTS == $success) {
+        if (PayPalOrderModel::ORDER_STATE_WAIT_FOR_WEBHOOK_EVENTS === $success) {
             return 'order';
         }
 
-        if (PayPalOrderModel::ORDER_STATE_NEED_CALL_ACDC_FINALIZE == $success) {
+        if (PayPalOrderModel::ORDER_STATE_NEED_CALL_ACDC_FINALIZE === $success) {
             return 'order?fnc=finalizeacdc';
         }
 
-        if (PayPalOrderModel::ORDER_STATE_TIMEOUT_FOR_WEBHOOK_EVENTS == $success) {
+        if (PayPalOrderModel::ORDER_STATE_TIMEOUT_FOR_WEBHOOK_EVENTS === $success) {
             return 'order?fnc=finalizeacdc&fallbackfinalize=1';
         }
 
-        if (PayPalOrderModel::ORDER_STATE_ACDCCOMPLETED == $success) {
+        if (PayPalOrderModel::ORDER_STATE_ACDCCOMPLETED === $success) {
             return 'order?fnc=finalizeacdc&fallbackfinalize=1';
         }
 
         if (
-            EshopModelOrder::ORDER_STATE_ORDEREXISTS == $success
-            && Registry::getSession()->getVariable(Constants::SESSION_ACDC_PAYPALORDER_STATUS)
-                == Constants::PAYPAL_STATUS_COMPLETED
+            EshopModelOrder::ORDER_STATE_ORDEREXISTS === $success &&
+            Registry::getSession()->getVariable(Constants::SESSION_ACDC_PAYPALORDER_STATUS) ===
+            Constants::PAYPAL_STATUS_COMPLETED
         ) {
             Registry::getSession()->deleteVariable(Constants::SESSION_ACDC_PAYPALORDER_STATUS);
             PayPalSession::unsetPayPalSession();
         }
 
         return parent::getNextStep($success);
-    }
-
-    private function doCreatePatchedOrder(): array
-    {
-        $paymentService = $this->getServiceFromContainer(PaymentService::class);
-        $order = oxNew(EshopModelOrder::class);
-        $orderId = Registry::getSession()->getVariable('sess_challenge');
-        $order->load($orderId);
-        return $paymentService->doCreatePatchedOrder(
-            Registry::getSession()->getBasket(),
-            $order
-        );
     }
 }

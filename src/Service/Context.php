@@ -19,13 +19,11 @@ class Context
      */
     public function getPayPalLogFilePath(): string
     {
-        return Path::join(
-            [
+        return Path::join([
             Registry::getConfig()->getLogsDir(),
             'paypal',
             $this->getPayPalLogFileName()
-            ]
-        );
+        ]);
     }
 
     private function getPayPalLogFileName(): string

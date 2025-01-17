@@ -96,21 +96,18 @@ class User extends User_parent
 
     /**
      * get the InvoiceAddress from user with all required fields
-     *
      * @return array
      */
     public function getInvoiceAddress(): array
     {
         $result = [];
         $requiredAddressFields = oxNew(RequiredAddressFields::class);
-
         // Needed to not produce an error in InputValidator->hasRequiredParametersForVatInCheck()
         $requiredFields = $requiredAddressFields->getRequiredFields();
         $requiredFields[] = 'oxuser__oxustid';
         $requiredFields[] = 'oxuser__oxcountryid';
         $requiredFields[] = 'oxuser__oxcompany';
         $requiredAddressFields->setRequiredFields($requiredFields);
-
         foreach ($requiredAddressFields->getBillingFields() as $requiredAddressField) {
             $result[$requiredAddressField] = $this->{$requiredAddressField}->value;
         }

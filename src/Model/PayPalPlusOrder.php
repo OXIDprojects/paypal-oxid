@@ -141,7 +141,7 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function loadByOrderId($sOrderId)
     {
-        return $this->_loadBy('OXORDERID', $sOrderId);
+        return $this->loadBy('OXORDERID', $sOrderId);
     }
 
     /**
@@ -153,7 +153,7 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function loadBySaleId($sSaleId)
     {
-        return $this->_loadBy('OXSALEID', $sSaleId);
+        return $this->loadBy('OXSALEID', $sSaleId);
     }
 
     /**
@@ -165,7 +165,7 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function loadByPaymentId($sPaymentId)
     {
-        return $this->_loadBy('OXPAYMENTID', $sPaymentId);
+        return $this->loadBy('OXPAYMENTID', $sPaymentId);
     }
 
     /**
@@ -179,15 +179,13 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         if (is_null($this->order)) {
 
-            /**
- * @var Order $oOrder
-*/
+            /** @var Order $oOrder */
             $oOrder = oxNew(Order::class);
 
             if ($oOrder->load($this->getOrderId())) {
                 $this->order = $oOrder;
             } else {
-                $this->_throwCouldNotLoadOrderError();
+                $this->throwCouldNotLoadOrderError();
             }
         }
 
@@ -203,9 +201,7 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         if (is_null($this->refundList)) {
 
-            /**
- * @var PayPalPlusRefundList $oRefundList
-*/
+            /** @var PayPalPlusRefundList $oRefundList */
             $oRefundList = oxNew(PayPalPlusRefundList::class);
             $oRefundList->loadRefundsBySaleId($this->getSaleId());
 
@@ -226,9 +222,7 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         if (is_null($this->totalAmountRefunded)) {
 
-            /**
- * @var PayPalPlusRefundList $oRefundList
-*/
+            /** @var PayPalPlusRefundList $oRefundList */
             $oRefundList = oxNew(PayPalPlusRefundList::class);
             $this->totalAmountRefunded = $oRefundList->getRefundedSumBySaleId($this->getSaleId());
         }
@@ -267,7 +261,7 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
      *
      * @return bool
      */
-    protected function _loadBy($sFieldName, $sFieldValue)
+    protected function loadBy($sFieldName, $sFieldValue)
     {
         $db = DatabaseProvider::getDb();
         if (!in_array($sFieldName, ['OXORDERID', 'OXSALEID', 'OXPAYMENTID'])) {
@@ -288,7 +282,7 @@ class PayPalPlusOrder extends \OxidEsales\Eshop\Core\Model\BaseModel
      *
      * @throws StandardException
      */
-    protected function _throwCouldNotLoadOrderError()
+    protected function throwCouldNotLoadOrderError()
     {
         throw oxNew(StandardException::class, 'OSC_PAYPALPLUS_ERROR_NO_ORDER');
     }

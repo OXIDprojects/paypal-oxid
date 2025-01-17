@@ -11,9 +11,8 @@ namespace OxidSolutionCatalysts\PayPal\Core;
 
 /**
  * Class TransactionEventCodes
- *
  * @package OxidSolutionCatalysts\PayPal\Core
- * @see     https://developer.paypal.com/docs/integration/direct/transaction-search/transaction-event-codes/
+ * @see https://developer.paypal.com/docs/integration/direct/transaction-search/transaction-event-codes/
  */
 class TransactionEventCodes
 {

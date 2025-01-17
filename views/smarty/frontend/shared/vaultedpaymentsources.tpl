@@ -1,0 +1,5 @@
+[{if $oViewConf->isFlowCompatibleTheme()}]
+    [{include file='@osc_paypal/frontend/flow/vaultedpaymentsources.tpl'}]
+[{else}]
+    [{include file='@osc_paypal/frontend/wave/vaultedpaymentsources.tpl'}]
+[{/if}]

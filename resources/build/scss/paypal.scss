@@ -1,8 +1,20 @@
-.google-pay-loading-container {
-    float: right;
-    margin-right: calc(50%);
+.paypal-button-or {
+    padding: 10px;
+}
+.paypal-button-wrapper {
+    width: 100%;
+    &.large {
+        max-width: 250px;
+    }
+    &.small {
+        max-width: 200px;
+    }
+}
+.paypal-button-right {
+    margin-left: auto;
+    text-align: right;
 }
 
-#oscpaypal_googlepay {
-    float: right;
+#paypal-installment-banner-container {
+    margin-bottom: 1rem;
 }

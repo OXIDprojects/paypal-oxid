@@ -40,9 +40,7 @@ class CheckoutOrderApprovedHandler extends WebhookHandlerBase
                     );
                 $order->setOrderNumber(); //ensure the order has a number
             } catch (\Exception $exception) {
-                /**
- * @var Logger $logger
-*/
+                /** @var Logger $logger */
                 $logger = $this->getServiceFromContainer(Logger::class);
                 $logger->log(
                     'debug',
@@ -83,9 +81,7 @@ class CheckoutOrderApprovedHandler extends WebhookHandlerBase
      */
     private function capturePayment(string $orderId): OrderResponse
     {
-        /**
- * @var ServiceFactory $serviceFactory
-*/
+        /** @var ServiceFactory $serviceFactory */
         $serviceFactory = Registry::get(ServiceFactory::class);
         $service = $serviceFactory->getOrderService();
         $request = new OrderCaptureRequest();

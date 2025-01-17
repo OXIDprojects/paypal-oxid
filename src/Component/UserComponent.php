@@ -7,9 +7,11 @@
 
 namespace OxidSolutionCatalysts\PayPal\Component;
 
+use OxidEsales\Eshop\Core\Exception\UserException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidSolutionCatalysts\PayPal\Core\Utils\PayPalAddressResponseToOxidAddress;
+use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order;
 
 /**
  * @mixin \OxidEsales\Eshop\Application\Component\UserComponent
@@ -40,7 +42,7 @@ class UserComponent extends UserComponent_parent
         }
     }
 
-    public function createPayPalGuestUser(\OxidSolutionCatalysts\PayPalApi\Model\Orders\Order $response): void
+    public function createPayPalGuestUser(Order $response): void
     {
         $this->setParent(oxNew('Register'));
 
@@ -57,9 +59,11 @@ class UserComponent extends UserComponent_parent
     }
 
     /**
-     * @param \OxidSolutionCatalysts\PayPalApi\Model\Orders\Order $response
+     * @param Order $response
+     * @return bool
+     * @throws UserException
      */
-    public function loginPayPalCustomer(\OxidSolutionCatalysts\PayPalApi\Model\Orders\Order $response): bool
+    public function loginPayPalCustomer(Order $response): bool
     {
         $user = oxNew(User::class);
 
@@ -78,7 +82,7 @@ class UserComponent extends UserComponent_parent
 
     /**
      * @param string $paramName
-     * @param mixed  $paramValue
+     * @param mixed $paramValue
      */
     protected function setRequestParameterByPayPal(string $paramName, $paramValue): void
     {

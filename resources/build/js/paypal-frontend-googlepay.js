@@ -7,7 +7,6 @@ window.OxidPayPalGooglePay = {
     paymentsClient: null,
     allowedPaymentMethods: null,
     merchantInfo: null,
-    googlePayContainer: null,
     buttonId: null,
     token: null,
     selfLink: null,
@@ -20,19 +19,18 @@ window.OxidPayPalGooglePay = {
     language: null,
     loadingContainer: null,
     init: async function () {
-        this.googlePayContainer = document.getElementById('oscpaypal_googlepay');
-        if (this.googlePayContainer) {
-            this.buttonId = this.googlePayContainer.dataset.buttonId;
-            this.token = this.googlePayContainer.dataset.token;
-            this.selfLink = this.googlePayContainer.dataset.selfLink;
-            this.useGooglePayAddress = !!Number(this.googlePayContainer.dataset.useGooglePayAddress);
-            this.isSandbox = !!Number(this.googlePayContainer.dataset.isSandbox);
-            this.merchantName = this.googlePayContainer.dataset.merchantName;
-            this.totalPrice = this.googlePayContainer.dataset.totalPrice;
-            this.currency = this.googlePayContainer.dataset.currency;
-            this.deliveryAddressMD5 = this.googlePayContainer.dataset.deliveryAddressMd5;
-            this.language = this.googlePayContainer.dataset.language;
-            let elements = document.getElementsByClassName(this.googlePayContainer.dataset.loadingContainerClassName);
+        const googlePayDataContainer = document.getElementById('google_pay_button_data_container');
+        if (googlePayDataContainer) {
+            this.token = googlePayDataContainer.dataset.token;
+            this.selfLink = googlePayDataContainer.dataset.selfLink;
+            this.useGooglePayAddress = !!Number(googlePayDataContainer.dataset.useGooglePayAddress);
+            this.isSandbox = !!Number(googlePayDataContainer.dataset.isSandbox);
+            this.merchantName = googlePayDataContainer.dataset.merchantName;
+            this.totalPrice = googlePayDataContainer.dataset.totalPrice;
+            this.currency = googlePayDataContainer.dataset.currency;
+            this.deliveryAddressMD5 = googlePayDataContainer.dataset.deliveryAddressMd5;
+            this.language = googlePayDataContainer.dataset.language;
+            let elements = document.getElementsByClassName(googlePayDataContainer.dataset.loadingContainerClassName);
             this.loadingContainer = elements[0];
 
             await window.googlePayReady;
@@ -146,26 +144,22 @@ window.OxidPayPalGooglePay = {
 
     processPayment: async function (paymentData) {
         try {
-            const createOrderUrl = this.selfLink + '&cl=oscpaypalproxy&fnc=createGooglepayOrder&paymentid=oscpaypal_googlepay&context=continue&stoken=' + this.token;
+            const createOrderUrl = this.selfLink + '&cl=oscpaypalproxy&fnc=createGooglePayOrder&paymentid=oscpaypal_googlepay&context=continue&stoken=' + this.token;
 
-            const {id: orderId, status, links} = await fetch(createOrderUrl, {
+            const {id: orderId, status} = await fetch(createOrderUrl, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(paymentData),
             }).then((res) => res.json());
 
-            const hateoasLinks = new OxidPayPalHateoasLinks();
-            const approveLink = hateoasLinks.getApproveLink(links);
-
-            if (approveLink) {
-                window.location.href = approveLink;
+            if (status === "CREATED") {
+                /* Capture the Order */
+                this.confirmOrder(orderId, paymentData);
+                return {transactionState: "SUCCESS"};
             } else if (status === "APPROVED") {
                 /* Capture the Order */
                 this.captureOrder(orderId);
                 return {transactionState: "SUCCESS"};
-            } else if (status === "PAYER_ACTION_REQUIRED") {
-                console.log("==== Confirm Payment Completed Payer Action Required =====");
-                this.googlePayUserActionRequired(orderId);
             } else {
                 console.error("Payment was not approved");
                 return {transactionState: "ERROR"};
@@ -179,17 +173,34 @@ window.OxidPayPalGooglePay = {
             };
         }
     },
+    confirmOrder: async function (orderId, paymentData) {
+        const confirmOrderResponse = await paypal.Googlepay().confirmOrder({
+            orderId: orderId,
+            paymentMethodData: paymentData.paymentMethodData
+        });
+
+        if (confirmOrderResponse.status === "PAYER_ACTION_REQUIRED") {
+            console.log("==== Confirm Payment Completed Payer Action Required =====");
+            this.googlePayUserActionRequired(orderId);
+        } else {
+            if (this.isSandbox) {
+                console.log("==== confirmOrder: Not Approved =====");
+            }
+        }
+    },
+
     googlePayUserActionRequired: function (orderId) {
         paypal
             .Googlepay()
             .initiatePayerAction({ orderId: orderId })
             .then(async () => {
                 console.log("===== Payer Action Completed =====");
-                await this.createOxidOrder(orderId);
+                await this.executeOxidOrder(orderId);
+                await this.captureOrder(orderId);
             });
     },
-    createOxidOrder: async function (orderId) {
-        const url = this.selfLink + '&cl=order&fnc=createGooglePayOrder&context=continue&stoken=' + this.token + '&sDeliveryAddressMD5=' + this.deliveryAddressMD5;
+    executeOxidOrder: async function (orderId) {
+        const url = this.selfLink + '&cl=order&fnc=executeGooglePayOrder&context=continue&stoken=' + this.token + '&sDeliveryAddressMD5=' + this.deliveryAddressMD5;
         createData = new FormData();
         createData.append('orderID', orderId);
         fetch(url, {
@@ -198,6 +209,8 @@ window.OxidPayPalGooglePay = {
         }).then(function (res) {
             return res.json();
         }).then(function (data) {
+            console.log("==== Create OXID Order Completed ====");
+
             if (data.status === "ERROR") {
                 location.reload();
             }
@@ -214,8 +227,8 @@ window.OxidPayPalGooglePay = {
         }).then(function (data) {
             console.log("==== Capture Order Completed ====");
             var goNext = Array.isArray(data.location) && data.location[0];
+            window.location.href = this.selfLink + goNext + '&stoken=' + this.token;
 
-            window.location.href = this.selfLink + goNext;
             if (data.status === "ERROR") {
                 location.reload();
             }

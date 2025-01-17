@@ -7,13 +7,18 @@
 
 namespace OxidSolutionCatalysts\PayPal\Core\Api;
 
+use GuzzleHttp\Exception\GuzzleException;
+use JsonException;
+use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
 use OxidSolutionCatalysts\PayPalApi\Service\BaseService;
 use Psr\Http\Message\ResponseInterface;
 
 class IdentityService extends BaseService
 {
-    protected $basePath = '/v1/identity';
-
+    /**
+     * @throws ApiException
+     * @throws JsonException
+     */
     public function requestClientToken(): array
     {
         $headers = [];
@@ -22,17 +27,18 @@ class IdentityService extends BaseService
 
         $path = '/v1/identity/generate-token';
 
-        /**
- * @var ResponseInterface $response
-*/
+        /** @var ResponseInterface $response */
         $response = $this->send('POST', $path, [], $headers);
         $body = $response->getBody();
 
-        return $body ? json_decode((string)$body, true) : [];
+        $result = json_decode((string)$body, true, 512, JSON_THROW_ON_ERROR);
+        return is_array($result) ? $result : [];
     }
 
     /**
      * @return array
+     * @throws JsonException
+     * @throws GuzzleException
      */
     protected function getAuthHeaders(): array
     {

@@ -12,6 +12,7 @@ namespace OxidSolutionCatalysts\PayPal\Core;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Core\Exception\LanguageNotFoundException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Core\Language;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderConfirmApplicationContext;
@@ -20,7 +21,6 @@ use OxidSolutionCatalysts\PayPalApi\Model\Orders\ConfirmOrderRequest;
 
 /**
  * Class ConfirmOrderRequestFactory
- *
  * @package OxidSolutionCatalysts\PayPal\Core
  */
 class ConfirmOrderRequestFactory
@@ -35,6 +35,7 @@ class ConfirmOrderRequestFactory
      * @param string $requestName Name of the RequestClass defined in PayPalClient
      *
      * @return ConfirmOrderRequest
+     * @throws LanguageNotFoundException
      */
     public function getRequest(
         Basket $basket,
@@ -77,19 +78,14 @@ class ConfirmOrderRequestFactory
             $paymentSource->$requestName->attributes->verification = new \stdClass();
             $paymentSource->$requestName->attributes->verification->method = 'SCA_ALWAYS';
         } else {
-            $paymentSource = new PaymentSource(
-                [
+            $paymentSource = new PaymentSource([
                 $requestName => [
                     'name' => $userName,
+                    'email' => $user->getFieldData('oxusername'),
                     'country_code' => $country->getFieldData('oxisoalpha2')
                 ]
-                ]
-            );
+            ]);
         }
-
-        Registry::getLogger()->error('ConfirmOrder');
-        Registry::getLogger()->error(print_r($paymentSource, true));
-
 
         return $paymentSource;
     }
@@ -97,6 +93,7 @@ class ConfirmOrderRequestFactory
     /**
      * Sets application context
      *
+     * @throws LanguageNotFoundException
      * @return OrderConfirmApplicationContext
      */
     protected function getApplicationContext(): OrderConfirmApplicationContext

@@ -2,10 +2,9 @@
 
 {% block shippingAndPayment %}
     {% set payment = oView.getPayment() %}
-    {% if payment.getId() == "oscpaypal_acdc" or payment.getId() == "oscpaypal_pui" %}
+    {% if payment.getId() in ['oscpaypal_acdc', 'oscpaypal_pui', 'oscpaypal'] or vaultedPaymentDescription %}
         {% set sPaymentID = payment.getId() %}
-        {% set sSelfLink = oViewConf.getSslSelfLink()|replace({"&amp;": "&"}) %}
-        <form action="{{ oViewConf.getSslSelfLink()|raw }}" method="post"
+        <form action="{{ oViewConf.getSslSelfLink()|replace({'&amp;': '&'})|raw }}" method="post"
               id="orderShipping">
             {{ oViewConf.getHiddenSid()|raw }}
             <input type="hidden" name="cl" value="payment">
@@ -24,7 +23,7 @@
                 {{ oShipSet.oxdeliveryset__oxtitle.value }}
             </div>
         </form>
-        <form action="{{ oViewConf.getSslSelfLink()|raw }}" method="post"
+        <form action="{{ oViewConf.getSslSelfLink()|replace({'&amp;': '&'})|raw }}" method="post"
               id="orderPayment">
             {{ oViewConf.getHiddenSid()|raw }}
             <input type="hidden" name="cl" value="payment">
@@ -41,12 +40,16 @@
         </form>
         <div class="card-body">
             {% set payment = oView.getPayment() %}
-            {{ payment.oxpayments__oxdesc.value }}
-            {% if not oscpaypal_executing_order %}
+            {% if vaultedPaymentDescription %}
+                {{ vaultedPaymentDescription }}
+            {% elseif not oscpaypal_executing_order %}
+                {{ payment.oxpayments__oxdesc.value }}
                 {% if sPaymentID == "oscpaypal_acdc" %}
                     {% include "@osc_paypal/frontend/acdc.html.twig" %}
                 {% elseif sPaymentID == "oscpaypal_pui" %}
-                    {% include "@osc_paypal/frontend/pui_flow.html.twig" %}
+                    {% include "@osc_paypal/frontend/pui.html.twig" %}
+                {% elseif sPaymentID == "oscpaypal" %}
+                    {% include "@osc_paypal/frontend/paypal.html.twig" %}
                 {% endif %}
             {% endif %}
         </div>
@@ -63,7 +66,7 @@
         {% include "@osc_paypal/frontend/googlepay_button.html.twig" %}
     {% elseif paymentId == "oscpaypal_apple_pay"%}
         {# apple pay has a specific button #}
-        <div id="{{paymentId}}" class="paypal-button-container paypal-button-wrapper large"></div>
+        {% include "@osc_paypal/frontend/applepay_button.html.twig" with {paymentId: payment.getId()} %}
     {% else %}
         {# usual order button #}
         <button type="button" class="btn btn-highlight btn-lg w-100"

@@ -49,7 +49,6 @@ class PayPalOrder extends BaseModel
         }
         return $return;
     }
-
     public function getPayPalOrderId(): string
     {
         return (string) $this->getFieldData('oxpaypalorderid');

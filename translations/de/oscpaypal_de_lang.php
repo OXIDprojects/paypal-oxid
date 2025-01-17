@@ -33,20 +33,16 @@ $aLang = [
     'OSC_PAYPAL_PUI_PHONENUMBER_PLACEHOLDER'        => '+49 30 123456789',
     'OSC_PAYPAL_PUI_PLEASE_RETRY'                   => 'Bitte geben Sie ihre Daten erneut ein.',
     'PAYPAL_PAYMENT_ERROR_PUI_GENRIC'               => 'Validierung der Kundendaten für PayPal Rechnungskauf mit Ratepay fehlgeschlagen.',
-    'PUI_PAYMENT_SOURCE_INFO_CANNOT_BE_VERIFIED'    => 'Die Kombination aus Ihrem Namen und Ihrer Anschrift konnte nicht für  PayPal Rechnungskauf validiert werden. Bitte korrigieren Sie Ihre Daten und versuchen Sie es erneut. Weitere Informationen finden Sie in den <a href="https://www.ratepay.com/legal-payment-dataprivacy/?lang=de">Ratepay Datenschutzbestimmungen</a> oder nutzen Sie das <a href="https://www.ratepay.com/kontakt/">Ratepay Kontaktformular</a>.',
+    'PUI_PAYMENT_SOURCE_INFO_CANNOT_BE_VERIFIED'    => 'Die Kombination aus Ihrem Namen und Ihrer Anschrift konnte nicht für PayPal Rechnungskauf validiert werden. Bitte korrigieren Sie Ihre Daten und versuchen Sie es erneut. Weitere Informationen finden Sie in den <a href="https://www.ratepay.com/legal-payment-dataprivacy/?lang=de">Ratepay Datenschutzbestimmungen</a> oder nutzen Sie das <a href="https://www.ratepay.com/kontakt/">Ratepay Kontaktformular</a>.',
     'PUI_PAYMENT_SOURCE_DECLINED_BY_PROCESSOR'      => 'Die gewählte Zahlungsart  PayPal Rechnungskauf kann nicht genutzt werden. Diese Entscheidung basiert auf einem automatisierten Datenverarbeitungsverfahren. Weitere Informationen finden Sie in den <a href="https://www.ratepay.com/legal-payment-dataprivacy/?lang=de">Ratepay Datenschutzbestimmungen</a> oder nutzen Sie das <a href="https://www.ratepay.com/kontakt/">Ratepay Kontaktformular</a>.',
     'PAYMENT_ERROR_INSTRUMENT_DECLINED'             => 'Die gewählte Zahlart steht Ihnen bei PayPal nicht zur Verfügung.',
     'OSC_PAYPAL_ORDER_NOT_APPROVED'                 => 'Die Bestellung wurde nicht genehmigt. Bitte versuchen Sie es später oder mit einer anderen Zahlart.',
 
-    'OSC_PAYPAL_ORDER_EXECUTION_IN_PROGRESS'       => 'Ihre Bestellung wird geprüft, das kann bis zu 60 Sekunden dauern. Bitte kurz warten und dann erneut auf "zahlungspflichtig bestellen" klicken.',
-    'OSC_PAYPAL_LOG_IN_TO_CONTINUE'                => 'Bitte loggen Sie sich ein, um die Bestellung abzuschliessen.',
-    'OSC_PAYPAL_3DSECURITY_ERROR'                  => 'Die Sicherheitsüberprüfung ist fehlgeschlagen, bitte erneut versuchen.',
-    'OSC_PAYPAL_ORDEREXECUTION_ERROR'              => 'Der Bezahlvorgang wurde abgebrochen.',
-    'OSCPAYPAL_KILL_EXPRESS_SESSION_REASON'        => 'Der Warenkorb wurde geändert. Aus diesem Grund wurde der aktive PayPal-Zahlvorgang automatisch abgebrochen. Bitte starten Sie die Zahlung mit PayPal erneut. Es wurde noch kein Geld von PayPal eingezogen.',
     'OSC_PAYPAL_ORDER_EXECUTION_IN_PROGRESS'        => 'Ihre Bestellung wird geprüft, das kann bis zu 60 Sekunden dauern. Bitte kurz warten und dann erneut auf "zahlungspflichtig bestellen" klicken.',
     'OSC_PAYPAL_LOG_IN_TO_CONTINUE'                 => 'Bitte loggen Sie sich ein, um die Bestellung abzuschliessen.',
     'OSC_PAYPAL_3DSECURITY_ERROR'                   => 'Die Sicherheitsüberprüfung ist fehlgeschlagen, bitte erneut versuchen.',
     'OSC_PAYPAL_ORDEREXECUTION_ERROR'               => 'Der Bezahlvorgang wurde abgebrochen.',
+    'OSCPAYPAL_KILL_EXPRESS_SESSION_REASON'         => 'Der Warenkorb wurde geändert. Aus diesem Grund wurde der aktive PayPal-Zahlvorgang automatisch abgebrochen. Bitte starten Sie die Zahlung mit PayPal erneut. Es wurde noch kein Geld von PayPal eingezogen.',
 
     'OSC_PAYPAL_VAULTING_MENU'                      => 'PayPal Zahlart speichern',
     'OSC_PAYPAL_VAULTING_MENU_CARD'                 => 'PayPal Kreditkarte speichern',
@@ -62,5 +58,4 @@ $aLang = [
     'OSC_PAYPAL_CARD_ENDING_IN'                     => 'endet mit ●●●',
     'OSC_PAYPAL_CARD_PAYPAL_PAYMENT'                => 'PayPal Zahlung mit',
     'OSC_PAYPAL_DELETE_FAILED'                      => 'Beim Löschen Ihrer Zahlart ist etwas schiefgelaufen.',
-    'OSCPAYPAL_KILL_EXPRESS_SESSION_REASON'         => 'Der Warenkorb wurde geändert. Aus diesem Grund wurde der aktive PayPal-Zahlvorgang automatisch abgebrochen. Bitte starten Sie die Zahlung mit PayPal erneut. Es wurde noch kein Geld von PayPal eingezogen.',
 ];

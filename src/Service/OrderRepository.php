@@ -20,14 +20,10 @@ use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInt
 
 class OrderRepository
 {
-    /**
-     * @var QueryBuilderFactoryInterface
-     */
+    /** @var QueryBuilderFactoryInterface */
     private $queryBuilderFactory;
 
-    /**
-     * @var EshopCoreConfig
-     */
+    /** @var EshopCoreConfig */
     private $config;
 
     public function __construct(
@@ -118,9 +114,7 @@ class OrderRepository
 
     public function getPayPalOrderIdByShopOrderId(string $shopOrderId): string
     {
-        /**
- * @var QueryBuilder $queryBuilder
-*/
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->queryBuilderFactory->create();
 
         $parameters = [
@@ -161,12 +155,10 @@ class OrderRepository
             ->from('oxorder')
             ->where('oxtransstatus = :oxtransstatus')
             ->andWhere('oxshopid = :oxshopid')
-            ->andWhere(
-                $queryBuilder->expr()->like(
-                    'oxpaymenttype',
-                    $queryBuilder->expr()->literal('%' . $parameters['oxpaymenttype'] . '%')
-                )
-            )
+            ->andWhere($queryBuilder->expr()->like(
+                'oxpaymenttype',
+                $queryBuilder->expr()->literal('%' . $parameters['oxpaymenttype'] . '%')
+            ))
             ->andWhere('oxorderdate < now() - interval :sessiontime MINUTE');
 
         $ids = $queryBuilder->setParameters($parameters)
@@ -188,9 +180,7 @@ class OrderRepository
         string $payPalTransactionId = '',
         string $payPalTransactionType = ''
     ): string {
-        /**
- * @var QueryBuilder $queryBuilder
-*/
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->queryBuilderFactory->create();
 
         $parameters = [
@@ -233,9 +223,7 @@ class OrderRepository
 
     private function getShopOrderIdByPaypalOrderId(string $paypalOrderId): string
     {
-        /**
- * @var QueryBuilder $queryBuilder
-*/
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->queryBuilderFactory->create();
 
         $parameters = [
@@ -257,9 +245,7 @@ class OrderRepository
 
     private function getShopOrderIdByPaypalTransactionId(string $paypalTransactionId): string
     {
-        /**
- * @var QueryBuilder $queryBuilder
-*/
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->queryBuilderFactory->create();
 
         $parameters = [

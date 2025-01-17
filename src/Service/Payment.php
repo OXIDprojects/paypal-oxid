@@ -14,7 +14,8 @@ use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Session as EshopSession;
-use OxidSolutionCatalysts\PayPal\Core\Config;
+use OxidEsales\Eshop\Core\ShopVersion;
+use OxidSolutionCatalysts\PayPal\Controller\PaymentController;
 use OxidSolutionCatalysts\PayPal\Core\ConfirmOrderRequestFactory;
 use OxidSolutionCatalysts\PayPal\Core\Constants;
 use OxidSolutionCatalysts\PayPal\Core\OrderRequestFactory;
@@ -23,17 +24,13 @@ use OxidSolutionCatalysts\PayPal\Core\PayPalDefinitions;
 use OxidSolutionCatalysts\PayPal\Core\PayPalSession;
 use OxidSolutionCatalysts\PayPal\Core\ServiceFactory;
 use OxidSolutionCatalysts\PayPal\Exception\PayPalException;
-use OxidSolutionCatalysts\PayPal\Exception\UserPhone as UserPhoneException;
 use OxidSolutionCatalysts\PayPal\Model\PayPalOrder as PayPalOrderModel;
-use OxidSolutionCatalysts\PayPal\Service\ModuleSettings as ModuleSettingsService;
+use OxidSolutionCatalysts\PayPal\Module;
 use OxidSolutionCatalysts\PayPal\Traits\ServiceContainer;
 use OxidSolutionCatalysts\PayPalApi\Exception\ApiException;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\AuthorizationWithAdditionalData;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\ConfirmOrderRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as ApiModelOrder;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as ApiOrderModel;
-use OxidSolutionCatalysts\PayPalApi\Model\Orders\Order as OrderResponse;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderAuthorizeRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Orders\OrderCaptureRequest;
 use OxidSolutionCatalysts\PayPalApi\Model\Payments\CaptureRequest;
@@ -68,29 +65,19 @@ class Payment
      */
     private $orderRepository;
 
-    /**
-     * @var ServiceFactory
-     */
+    /** @var ServiceFactory */
     private $serviceFactory;
 
-    /**
-     * @var PatchRequestFactory
-     */
+    /** @var PatchRequestFactory */
     private $patchRequestFactory;
 
-    /**
-     * @var OrderRequestFactory
-     */
+    /** @var OrderRequestFactory */
     private $orderRequestFactory;
 
-    /**
-     * @var SCAValidatorInterface
-     */
+    /** @var SCAValidatorInterface */
     private $scaValidator;
 
-    /**
-     * @var ModuleSettingsService
-     */
+    /** @var ModuleSettings */
     private $moduleSettingsService;
 
     private $logger;
@@ -99,7 +86,7 @@ class Payment
         EshopSession $eshopSession,
         OrderRepository $orderRepository,
         SCAValidatorInterface $scaValidator,
-        ModuleSettingsService $moduleSettingsService,
+        ModuleSettings $moduleSettingsService,
         Logger $logger,
         ServiceFactory $serviceFactory = null,
         PatchRequestFactory $patchRequestFactory = null,
@@ -125,29 +112,24 @@ class Payment
         string $payPalPartnerAttributionId = '',
         string $returnUrl = null,
         string $cancelUrl = null,
-        bool $setProvidedAddress = true,
-        ?EshopModelOrder $order = null
-        // ): ?ApiModelOrder
+        bool $setProvidedAddress = true
     ) {
         //TODO return value
         $this->setPaymentExecutionError(self::PAYMENT_ERROR_NONE);
-        $order instanceof EshopModelOrder ?? $order->setOrderNumber();
-        /**
- * @var ApiOrderService $orderService
-*/
+
+        /** @var ApiOrderService $orderService */
         $orderService = $this->serviceFactory->getOrderService();
 
         $request = $this->orderRequestFactory->getRequest(
             $basket,
             $intent,
             $userAction,
-            $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null,
+            null, //customId is patched in doCapturePayPalOrder (ordernr is unavailable at this point)
             $processingInstruction,
             $paymentSource,
             null,
             $returnUrl,
             $cancelUrl,
-            true,
             $setProvidedAddress
         );
 
@@ -157,7 +139,8 @@ class Payment
             $response = $orderService->createOrder(
                 $request,
                 $payPalPartnerAttributionId,
-                $payPalClientMetadataId
+                $payPalClientMetadataId,
+                'return=minimal'
             );
         } catch (ApiException $exception) {
             $this->logger->log('error', 'API Error.', [$exception]);
@@ -172,8 +155,7 @@ class Payment
     }
 
     public function doCreatePatchedOrder(
-        EshopModelBasket $basket,
-        EshopModelOrder $order
+        EshopModelBasket $basket
     ): array {
         // PatchOrders access an OrderCall that has taken place before.
         // For this reason, the payPalPartnerAttributionId does not have
@@ -188,9 +170,7 @@ class Payment
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
             null,
             null,
-            true,
-            $order,
-            $order
+            false
         );
 
         $paypalOrderId = $response->id ?: '';
@@ -206,8 +186,7 @@ class Payment
 
         $return = [
             'id' => $paypalOrderId,
-            'status' => $status,
-            'hateoasLinks' => $response?->links ?? [],
+            'status' => $status
         ];
 
         return $return;
@@ -218,9 +197,7 @@ class Payment
         string $checkoutOrderId,
         string $shopOrderId = ''
     ): void {
-        /**
- * @var ApiOrderService $orderService
-*/
+        /** @var ApiOrderService $orderService */
         $orderService = $this->serviceFactory->getOrderService();
 
         $request = $this->patchRequestFactory
@@ -243,12 +220,10 @@ class Payment
         EshopModelOrder $order,
         string $checkoutOrderId,
         string $paymentId,
-        ApiOrderModel $payPalOrder = null
-    ): ApiOrderModel {
+        Order $payPalOrder = null
+    ): Order {
 
-        /**
- * @var ApiOrderModel $payPalOrder
-*/
+        /** @var Order $payPalOrder */
         if (is_null($payPalOrder) || !isset($payPalOrder->payment_source)) {
             $payPalOrder = $this->fetchOrderFields($checkoutOrderId);
         }
@@ -258,13 +233,9 @@ class Payment
             throw oxNew(StandardException::class, 'OSC_PAYPAL_3DSECURITY_ERROR');
         }
 
-        /**
- * @var ApiPaymentService $paymentService
-*/
+        /** @var ApiPaymentService $paymentService */
         $paymentService = Registry::get(ServiceFactory::class)->getPaymentService();
-        /**
- * @var ApiOrderService $orderService
-*/
+        /** @var ApiOrderService $orderService */
         $orderService = $this->serviceFactory->getOrderService();
 
         // Capture Order
@@ -272,7 +243,7 @@ class Payment
             //TODO: split into multiple methods
             if ($payPalOrder->intent === Constants::PAYPAL_ORDER_INTENT_AUTHORIZE) {
                 // if order approved then authorize
-                if ($payPalOrder->status === ApiOrderModel::STATUS_APPROVED) {
+                if ($payPalOrder->status === Order::STATUS_APPROVED) {
                     $request = new OrderAuthorizeRequest();
                     $payPalOrder = $orderService->authorizePaymentForOrder(
                         '',
@@ -283,9 +254,7 @@ class Payment
                     );
                 }
 
-                /**
- * @var AuthorizationWithAdditionalData $authorization
-*/
+                /** @var AuthorizationWithAdditionalData $authorization */
                 $authorization = $payPalOrder->purchase_units[0]->payments->authorizations[0];
                 $authorizationId = $authorization->id;
 
@@ -336,25 +305,19 @@ class Payment
             } elseif ($payPalOrder->status !== Constants::PAYPAL_STATUS_COMPLETED) {
                 $request = new OrderCaptureRequest();
                 //order number must be resolved before order patching
-                $shopOrderId = $order->getFieldData('oxordernr');
-                if (!$shopOrderId) {
+                if (!$order->hasOrderNumber()){
                     $order->setOrderNumber();
-                    $shopOrderId = $order->getFieldData('oxordernr');
                 }
-
-                $order->setOrderNumber();
 
                 try {
                     //Patching the order with OXID order number as custom value
                     $this->doPatchPayPalOrder(
                         Registry::getSession()->getBasket(),
                         $checkoutOrderId,
-                        $shopOrderId
+                        $this->getCustomIdParameter($order)
                     );
 
-                    /**
- * @var $result ApiOrderModel
-*/
+                    /** @var $result Order */
                     $result = $orderService->capturePaymentForOrder(
                         '',
                         $checkoutOrderId,
@@ -367,13 +330,6 @@ class Payment
 
                     $issue = $exception->getErrorIssue();
                     $this->displayErrorIfInstrumentDeclined($issue);
-                    /**
- * @var Config $payPalConfig
-*/
-                    $payPalConfig = oxNew(Config::class);
-                    if ($payPalConfig->isLogLevel('debug')) {
-                        $this->logger->log('debug', $exception->getMessage(), [$exception]);
-                    }
                     throw oxNew(StandardException::class, 'OSC_PAYPAL_ORDEREXECUTION_ERROR');
                 }
             } else {
@@ -386,11 +342,9 @@ class Payment
                 $result->purchase_units[0]->payments->captures[0]->id : '';
 
             $status = $result && $result->purchase_units[0]->payments->captures[0]->status ?
-                $result->purchase_units[0]->payments->captures[0]->status : ApiOrderModel::STATUS_SAVED;
+                $result->purchase_units[0]->payments->captures[0]->status : Order::STATUS_SAVED;
 
-            /**
- * @var PayPalOrderModel $paypalOrder
-*/
+            /** @var PayPalOrderModel $paypalOrder */
             $this->trackPayPalOrder(
                 $order->getId(),
                 $checkoutOrderId,
@@ -452,13 +406,9 @@ class Payment
     ): string {
         $redirectLink = '';
 
-        /**
- * @var OrderRequestFactory $requestFactory
-*/
+        /** @var OrderRequestFactory $requestFactory */
         $requestFactory = Registry::get(ConfirmOrderRequestFactory::class);
-        /**
- * @var ConfirmOrderRequest $request
-*/
+        /** @var ConfirmOrderRequest $request */
         $request = $requestFactory->getRequest(
             $basket,
             $uapmName
@@ -469,14 +419,10 @@ class Payment
         // Transactions that do not include a client metadata ID are not eligible for PayPal Seller Protection.
         $payPalClientMetadataId = '';
 
-        /**
- * @var ApiOrderService $orderService
-*/
+        /** @var ApiOrderService $orderService */
         $orderService = $this->serviceFactory->getOrderService();
 
-        /**
- * @var ApiModelOrder $response
-*/
+        /** @var Order $response */
         $response = $orderService->confirmTheOrder(
             $payPalClientMetadataId,
             $checkoutOrderId,
@@ -538,22 +484,16 @@ class Payment
             $orderModel->isLoaded()
         ) {
             $orderModel->cancelOrder();
-            $this->logger->log(
-                'debug',
-                sprintf(
-                    'Temporary order with id %s was canceled',
-                    $sessionOrderId
-                )
-            );
+            $this->logger->log('debug', sprintf(
+                'Temporary order with id %s was canceled',
+                $sessionOrderId
+            ));
             if (!$orderModel->hasOrderNumber()) {
                 $orderModel->delete();
-                $this->logger->log(
-                    'debug',
-                    sprintf(
-                        'Temporary order without Order number and with id %s was deleted',
-                        $sessionOrderId
-                    )
-                );
+                $this->logger->log('debug', sprintf(
+                    'Temporary order without Order number and with id %s was deleted',
+                    $sessionOrderId
+                ));
             }
         }
 
@@ -598,13 +538,6 @@ class Payment
         $redirectLink = '';
 
         try {
-            //sent Order OXID as custom_id to PayPal
-            $this->doPatchPayPalOrder(
-                Registry::getSession()->getBasket(),
-                $uapmOrderId,
-                (string)$order->getFieldData('oxordernr')
-            );
-
             $redirectLink = $this->doConfirmUAPM(
                 $order,
                 $basket,
@@ -649,8 +582,7 @@ class Payment
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
             $returnUrl,
             $cancelUrl,
-            false,
-            $order
+            false
         );
 
         $orderId = $response->id ?: '';
@@ -699,9 +631,7 @@ class Payment
             Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
             null,
             null,
-            false,
-            true,
-            null
+            false
         );
 
         return $response->id ?: '';
@@ -722,24 +652,17 @@ class Payment
                 Constants::PAYPAL_PUI_PROCESSING_INSTRUCTIONS,
                 PayPalDefinitions::PUI_REQUEST_PAYMENT_SOURCE_NAME,
                 $payPalClientMetadataId,
-                Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP,
-                null,
-                null,
-                true,
-                $order
+                Constants::PAYPAL_PARTNER_ATTRIBUTION_ID_PPCP
             );
             $payPalOrderId = $result->id;
-        } catch (UserPhoneException $e) {
-            //mistyped phone in last order step
-            $this->setPaymentExecutionError(self::PAYMENT_ERROR_PUI_PHONE);
         } catch (Exception $exception) {
             $this->setPaymentExecutionError(self::PAYMENT_ERROR_PUI_GENERIC);
             $this->logger->log('error', 'Error on pui order creation call.', [$exception]);
         }
 
-        // TODO: check what we created, ensure it is a pui order
-        // $paymentSource = $this->fetchOrderFields((string) $payPalOrderId, 'payment_source');
-        // $this->logger->log('error', serialize($paymentSource));
+        # TODO: check what we created, ensure it is a pui order
+        # $paymentSource = $this->fetchOrderFields((string) $payPalOrderId, 'payment_source');
+        # $this->logger->log('error', serialize($paymentSource));
 
         if (!$payPalOrderId) {
             return false;
@@ -775,9 +698,7 @@ class Payment
         string $payPalTransactionId = '',
         string $transactionType = Constants::PAYPAL_TRANSACTION_TYPE_CAPTURE
     ): PayPalOrderModel {
-        /**
- * @var PayPalOrderModel $payPalOrder
-*/
+        /** @var PayPalOrderModel $payPalOrder */
         $payPalOrder = $this->getPayPalCheckoutOrder($shopOrderId, $payPalOrderId, $payPalTransactionId);
 
         $payPalOrder->setPaymentMethodId($paymentMethodId);
@@ -794,9 +715,7 @@ class Payment
         string $payPalOrderId,
         string $payPalTransactionId = ''
     ) {
-        /**
- * @var PayPalOrderModel $payPalOrder
-*/
+        /** @var PayPalOrderModel $payPalOrder */
         return $this->orderRepository->paypalOrderByOrderIdAndPayPalId(
             $shopOrderId,
             $payPalOrderId,
@@ -804,7 +723,7 @@ class Payment
         );
     }
 
-    public function fetchOrderFields(string $paypalOrderId, string $fields = ''): ApiOrderModel
+    public function fetchOrderFields(string $paypalOrderId, string $fields = ''): Order
     {
         return $this->serviceFactory
             ->getOrderService()
@@ -818,7 +737,7 @@ class Payment
     /**
      * @throws StandardException
      */
-    public function verify3D(string $paymentId, ApiOrderModel $payPalOrder): bool
+    public function verify3D(string $paymentId, Order $payPalOrder): bool
     {
         //no ACDC payment
         if ($paymentId != PayPalDefinitions::ACDC_PAYPAL_PAYMENT_ID) {
@@ -830,8 +749,8 @@ class Payment
         }
         //case check is to be done automatic but we have no result to check
         if (
-            (Constants::PAYPAL_SCA_WHEN_REQUIRED === $this->moduleSettingsService->getPayPalSCAContingency())
-            && is_null($this->scaValidator->getCardAuthenticationResult($payPalOrder))
+            (Constants::PAYPAL_SCA_WHEN_REQUIRED === $this->moduleSettingsService->getPayPalSCAContingency()) &&
+            is_null($this->scaValidator->getCardAuthenticationResult($payPalOrder))
         ) {
             return true;
         }
@@ -875,5 +794,30 @@ class Payment
                 'paypal_error'
             );
         }
+    }
+
+    /**
+     * @param \OxidEsales\Eshop\Application\Model\Order|null $order
+     * @return mixed|null
+     */
+    public function getCustomIdParameter(?EshopModelOrder $order): string
+    {
+        /** @var ModuleSettings $moduleSettings */
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
+        $module = oxNew(\OxidEsales\Eshop\Core\Module\Module::class);
+        $module->load(Module::MODULE_ID);
+        $orderNumber = $order instanceof EshopModelOrder ? $order->getFieldData('oxordernr') : null;
+
+        if($moduleSettings->isCustomIdSchemaStructural()){
+            $customID = [
+                'oxordernr' => $orderNumber,
+                'moduleVersion' => $module->getInfo('version'),
+                'oxidVersion' => ShopVersion::getVersion()
+            ];
+
+            return json_encode($customID);
+        }
+
+        return $orderNumber;
     }
 }

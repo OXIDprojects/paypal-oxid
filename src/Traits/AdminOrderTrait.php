@@ -25,29 +25,19 @@ trait AdminOrderTrait
 {
     use ServiceContainer;
 
-    /**
-     * @var Order|null
-     */
+    /** @var Order|null */
     protected $order = null;
 
-    /**
-     * @var bool|null
-     */
+    /** @var bool|null  */
     protected $isPayPalStandardManuallyCapture = null;
 
-    /**
-     * @var bool|null
-     */
+    /** @var bool|null  */
     protected $isPayPalStandardOnDeliveryCapture = null;
 
-    /**
-     * @var bool|null
-     */
+    /** @var bool|null  */
     protected $isPayPalStandardOrder = null;
 
-    /**
-     * @var bool|null
-     */
+    /** @var bool|null  */
     protected $isAuthorizedPayPalStandardOrder = null;
 
     /**
@@ -74,9 +64,7 @@ trait AdminOrderTrait
             $orderId = $paypalOrder->id;
 
             $service = $this->getServiceFromContainer(PaymentService::class);
-            /**
- * @var PayPalOrder $result
-*/
+            /** @var PayPalOrder $result */
             $result = $service->doCapturePayPalOrder(
                 $order,
                 $orderId,
@@ -163,8 +151,8 @@ trait AdminOrderTrait
         if (is_null($this->isPayPalStandardOrder)) {
             $this->isPayPalStandardOrder = false;
             if (
-                ($order = $this->getOrder())
-                && ($order->oxorder__oxpaymenttype->value === PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID)
+                ($order = $this->getOrder()) &&
+                ($order->oxorder__oxpaymenttype->value === PayPalDefinitions::STANDARD_PAYPAL_PAYMENT_ID)
             ) {
                 $this->isPayPalStandardOrder = true;
             }
@@ -180,9 +168,7 @@ trait AdminOrderTrait
     protected function getPayPalCheckoutOrder(): PayPalOrder
     {
         $order = $this->getOrder();
-        /**
- * @var PayPalOrder $payPalOrder
-*/
+        /** @var PayPalOrder $payPalOrder */
         $payPalOrder = $order->getPayPalCheckoutOrder();
         return $payPalOrder;
     }
