@@ -247,7 +247,28 @@ class VaultingService extends BaseService
                 ->log('error', __CLASS__ . ' ' . __FUNCTION__ . ' : ' . $e->getMessage());
             $result = [];
         }
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettings::class);
+        $vaultedPaymentTokens = $result['payment_tokens'];
+        $filteredVaultedPaymentTokens = [];
+        $uniquePaypalVaultedPaymentSources = [];
+        foreach ($vaultedPaymentTokens as $vaultedPaymentToken) {
+            foreach ($vaultedPaymentToken["payment_source"] as $paymentType => $paymentSource) {
+                if ($paymentType === 'paypal' && $moduleSettings->isVaultingAllowedForPayPal()) {
+                    $email = $paymentSource["email_address"];
+                    $payer_id = $paymentSource["payer_id"];
 
+                    if (!isset($uniquePaypalVaultedPaymentSources[$email])) {
+                        $uniquePaypalVaultedPaymentSources[$email] = [];
+                    }
+                    if (in_array($payer_id, $uniquePaypalVaultedPaymentSources[$email])) {
+                        continue;
+                    }
+                    $uniquePaypalVaultedPaymentSources[$email][] = $payer_id;
+                }
+                $filteredVaultedPaymentTokens[] = $vaultedPaymentToken;
+            }
+        }
+        $result['payment_tokens'] = $filteredVaultedPaymentTokens;
         return is_array($result) ? $result : [];
     }
 
